@@ -12,8 +12,8 @@ class Account(Base):
 
     id = Column(Integer, primary_key=True)
     name = Column(String, nullable=False)
-    account_type = Column(String, nullable=False)
     shared = Column(Boolean, nullable=False)
+    category = Column(String, nullable=False, default="Cash")
 
 class MonthlyBalance(Base):
     __tablename__ = "balances"

@@ -3,6 +3,7 @@ from datetime import date
 
 from schemas import AccountCreate, MonthlyBalanceCreate, ContributionCreate
 from repositories import accounts_repository, balances_repository, contributions_repository
+from account_categories import get_category_attributes
 
 def calculate_total_contributions(
     db: Session,
@@ -57,15 +58,74 @@ def calculate_growth(
     }
 
 def get_account(db: Session, account_id: int):
-    return accounts_repository.db_get_account(db, account_id)
+    account = accounts_repository.db_get_account(db, account_id)
+    if account is None:
+        return None
+
+    return {
+        "id": account.id,
+        "name": account.name,
+        "shared": account.shared,
+        "category": account.category,
+        "category_attributes": get_category_attributes(account.category),
+    }
 
 
 def get_accounts(db: Session):
-    return accounts_repository.db_get_accounts(db)
+    accounts = accounts_repository.db_get_accounts(db)
+    return [
+        {
+            "id": account.id,
+            "name": account.name,
+            "shared": account.shared,
+            "category": account.category,
+            "category_attributes": get_category_attributes(account.category),
+        }
+        for account in accounts
+    ]
 
 
-def update_account_name(db: Session, account_id: int, new_name: str):
-    account = accounts_repository.db_update_account_name(db, account_id, new_name)
+def get_dashboard_summary(db: Session):
+    accounts = accounts_repository.db_get_accounts(db)
+    latest_balances = []
+
+    for account in accounts:
+        balances = balances_repository.db_get_monthly_balances(db, account.id)
+        latest_balance = balances[-1].balance_cents if balances else 0
+        latest_balances.append((account, latest_balance))
+
+    net_worth = sum(balance for _, balance in latest_balances)
+
+    categories = {
+        "retirement": 0,
+        "non_retirement": 0,
+        "cash": 0,
+        "spendable": 0,
+    }
+
+    for account, balance in latest_balances:
+        category_name = account.category or "Cash"
+        category_attributes = get_category_attributes(category_name)
+
+        if category_attributes.get("retirement"):
+            categories["retirement"] += balance
+        else:
+            categories["non_retirement"] += balance
+
+        if category_name == "Cash":
+            categories["cash"] += balance
+
+        if category_attributes.get("spendable"):
+            categories["spendable"] += balance
+
+    return {
+        "net_worth": net_worth,
+        "categories": categories,
+    }
+
+
+def update_account(db: Session, account_id: int, account_data):
+    account = accounts_repository.db_update_account(db, account_id, account_data)
 
     if account is None:
         return {"id": account_id, "status": "not_found"}
@@ -73,6 +133,8 @@ def update_account_name(db: Session, account_id: int, new_name: str):
     return {
         "id": account.id,
         "name": account.name,
+        "shared": account.shared,
+        "category": account.category,
         "status": "updated",
     }
 

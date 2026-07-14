@@ -30,6 +30,15 @@ def api_get_accounts():
     finally:
         db.close()
 
+@app.get("/dashboard")
+def api_get_dashboard_summary():
+    db = SessionLocal()
+
+    try:
+        return services.get_dashboard_summary(db)
+    finally:
+        db.close()
+
 @app.get("/accounts/{account_id}")
 def api_get_account(account_id: int):
     db = SessionLocal()
@@ -89,7 +98,7 @@ def update_account(account_id: int, account_data: schemas.AccountUpdate):
     db = SessionLocal()
 
     try:
-        return services.update_account_name(db, account_id, account_data.name)
+        return services.update_account(db, account_id, account_data)
     finally:
         db.close()
     

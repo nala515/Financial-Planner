@@ -3,11 +3,13 @@ from datetime import date
 
 class AccountCreate(BaseModel):
     name: str
-    account_type: str
     shared: bool
+    category: str | None = None
 
 class AccountUpdate(BaseModel):
-    name: str
+    name: str | None = None
+    shared: bool | None = None
+    category: str | None = None
 
 class MonthlyBalanceCreate(BaseModel):
     account_id: int
