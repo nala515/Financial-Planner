@@ -129,6 +129,15 @@ def delete_account(account_id: int):
     finally:
         db.close()
 
+@app.delete("/accounts")
+def delete_all_accounts():
+    db = SessionLocal()
+
+    try:
+        return services.delete_all_accounts(db)
+    finally:
+        db.close()
+
 @app.delete("/monthly_balance/{balance_id}")
 def delete_monthly_balance(balance_id: int):
     db = SessionLocal()

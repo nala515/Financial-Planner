@@ -196,7 +196,12 @@ function formatCurrency(cents) {
 
 function formatMonthLabel(snapshotDate) {
     const date = new Date(snapshotDate);
-    return date.toLocaleDateString("en-US", { month: "long", year: "numeric" });
+    return date.toLocaleDateString("en-US", { month: "long" });
+}
+
+function formatYearLabel(snapshotDate) {
+    const date = new Date(snapshotDate);
+    return date.getFullYear().toString();
 }
 
 async function loadBalancesForAccount(accountId, container) {
@@ -220,17 +225,35 @@ async function loadBalancesForAccount(accountId, container) {
             return;
         }
 
+        const sortedBalances = [...balances].sort((a, b) => new Date(b.snapshot_date) - new Date(a.snapshot_date));
+        const groupedBalances = sortedBalances.reduce((groups, balance) => {
+            const year = formatYearLabel(balance.snapshot_date);
+            if (!groups[year]) {
+                groups[year] = [];
+            }
+            groups[year].push(balance);
+            return groups;
+        }, {});
+
+        const years = Object.keys(groupedBalances).sort((a, b) => Number(b) - Number(a));
         const list = document.createElement("ul");
         list.className = "account-list";
 
-        balances.forEach(balance => {
-            const item = document.createElement("li");
-            item.className = "account-card";
-            item.innerHTML = `
-                <strong>${formatMonthLabel(balance.snapshot_date)}</strong>
-                <span>${formatCurrency(balance.balance_cents)}</span>
-            `;
-            list.appendChild(item);
+        years.forEach(year => {
+            const yearSection = document.createElement("li");
+            yearSection.className = "account-card year-section";
+            yearSection.innerHTML = `<strong>${year}</strong>`;
+            list.appendChild(yearSection);
+
+            groupedBalances[year].forEach(balance => {
+                const item = document.createElement("li");
+                item.className = "account-card balance-row";
+                item.innerHTML = `
+                    <span>${formatMonthLabel(balance.snapshot_date)}</span>
+                    <span>${formatCurrency(balance.balance_cents)}</span>
+                `;
+                list.appendChild(item);
+            });
         });
 
         container.appendChild(list);

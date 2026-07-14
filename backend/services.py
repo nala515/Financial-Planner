@@ -181,6 +181,15 @@ def delete_account(db: Session, account_id: int):
     }
 
 
+def delete_all_accounts(db: Session):
+    deleted_count = accounts_repository.db_delete_all_accounts(db)
+
+    return {
+        "status": "deleted",
+        "deleted_count": deleted_count,
+    }
+
+
 def delete_monthly_balance(db: Session, balance_id: int):
     deleted = balances_repository.db_delete_monthly_balance(db, balance_id)
 
