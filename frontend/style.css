@@ -1,0 +1,61 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 2rem;
+    color: #1f2937;
+}
+
+nav {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+nav a {
+    color: #2563eb;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.account-list {
+    list-style: none;
+    padding: 0;
+    display: grid;
+    gap: 1rem;
+}
+
+.account-card {
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    background: #f9fafb;
+}
+
+.account-card strong {
+    font-size: 1.1rem;
+}
+
+.account-card span,
+.account-card small,
+.account-card a {
+    color: #6b7280;
+}
+
+.account-card a {
+    text-decoration: none;
+    font-weight: 600;
+}
+
+label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
+
+select {
+    margin-bottom: 1rem;
+    padding: 0.5rem;
+    min-width: 240px;
+}
