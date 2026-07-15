@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from datetime import date
 from .database import engine, SessionLocal
 from .models import Base
-import services, schemas
+import backend.services, backend.schemas
 
 app = FastAPI()
 
