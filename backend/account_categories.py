@@ -1,0 +1,49 @@
+ACCOUNT_CATEGORIES = {
+    "Cash": {
+        "retirement": False,
+        "spendable": True,
+        "invested": False,
+        "net_worth": True,
+    },
+    "Investment": {
+        "retirement": False,
+        "spendable": True,
+        "invested": True,
+        "net_worth": True,
+    },
+    "Retirement": {
+        "retirement": True,
+        "spendable": False,
+        "invested": True,
+        "net_worth": True,
+    },
+    "HSA": {
+        "retirement": True,
+        "spendable": False,
+        "invested": True,
+        "net_worth": True,
+    },
+    "529": {
+        "retirement": False,
+        "spendable": False,
+        "invested": True,
+        "net_worth": True,
+    },
+}
+
+
+def normalize_category(category: str | None) -> str:
+    if not category:
+        return "Cash"
+
+    normalized = category.strip().lower()
+
+    for name in ACCOUNT_CATEGORIES:
+        if name.lower() == normalized:
+            return name
+
+    return "Cash"
+
+
+def get_category_attributes(category: str | None) -> dict[str, bool]:
+    return ACCOUNT_CATEGORIES[normalize_category(category)]

@@ -1,0 +1,132 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 2rem;
+    color: #f3f4f6;
+    background: #111827;
+}
+
+nav {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+nav a {
+    color: #60a5fa;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.dashboard-card {
+    border: 1px solid #374151;
+    border-radius: 8px;
+    padding: 1rem;
+    background: #1f2937;
+    margin-bottom: 1rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+.dashboard-grid {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.account-list {
+    list-style: none;
+    padding: 0;
+    display: grid;
+    gap: 1rem;
+}
+
+.account-card {
+    border: 1px solid #374151;
+    border-radius: 8px;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    background: #1f2937;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.balance-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.35rem 0;
+    width: min(100%, 320px);
+    margin: 0 auto;
+}
+
+.balance-row span:last-child {
+    font-weight: 600;
+    color: #f9fafb;
+    text-align: right;
+}
+
+.year-section {
+    align-items: center;
+    justify-content: center;
+    margin-top: 0.5rem;
+}
+
+.account-card strong {
+    font-size: 1.1rem;
+}
+
+.account-card span,
+.account-card small,
+.account-card a {
+    color: #d1d5db;
+}
+
+.account-card a {
+    text-decoration: none;
+    font-weight: 600;
+}
+
+label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
+
+select,
+input[type="text"],
+button {
+    margin-bottom: 1rem;
+    padding: 0.5rem;
+    min-width: 240px;
+    background: #374151;
+    color: #f9fafb;
+    border: 1px solid #4b5563;
+    border-radius: 6px;
+}
+
+.account-form {
+    border: 1px solid #374151;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    background: #1f2937;
+}
+
+.checkbox-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 500;
+}
+
+.checkbox-row input {
+    margin-bottom: 0;
+    min-width: auto;
+}
+
+.form-status {
+    min-height: 1.25rem;
+    color: #93c5fd;
+    font-weight: 600;
+}
