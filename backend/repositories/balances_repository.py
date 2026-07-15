@@ -1,5 +1,5 @@
-from .models import MonthlyBalance
-from .schemas import MonthlyBalanceCreate
+from ..models import MonthlyBalance
+from ..schemas import MonthlyBalanceCreate
 
 from datetime import date
 from sqlalchemy.orm import Session

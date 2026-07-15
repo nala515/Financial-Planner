@@ -1,5 +1,5 @@
-from .models import Contribution
-from .schemas import ContributionCreate
+from ..models import Contribution
+from ..schemas import ContributionCreate
 
 from datetime import date
 from sqlalchemy.orm import Session
