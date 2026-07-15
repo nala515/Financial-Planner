@@ -1,9 +1,9 @@
 from sqlalchemy.orm import Session
 from datetime import date
 
-from schemas import AccountCreate, MonthlyBalanceCreate, ContributionCreate
-from repositories import accounts_repository, balances_repository, contributions_repository
-from account_categories import get_category_attributes
+from .schemas import AccountCreate, MonthlyBalanceCreate, ContributionCreate
+from .repositories import accounts_repository, balances_repository, contributions_repository
+from .account_categories import get_category_attributes
 
 def calculate_total_contributions(
     db: Session,
