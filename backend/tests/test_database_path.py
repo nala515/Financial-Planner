@@ -2,6 +2,10 @@ import importlib
 import sys
 from pathlib import Path
 
+repo_root = Path(__file__).resolve().parents[2]
+backend_path = repo_root / "backend"
+sys.path.insert(0, str(backend_path))
+
 import database
 
 
@@ -17,7 +21,7 @@ def test_import_csv_is_idempotent_for_repeated_imports(tmp_path, monkeypatch):
     monkeypatch.setenv("FINANCIAL_PLANNER_DB_PATH", str(db_path))
 
     repo_root = Path(__file__).resolve().parents[2]
-    importer_path = repo_root / "importer"
+    importer_path = repo_root / "backend" / "importer"
     backend_path = repo_root / "backend"
     sys.path.insert(0, str(repo_root))
     sys.path.insert(0, str(backend_path))
