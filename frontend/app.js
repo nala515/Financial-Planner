@@ -1,4 +1,3 @@
-const apiBaseUrl = "http://127.0.0.1:8000";
 let accountCache = [];
 
 function populateAccountCategoryOptions(select) {
@@ -41,7 +40,7 @@ async function loadDashboard() {
     }
 
     try {
-        const response = await fetch(`${apiBaseUrl}/dashboard`);
+        const response = await fetch(`/dashboard`);
         if (!response.ok) {
             throw new Error("Unable to load dashboard");
         }
@@ -80,7 +79,7 @@ async function loadAccounts() {
     }
 
     try {
-        const response = await fetch(`${apiBaseUrl}/accounts`);
+        const response = await fetch(`/accounts`);
 
         if (!response.ok) {
             throw new Error("Unable to load accounts");
@@ -149,7 +148,7 @@ async function loadBalances() {
     }
 
     try {
-        const response = await fetch(`${apiBaseUrl}/accounts`);
+        const response = await fetch(`/accounts`);
 
         if (!response.ok) {
             throw new Error("Unable to load accounts");
@@ -211,7 +210,7 @@ async function loadBalancesForAccount(accountId, container) {
     }
 
     try {
-        const response = await fetch(`${apiBaseUrl}/accounts/${accountId}/balances`);
+        const response = await fetch(`/accounts/${accountId}/balances`);
 
         if (!response.ok) {
             throw new Error("Unable to load balances");
@@ -288,7 +287,7 @@ async function handleAccountUpdate(event) {
     };
 
     try {
-        const response = await fetch(`${apiBaseUrl}/accounts/${accountId}`, {
+        const response = await fetch(`/accounts/${accountId}`, {
             method: "PATCH",
             headers: {
                 "Content-Type": "application/json",
