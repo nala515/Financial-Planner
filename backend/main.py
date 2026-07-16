@@ -19,7 +19,7 @@ app.add_middleware(
 
 Base.metadata.create_all(bind=engine)
 
-@qpp.mount("/static",
+@app.mount("/static",
            StaticFiles(directory="frontend"),
            name="static")
 
