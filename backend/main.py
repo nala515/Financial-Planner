@@ -1,5 +1,6 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 from datetime import date
 from .database import engine, SessionLocal
 from .models import Base
@@ -17,9 +18,13 @@ app.add_middleware(
 
 Base.metadata.create_all(bind=engine)
 
+@qpp.mount("/static",
+           StaticFiles(directory="frontend"),
+           name="static")
+
 @app.get("/")
-def hello():
-    return {"message": "Hello, Jacqueline!"}
+def home():
+    return FileResponse("frontend/index.html")
 
 @app.get("/accounts")
 def api_get_accounts():
