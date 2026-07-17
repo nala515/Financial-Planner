@@ -31,11 +31,11 @@ def home():
 
 @app.get("/accounts")
 def get_accounts():
-    return FileResponse("frontend/accounts")
+    return FileResponse("frontend/accounts.html")
 
 @app.get("/balances")
 def get_balances():
-    return FileResponse("/frontend/balances")
+    return FileResponse("/frontend/balances.html")
 
 @app.get("/api/accounts")
 def api_get_accounts():
