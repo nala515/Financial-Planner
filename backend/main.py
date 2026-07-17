@@ -5,7 +5,7 @@ from fastapi.responses import FileResponse
 from datetime import date
 from .database import engine, SessionLocal
 from .models import Base
-import backend.services, backend.schemas
+from . import services, schemas
 
 app = FastAPI()
 
