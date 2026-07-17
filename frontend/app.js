@@ -128,7 +128,7 @@ async function loadAccounts() {
                 <small>${account.category || "Cash"}</small>
                 <small>${account.shared ? "Shared" : "Personal"}</small>
                 <small>${account.category_attributes?.retirement ? "Retirement" : "Non-retirement"}</small>
-                <a href="balances.html?accountId=${account.id}">View balances</a>
+                <a href="/balances?accountId=${account.id}">View balances</a>
             `;
             list.appendChild(item);
         });

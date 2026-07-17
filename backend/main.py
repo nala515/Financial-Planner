@@ -30,12 +30,14 @@ def home():
     return FileResponse("frontend/index.html")
 
 @app.get("/accounts")
+@app.get("/accounts.html")
 def get_accounts():
     return FileResponse("frontend/accounts.html")
 
 @app.get("/balances")
+@app.get("/balances.html")
 def get_balances():
-    return FileResponse("/frontend/balances.html")
+    return FileResponse("frontend/balances.html")
 
 @app.get("/api/accounts")
 def api_get_accounts():
