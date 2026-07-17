@@ -40,7 +40,7 @@ async function loadDashboard() {
     }
 
     try {
-        const response = await fetch(`/dashboard`);
+        const response = await fetch(`/api/dashboard`);
         if (!response.ok) {
             throw new Error("Unable to load dashboard");
         }
@@ -79,7 +79,7 @@ async function loadAccounts() {
     }
 
     try {
-        const response = await fetch(`/accounts`);
+        const response = await fetch(`/api/accounts`);
 
         if (!response.ok) {
             throw new Error("Unable to load accounts");
@@ -148,7 +148,7 @@ async function loadBalances() {
     }
 
     try {
-        const response = await fetch(`/accounts`);
+        const response = await fetch(`/api/accounts`);
 
         if (!response.ok) {
             throw new Error("Unable to load accounts");
@@ -210,7 +210,7 @@ async function loadBalancesForAccount(accountId, container) {
     }
 
     try {
-        const response = await fetch(`/accounts/${accountId}/balances`);
+        const response = await fetch(`/api/accounts/${accountId}/balances`);
 
         if (!response.ok) {
             throw new Error("Unable to load balances");
@@ -287,7 +287,7 @@ async function handleAccountUpdate(event) {
     };
 
     try {
-        const response = await fetch(`/accounts/${accountId}`, {
+        const response = await fetch(`/api/accounts/${accountId}`, {
             method: "PATCH",
             headers: {
                 "Content-Type": "application/json",
