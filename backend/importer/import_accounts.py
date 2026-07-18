@@ -5,9 +5,9 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from database import SessionLocal, initialize_database
-from models import Account, Contribution, MonthlyBalance
-from account_categories import normalize_category
+from ..database import SessionLocal, initialize_database
+from ..models import Account, Contribution, MonthlyBalance
+from ..account_categories import normalize_category
 
 
 def _get_existing_account(db, name: str, category: str, shared: bool):
