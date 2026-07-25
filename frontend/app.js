@@ -417,9 +417,10 @@ async function loadContributionsForAccount(accountId, container) {
 //-----------------------------------------------------
 
 function formatCurrency(cents) {
-    const dollars = Math.floor(cents / 100);
-    const centsPart = Math.abs(cents % 100).toString().padStart(2, "0");
-    return `$${dollars}.${centsPart}`;
+    return (cents / 100).toLocaleString("en-US", {
+        style: "currency",
+        currency: "USD"
+    });
 }
 
 function formatMonthLabel(snapshotDate) {
