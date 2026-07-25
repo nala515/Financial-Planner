@@ -17,7 +17,6 @@ def _get_existing_account(db, name: str, category: str, shared: bool):
         .first()
     )
 
-
 def parse_bool(value: str) -> bool:
     return str(value).strip().lower() in {"true", "1", "yes", "y"}
 
@@ -83,6 +82,9 @@ def import_csv(csv_path: str):
                 balance_cents=balance_cents,
             )
             db.add(balance)
+
+            if contribution_cents == 0:
+                continue
 
             # check for existing contribution, add one if none exists
             existing_contribution = (

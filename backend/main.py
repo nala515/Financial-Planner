@@ -25,6 +25,10 @@ app.mount(
     name="static"
 )
 
+##-----------------------------------------------------
+## Gets
+##-----------------------------------------------------
+
 @app.get("/")
 def home():
     return FileResponse("frontend/index.html")
@@ -38,6 +42,11 @@ def get_accounts():
 @app.get("/balances.html")
 def get_balances():
     return FileResponse("frontend/balances.html")
+
+@app.get("/contributions")
+@app.get("/contributions.html")
+def get_contributions():
+    return FileResponse("frontend/contributions.html")
 
 @app.get("/api/accounts")
 def api_get_accounts():
@@ -84,6 +93,24 @@ def api_get_balances(
     finally:
         db.close()
 
+@app.get("/api/accounts/{account_id}/contributions")
+def api_get_contributions(
+    account_id: int,
+    start: date | None = None,
+    end: date | None = None,
+):
+    db = SessionLocal()
+
+    try:
+        return services.get_monthly_contributions(
+            db,
+            account_id,
+            start,
+            end,
+        )
+    finally:
+        db.close()
+
 @app.get("/api/accounts/{account_id}/growth")
 def api_get_growth(
     account_id: int,
@@ -102,21 +129,16 @@ def api_get_growth(
     finally:
         db.close()
 
+##-----------------------------------------------------
+## Posts
+##-----------------------------------------------------
+
 @app.post("/api/account")
 def create_account(account_data: schemas.AccountCreate):
     db = SessionLocal()
 
     try:
         return services.create_account(db, account_data)
-    finally:
-        db.close()
-
-@app.patch("/api/accounts/{account_id}")
-def update_account(account_id: int, account_data: schemas.AccountUpdate):
-    db = SessionLocal()
-
-    try:
-        return services.update_account(db, account_id, account_data)
     finally:
         db.close()
 
@@ -137,6 +159,23 @@ def create_contribution(contribution_data: schemas.ContributionCreate):
         return services.create_contribution(db, contribution_data)
     finally:
         db.close()
+
+##-----------------------------------------------------
+## Patches
+##-----------------------------------------------------
+
+@app.patch("/api/accounts/{account_id}")
+def update_account(account_id: int, account_data: schemas.AccountUpdate):
+    db = SessionLocal()
+
+    try:
+        return services.update_account(db, account_id, account_data)
+    finally:
+        db.close()
+
+##-----------------------------------------------------
+## Deletes
+##-----------------------------------------------------
 
 @app.delete("/api/accounts/{account_id}")
 def delete_account(account_id: int):

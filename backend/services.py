@@ -5,6 +5,10 @@ from .schemas import AccountCreate, MonthlyBalanceCreate, ContributionCreate
 from .repositories import accounts_repository, balances_repository, contributions_repository
 from .account_categories import get_category_attributes
 
+##-----------------------------------------------------
+## Utilities
+##-----------------------------------------------------
+
 def calculate_total_contributions(
     db: Session,
     account_id: int,
@@ -57,33 +61,9 @@ def calculate_growth(
         "investment_return": investment_return,
     }
 
-def get_account(db: Session, account_id: int):
-    account = accounts_repository.db_get_account(db, account_id)
-    if account is None:
-        return None
-
-    return {
-        "id": account.id,
-        "name": account.name,
-        "shared": account.shared,
-        "category": account.category,
-        "category_attributes": get_category_attributes(account.category),
-    }
-
-
-def get_accounts(db: Session):
-    accounts = accounts_repository.db_get_accounts(db)
-    return [
-        {
-            "id": account.id,
-            "name": account.name,
-            "shared": account.shared,
-            "category": account.category,
-            "category_attributes": get_category_attributes(account.category),
-        }
-        for account in accounts
-    ]
-
+##-----------------------------------------------------
+## Dashboard
+##-----------------------------------------------------
 
 def get_dashboard_summary(db: Session):
     accounts = accounts_repository.db_get_accounts(db)
@@ -123,25 +103,46 @@ def get_dashboard_summary(db: Session):
         "categories": categories,
     }
 
+##-----------------------------------------------------
+## Getters
+##-----------------------------------------------------
 
-def update_account(db: Session, account_id: int, account_data):
-    account = accounts_repository.db_update_account(db, account_id, account_data)
-
+def get_account(db: Session, account_id: int):
+    account = accounts_repository.db_get_account(db, account_id)
     if account is None:
-        return {"id": account_id, "status": "not_found"}
+        return None
 
     return {
         "id": account.id,
         "name": account.name,
         "shared": account.shared,
         "category": account.category,
-        "status": "updated",
+        "category_attributes": get_category_attributes(account.category),
     }
 
+
+def get_accounts(db: Session):
+    accounts = accounts_repository.db_get_accounts(db)
+    return [
+        {
+            "id": account.id,
+            "name": account.name,
+            "shared": account.shared,
+            "category": account.category,
+            "category_attributes": get_category_attributes(account.category),
+        }
+        for account in accounts
+    ]
 
 def get_monthly_balances(db: Session, account_id: int, start: date | None = None, end: date | None = None):
     return balances_repository.db_get_monthly_balances(db, account_id, start, end)
 
+def get_monthly_contributions(db: Session, account_id: int, start: date | None = None, end: date | None = None):
+    return contributions_repository.db_get_contributions(db, account_id, start, end)
+
+##-----------------------------------------------------
+## Creates
+##-----------------------------------------------------
 
 def create_account(db: Session, account_data: AccountCreate):
     account = accounts_repository.db_create_account(db, account_data)
@@ -150,7 +151,6 @@ def create_account(db: Session, account_data: AccountCreate):
         "id": account.id,
         "status": "created"
     }
-
 
 def create_monthly_balance(db: Session, balance_data: MonthlyBalanceCreate):
 
@@ -161,7 +161,6 @@ def create_monthly_balance(db: Session, balance_data: MonthlyBalanceCreate):
         "status": "created"
     }
 
-
 def create_contribution(db: Session, contribution_data: ContributionCreate):
 
     contribution = contributions_repository.db_create_contribution(db, contribution_data)
@@ -171,6 +170,9 @@ def create_contribution(db: Session, contribution_data: ContributionCreate):
         "status": "created"
     }
 
+##-----------------------------------------------------
+## Deletes
+##-----------------------------------------------------
 
 def delete_account(db: Session, account_id: int):
     deleted = accounts_repository.db_delete_account(db, account_id)
@@ -205,4 +207,22 @@ def delete_contribution(db: Session, contribution_id: int):
     return {
         "id": contribution_id,
         "status": "deleted" if deleted else "not_found",
+    }
+
+##-----------------------------------------------------
+## Updates
+##-----------------------------------------------------
+
+def update_account(db: Session, account_id: int, account_data):
+    account = accounts_repository.db_update_account(db, account_id, account_data)
+
+    if account is None:
+        return {"id": account_id, "status": "not_found"}
+
+    return {
+        "id": account.id,
+        "name": account.name,
+        "shared": account.shared,
+        "category": account.category,
+        "status": "updated",
     }
