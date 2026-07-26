@@ -12,6 +12,7 @@
     <a href="/accounts">Accounts</a>
     <a href="/balances">Balances</a>
     <a href="/contributions">Contributions</a>
+    <a href="/summary">Summary</a>
 </nav>
 
 <h1>My Finance Tracker</h1>
@@ -19,6 +20,12 @@
 <div id="dashboard"></div>
 
 <script src="/static/app.js"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    loadDashboard();
+});
+</script>
 
 </body>
 </html>

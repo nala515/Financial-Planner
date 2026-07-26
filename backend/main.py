@@ -45,6 +45,14 @@ def get_balances():
 def get_contributions():
     return FileResponse("frontend/contributions.html")
 
+@app.get("/summary")
+def get_summary():
+    return FileResponse("frontend/summary.html")
+
+##-----------------------------------------------------
+## API Gets
+##-----------------------------------------------------
+
 @app.get("/api/accounts")
 def api_get_accounts():
     db = SessionLocal()
@@ -108,7 +116,7 @@ def api_get_contributions(
     finally:
         db.close()
 
-@app.get("/api/accounts/{account_id}/growth")
+@app.get("/api/accounts/{account_id}/summary")
 def api_get_growth(
     account_id: int,
     start: date,

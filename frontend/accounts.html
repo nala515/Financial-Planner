@@ -11,6 +11,7 @@
     <a href="/accounts">Accounts</a>
     <a href="/balances">Balances</a>
     <a href="/contributions">Contributions</a>
+    <a href="/summary">Summary</a>
 </nav>
 
 <h1>All Accounts</h1>
@@ -47,5 +48,18 @@
 <div id="accounts"></div>
 
 <script src="/static/app.js"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    loadAccounts();
+
+    const form = document.getElementById("account-form");
+
+    if (form) {
+        form.addEventListener("submit", handleAccountUpdate);
+    }
+});
+</script>
+
 </body>
 </html>

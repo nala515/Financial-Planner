@@ -130,3 +130,61 @@ button {
     color: #93c5fd;
     font-weight: 600;
 }
+
+/* from claude */
+
+.table-wrapper {
+    max-height: 80vh;
+    overflow-y: auto;
+    position: relative;
+    border: 1px solid #374151;
+    border-radius: 8px;
+    width: 50%;
+    margin: 0 auto;   /* remove this if you want it left-aligned instead of centered */
+}
+
+.account-table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+
+.account-table th,
+.account-table td {
+    border: 1px solid #374151;   /* visible cell borders, not just row dividers */
+}
+
+.account-table thead th {
+    position: sticky;
+    top: 0;
+    background: #1f2937;
+    color: #f9fafb;
+    z-index: 2;
+    text-align: left;
+    padding: 8px 12px;
+}
+
+.account-table td {
+    padding: 6px 12px;
+    color: #d1d5db;
+}
+
+.summary-year-row td {
+    font-weight: bold;
+    background: #111827;
+    color: #f9fafb;
+}
+
+.account-table td.growth-positive {
+    color: #4ade80;
+    font-weight: 600;
+}
+
+.account-table td.growth-negative {
+    color: #f87171;
+    font-weight: 600;
+}
+
+.account-table td.growth-neutral {
+    color: #d1d5db;
+}
