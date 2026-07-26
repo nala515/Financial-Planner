@@ -20,7 +20,7 @@ SessionLocal = sessionmaker(bind=engine)
 
 def ensure_account_schema(target_engine=None):
     active_engine = target_engine or engine
-    from models import Base
+    from .models import Base
 
     Base.metadata.create_all(bind=active_engine)
 

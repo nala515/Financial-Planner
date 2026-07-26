@@ -1,9 +1,11 @@
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 from datetime import date
-from database import engine, SessionLocal
-from models import Base
-import services, schemas
+from .database import engine, SessionLocal
+from .models import Base
+from . import services, schemas
 
 app = FastAPI()
 
@@ -17,11 +19,33 @@ app.add_middleware(
 
 Base.metadata.create_all(bind=engine)
 
+app.mount(
+    "/static",
+    StaticFiles(directory="frontend"),
+    name="static"
+)
+
+##-----------------------------------------------------
+## Gets
+##-----------------------------------------------------
+
 @app.get("/")
-def hello():
-    return {"message": "Hello, Jacqueline!"}
+def home():
+    return FileResponse("frontend/index.html")
 
 @app.get("/accounts")
+def get_accounts():
+    return FileResponse("frontend/accounts.html")
+
+@app.get("/balances")
+def get_balances():
+    return FileResponse("frontend/balances.html")
+
+@app.get("/contributions")
+def get_contributions():
+    return FileResponse("frontend/contributions.html")
+
+@app.get("/api/accounts")
 def api_get_accounts():
     db = SessionLocal()
 
@@ -30,7 +54,7 @@ def api_get_accounts():
     finally:
         db.close()
 
-@app.get("/dashboard")
+@app.get("/api/dashboard")
 def api_get_dashboard_summary():
     db = SessionLocal()
 
@@ -39,7 +63,7 @@ def api_get_dashboard_summary():
     finally:
         db.close()
 
-@app.get("/accounts/{account_id}")
+@app.get("/api/accounts/{account_id}")
 def api_get_account(account_id: int):
     db = SessionLocal()
 
@@ -48,7 +72,7 @@ def api_get_account(account_id: int):
     finally:
         db.close()
 
-@app.get("/accounts/{account_id}/balances")
+@app.get("/api/accounts/{account_id}/balances")
 def api_get_balances(
     account_id: int,
     start: date | None = None,
@@ -66,7 +90,25 @@ def api_get_balances(
     finally:
         db.close()
 
-@app.get("/accounts/{account_id}/growth")
+@app.get("/api/accounts/{account_id}/contributions")
+def api_get_contributions(
+    account_id: int,
+    start: date | None = None,
+    end: date | None = None,
+):
+    db = SessionLocal()
+
+    try:
+        return services.get_monthly_contributions(
+            db,
+            account_id,
+            start,
+            end,
+        )
+    finally:
+        db.close()
+
+@app.get("/api/accounts/{account_id}/growth")
 def api_get_growth(
     account_id: int,
     start: date,
@@ -84,7 +126,11 @@ def api_get_growth(
     finally:
         db.close()
 
-@app.post("/account")
+##-----------------------------------------------------
+## Posts
+##-----------------------------------------------------
+
+@app.post("/api/account")
 def create_account(account_data: schemas.AccountCreate):
     db = SessionLocal()
 
@@ -93,16 +139,7 @@ def create_account(account_data: schemas.AccountCreate):
     finally:
         db.close()
 
-@app.patch("/accounts/{account_id}")
-def update_account(account_id: int, account_data: schemas.AccountUpdate):
-    db = SessionLocal()
-
-    try:
-        return services.update_account(db, account_id, account_data)
-    finally:
-        db.close()
-    
-@app.post("/monthly_balance")
+@app.post("/api/monthly_balance")
 def create_monthly_balance(balance_data: schemas.MonthlyBalanceCreate):
     db = SessionLocal()
 
@@ -111,7 +148,7 @@ def create_monthly_balance(balance_data: schemas.MonthlyBalanceCreate):
     finally:
         db.close()
 
-@app.post("/contribution")
+@app.post("/api/contribution")
 def create_contribution(contribution_data: schemas.ContributionCreate):
     db = SessionLocal()
 
@@ -120,7 +157,24 @@ def create_contribution(contribution_data: schemas.ContributionCreate):
     finally:
         db.close()
 
-@app.delete("/accounts/{account_id}")
+##-----------------------------------------------------
+## Patches
+##-----------------------------------------------------
+
+@app.patch("/api/accounts/{account_id}")
+def update_account(account_id: int, account_data: schemas.AccountUpdate):
+    db = SessionLocal()
+
+    try:
+        return services.update_account(db, account_id, account_data)
+    finally:
+        db.close()
+
+##-----------------------------------------------------
+## Deletes
+##-----------------------------------------------------
+
+@app.delete("/api/accounts/{account_id}")
 def delete_account(account_id: int):
     db = SessionLocal()
 
@@ -129,7 +183,7 @@ def delete_account(account_id: int):
     finally:
         db.close()
 
-@app.delete("/accounts")
+@app.delete("/api/accounts")
 def delete_all_accounts():
     db = SessionLocal()
 
@@ -138,7 +192,7 @@ def delete_all_accounts():
     finally:
         db.close()
 
-@app.delete("/monthly_balance/{balance_id}")
+@app.delete("/api/monthly_balance/{balance_id}")
 def delete_monthly_balance(balance_id: int):
     db = SessionLocal()
 
@@ -147,7 +201,7 @@ def delete_monthly_balance(balance_id: int):
     finally:
         db.close()
 
-@app.delete("/contribution/{contribution_id}")
+@app.delete("/api/contribution/{contribution_id}")
 def delete_contribution(contribution_id: int):
     db = SessionLocal()
 

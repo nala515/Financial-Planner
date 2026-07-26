@@ -1,10 +1,9 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Finance Tracker</title>
+    <title>Contributions - Finance Tracker</title>
     <link rel="stylesheet" href="/static/style.css">
 </head>
-
 <body>
 
 <nav>
@@ -14,11 +13,13 @@
     <a href="/contributions">Contributions</a>
 </nav>
 
-<h1>My Finance Tracker</h1>
+<h1>Monthly Contributions</h1>
 
-<div id="dashboard"></div>
+<label for="account-selector">Select account</label>
+<select id="account-selector"></select>
+
+<div id="contributions"></div>
 
 <script src="/static/app.js"></script>
-
 </body>
 </html>
