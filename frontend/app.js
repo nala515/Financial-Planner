@@ -375,9 +375,9 @@ async function loadContributionsForAccount(accountId, container) {
             return;
         }
 
-        const sortedContributions = [...contributions].sort((a, b) => new Date(b.snapshot_date) - new Date(a.snapshot_date));
+        const sortedContributions = [...contributions].sort((a, b) => new Date(b.date) - new Date(a.date));
         const groupedContributions = sortedContributions.reduce((groups, contribution) => {
-            const year = formatYearLabel(contribution.snapshot_date);
+            const year = formatYearLabel(contribution.date);
             if (!groups[year]) {
                 groups[year] = [];
             }
@@ -399,8 +399,8 @@ async function loadContributionsForAccount(accountId, container) {
                 const item = document.createElement("li");
                 item.className = "account-card balance-row";
                 item.innerHTML = `
-                    <span>${formatMonthLabel(contribution.snapshot_date)}</span>
-                    <span>${formatCurrency(contribution.contribution_cents)}</span>
+                    <span>${formatMonthLabel(contribution.date)}</span>
+                    <span>${formatCurrency(contribution.amount_cents)}</span>
                 `;
                 list.appendChild(item);
             });
