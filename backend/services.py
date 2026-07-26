@@ -37,29 +37,39 @@ def calculate_growth(
         end,
     )
 
+    # Ensure ascending order by date so month-over-month pairs are correct,
+    # regardless of what order the repository returns them in.
+    balances = sorted(balances, key=lambda b: b.snapshot_date)
+
     if len(balances) < 2:
-        return None
+        return []
 
-    start_balance = balances[0].balance_cents
-    end_balance = balances[-1].balance_cents
+    results = []
 
-    contributions = calculate_total_contributions(
-        db,
-        account_id,
-        start,
-        end,
-    )
+    for i in range(1, len(balances)):
+        prev_balance = balances[i - 1]
+        curr_balance = balances[i]
 
-    growth = end_balance - start_balance
-    investment_return = growth - contributions
+        contributions = calculate_total_contributions(
+            db,
+            account_id,
+            prev_balance.snapshot_date,
+            curr_balance.snapshot_date,
+        )
 
-    return {
-        "starting_balance": start_balance,
-        "ending_balance": end_balance,
-        "growth": growth,
-        "contributions": contributions,
-        "investment_return": investment_return,
-    }
+        growth = curr_balance.balance_cents - prev_balance.balance_cents
+        investment_return = growth - contributions
+
+        results.append({
+            "month": curr_balance.snapshot_date,
+            "starting_balance": prev_balance.balance_cents,
+            "ending_balance": curr_balance.balance_cents,
+            "growth": growth,
+            "contributions": contributions,
+            "investment_return": investment_return,
+        })
+
+    return results
 
 ##-----------------------------------------------------
 ## Dashboard

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Contributions - Finance Tracker</title>
+    <title>Summary - Finance Tracker</title>
     <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
@@ -14,27 +14,35 @@
     <a href="/summary">Summary</a>
 </nav>
 
-<h1>Monthly Contributions</h1>
+<h1>Monthly Summary</h1>
 
 <label for="account-selector">Select account</label>
 <select id="account-selector"></select>
 
-<div id="contributions"></div>
+<div class="table-wrapper">
+    <table class="account-table">
+        <thead>
+            <tr>
+                <th>Month</th>
+                <th>Balance</th>
+                <th>Contributions</th>
+                <th>Growth</th>
+            </tr>
+        </thead>
+        <tbody id="summary-body"></tbody>
+    </table>
+</div>
 
 <script src="/static/app.js"></script>
 
 <script>
 document.addEventListener("DOMContentLoaded", () => {
-    loadContributions();
+    loadSummary();
 
     const selector = document.getElementById("account-selector");
-    const contributions = document.getElementById("contributions");
 
     selector.addEventListener("change", async (event) => {
-        await loadContributionsForAccount(
-            event.target.value,
-            contributions
-        );
+        await loadSummaryForAccount(event.target.value);
     });
 });
 </script>
