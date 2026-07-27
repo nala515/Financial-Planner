@@ -39,7 +39,13 @@ class IncomeEvent(Base):
     __tablename__ = "income_event"
 
     id = Column(Integer, primary_key=True)
-    #income_source = Column(Integer, nullable=False)
+    source_id = Column(Integer, nullable=False)
     date = Column(Date, nullable=False)
     amount_cents = Column(Integer, nullable=False)
     notes = Column(String, nullable=True)
+
+class IncomeSource(Base):
+    __tablename__ = "income_source"
+
+    id = Column(Integer, primary_key=True)
+    name = Column(String, nullable=False)
