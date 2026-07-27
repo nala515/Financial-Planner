@@ -21,7 +21,8 @@
 
 <div id="contributions"></div>
 
-<script src="/static/app.js"></script>
+<script src="/static/js/app.js"></script>
+<script src="/static/js/contributions.js"></script>
 
 <script>
 document.addEventListener("DOMContentLoaded", () => {
@@ -31,6 +32,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const contributions = document.getElementById("contributions");
 
     selector.addEventListener("change", async (event) => {
+        setSelectedAccountId(accountId);
         await loadContributionsForAccount(
             event.target.value,
             contributions

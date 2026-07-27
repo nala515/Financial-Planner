@@ -34,7 +34,8 @@
     </table>
 </div>
 
-<script src="/static/app.js"></script>
+<script src="/static/js/app.js"></script>
+<script src="/static/js/summary.js"></script>
 
 <script>
 document.addEventListener("DOMContentLoaded", () => {
@@ -43,6 +44,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const selector = document.getElementById("account-selector");
 
     selector.addEventListener("change", async (event) => {
+        setSelectedAccountId(accountId);
         await loadSummaryForAccount(event.target.value);
     });
 });
