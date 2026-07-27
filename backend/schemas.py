@@ -21,5 +21,11 @@ class ContributionCreate(BaseModel):
     snapshot_date: date
     amount_cents: int
 
-#class IncomeCreate(BaseModel):
+class IncomeEventCreate(BaseModel):
+    source_id: int
+    snapshot_date: date
+    amount_cents: int
+
+class IncomeSourceCreate(BaseModel):
+    name: str
     
