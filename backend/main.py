@@ -71,7 +71,7 @@ def api_get_dashboard_summary():
     finally:
         db.close()
 
-@app.get("/api/balances", response_model=list[schemas.Balance])
+@app.get("/api/balances", response_model=list[models.Balance])
 def api_get_all_balances(
     start: date | None = None,
     end: date | None = None
