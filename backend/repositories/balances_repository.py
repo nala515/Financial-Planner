@@ -1,16 +1,16 @@
-from ..models import MonthlyBalance
-from ..schemas import MonthlyBalanceCreate
+from ..models import Balance
+from ..schemas import BalanceCreate
 
 from datetime import date
 from sqlalchemy.orm import Session
 
-def db_create_monthly_balance(db: Session, balance_data: MonthlyBalanceCreate):
+def db_create_balance(db: Session, balance_data: BalanceCreate):
     existing_balance = (
-        db.query(MonthlyBalance)
+        db.query(Balance)
         .filter(
-            MonthlyBalance.account_id == balance_data.account_id,
-            MonthlyBalance.snapshot_date >= date(balance_data.snapshot_date.year, balance_data.snapshot_date.month, 1),
-            MonthlyBalance.snapshot_date < date(balance_data.snapshot_date.year, balance_data.snapshot_date.month + 1, 1) if balance_data.snapshot_date.month < 12 else date(balance_data.snapshot_date.year + 1, 1, 1),
+            Balance.account_id == balance_data.account_id,
+            Balance.date >= date(balance_data.date.year, balance_data.date.month, 1),
+            Balance.date < date(balance_data.date.year, balance_data.date.month + 1, 1) if balance_data.date.month < 12 else date(balance_data.date.year + 1, 1, 1),
         )
         .first()
     )
@@ -21,9 +21,9 @@ def db_create_monthly_balance(db: Session, balance_data: MonthlyBalanceCreate):
         db.refresh(existing_balance)
         return existing_balance
 
-    balance = MonthlyBalance(
+    balance = Balance(
         account_id=balance_data.account_id,
-        snapshot_date=balance_data.snapshot_date,
+        date=balance_data.date,
         balance_cents=balance_data.balance_cents,
     )
 
@@ -38,43 +38,43 @@ def db_get_all_balances(
     start: date | None = None,
     end: date | None = None,
 ):
-    query = db.query(MonthlyBalance)
+    query = db.query(Balance)
 
     if start is not None:
-        query = query.filter(MonthlyBalance.snapshot_date >= start)
+        query = query.filter(Balance.date >= start)
 
     if end is not None:
-        query = query.filter(MonthlyBalance.snapshot_date <= end)
+        query = query.filter(Balance.date <= end)
 
-    return query.order_by(MonthlyBalance.snapshot_date).all()
+    return query.order_by(Balance.date).all()
 
-def db_get_monthly_balances(
+def db_get_account_balances(
     db: Session,
     account_id: int,
     start: date | None = None,
     end: date | None = None,
 ):
     query = (
-        db.query(MonthlyBalance)
-        .filter(MonthlyBalance.account_id == account_id)
+        db.query(Balance)
+        .filter(Balance.account_id == account_id)
     )
 
     if start is not None:
-        query = query.filter(MonthlyBalance.snapshot_date >= start)
+        query = query.filter(Balance.date >= start)
 
     if end is not None:
-        query = query.filter(MonthlyBalance.snapshot_date <= end)
+        query = query.filter(Balance.date <= end)
 
-    return query.order_by(MonthlyBalance.snapshot_date).all()
+    return query.order_by(Balance.date).all()
 
 
-def db_delete_monthly_balance(db: Session, balance_id: int):
-    balance = db.query(MonthlyBalance).filter(MonthlyBalance.id == balance_id).first()
+def db_delete_balance(db: Session, balance_id: int):
+    balance = db.query(Balance).filter(Balance.id == balance_id).first()
 
     if balance is None:
         return False
 
-    db.query(MonthlyBalance).filter(MonthlyBalance.id == balance_id).delete()
+    db.query(Balance).filter(Balance.id == balance_id).delete()
     db.commit()
 
     return True
