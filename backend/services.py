@@ -1,8 +1,8 @@
 from sqlalchemy.orm import Session
 from datetime import date
 
-from .schemas import AccountCreate, MonthlyBalanceCreate, ContributionCreate
-from .repositories import accounts_repository, balances_repository, contributions_repository
+from .schemas import AccountCreate, MonthlyBalanceCreate, ContributionCreate, IncomeEventCreate, IncomeSourceCreate
+from .repositories import accounts_repository, balances_repository, contributions_repository, income_repository
 from .account_categories import get_category_attributes
 
 ##-----------------------------------------------------
@@ -153,6 +153,16 @@ def get_monthly_contributions(db: Session, account_id: int, start: date | None =
 def get_income_events(db: Session, start: date | None = None, end: date | None = None):
     return income_repository.db_get_income_events(db, start, end)
 
+def get_income_sources(db: Session):
+    sources = income_repository.db_get_sources(db)
+    return [
+        {
+            "id": source.id,
+            "name": source.name,
+        }
+        for source in sources
+    ]
+
 ##-----------------------------------------------------
 ## Creates
 ##-----------------------------------------------------
@@ -189,6 +199,14 @@ def create_income_event(db: Session, income_data: IncomeEventCreate):
 
     return {
         "id": income_event.id,
+        "status": "created"
+    }
+
+def create_account(db: Session, source_data: IncomeSourceCreate):
+    source = income_repository.db_create_source(db, source_data)
+
+    return {
+        "id": source.id,
         "status": "created"
     }
 
@@ -236,6 +254,14 @@ def delete_income_event(db: Session, event_id: int):
 
     return {
         "id": event_id,
+        "status": "deleted" if deleted else "not_found",
+    }
+
+def delete_income_source(db: Session, source_id: int):
+    deleted = income_repository.db_delete_source(db, source_id)
+
+    return {
+        "id": source_id,
         "status": "deleted" if deleted else "not_found",
     }
 
