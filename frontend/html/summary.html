@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Summary - Finance Tracker</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<nav>
+    <a href="/">Home</a>
+    <a href="/accounts">Accounts</a>
+    <a href="/balances">Balances</a>
+    <a href="/contributions">Contributions</a>
+    <a href="/summary">Summary</a>
+</nav>
+
+<h1>Monthly Summary</h1>
+
+<label for="account-selector">Select account</label>
+<select id="account-selector"></select>
+
+<div class="table-wrapper">
+    <table class="account-table">
+        <thead>
+            <tr>
+                <th>Month</th>
+                <th>Balance</th>
+                <th>Contributions</th>
+                <th>Growth</th>
+                <th>Returns</th>
+            </tr>
+        </thead>
+        <tbody id="summary-body"></tbody>
+    </table>
+</div>
+
+<script src="/static/js/app.js"></script>
+<script src="/static/js/summary.js"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    loadSummary();
+
+    const selector = document.getElementById("account-selector");
+
+    selector.addEventListener("change", async (event) => {
+        setSelectedAccountId(event.target.value);
+        await loadSummaryForAccount(event.target.value);
+    });
+});
+</script>
+
+</body>
+</html>

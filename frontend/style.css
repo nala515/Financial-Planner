@@ -139,8 +139,8 @@ button {
     position: relative;
     border: 1px solid #374151;
     border-radius: 8px;
-    width: 50%;
-    margin: 0 auto;   /* remove this if you want it left-aligned instead of centered */
+    width: 75%;
+    /* margin: 0 auto; */   /* add this back in if you want it center aligned */
 }
 
 .account-table {
