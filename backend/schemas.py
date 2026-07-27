@@ -28,4 +28,7 @@ class IncomeEventCreate(BaseModel):
 
 class IncomeSourceCreate(BaseModel):
     name: str
+
+class IncomeSourceUpdate(BaseModel):
+    name: str | None = None
     
