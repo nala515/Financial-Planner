@@ -154,7 +154,7 @@ def get_income_events(db: Session, start: date | None = None, end: date | None =
     return income_repository.db_get_income_events(db, start, end)
 
 def get_income_sources(db: Session):
-    sources = income_repository.db_get_sources(db)
+    sources = income_repository.db_get_income_sources(db)
     return [
         {
             "id": source.id,
