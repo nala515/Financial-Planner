@@ -139,7 +139,7 @@ button {
     position: relative;
     border: 1px solid #374151;
     border-radius: 8px;
-    width: 50%;
+    width: 75%;
     /* margin: 0 auto; */   /* add this back in if you want it center aligned */
 }
 
