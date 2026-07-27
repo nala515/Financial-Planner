@@ -33,6 +33,21 @@ def db_create_monthly_balance(db: Session, balance_data: MonthlyBalanceCreate):
 
     return balance
 
+def db_get_all_balances(
+    db: Session,
+    start: date | None = None,
+    end: date | None = None,
+):
+    query = db.query(MonthlyBalance)
+
+    if start is not None:
+        query = query.filter(MonthlyBalance.snapshot_date >= start)
+
+    if end is not None:
+        query = query.filter(MonthlyBalance.snapshot_date <= end)
+
+    return query.order_by(MonthlyBalance.snapshot_date).all()
+
 def db_get_monthly_balances(
     db: Session,
     account_id: int,
