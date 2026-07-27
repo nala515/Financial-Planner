@@ -71,6 +71,38 @@ def api_get_dashboard_summary():
     finally:
         db.close()
 
+@app.get("/api/balances", response_model=list[schemas.MonthlyBalance])
+def api_get_all_balances(
+    start: date | None = None,
+    end: date | None = None
+):
+    db = SessionLocal()
+
+    try:
+        return services.get_all_balances(
+            db,
+            start,
+            end,
+        )
+    finally:
+        db.close()
+
+@app.get("/api/contributions", response_model=list[schemas.Contribution])
+def api_get_all_contributions(
+    start: date | None = None,
+    end: date | None = None
+):
+    db = SessionLocal()
+
+    try:
+        return services.get_all_contributions(
+            db,
+            start,
+            end,
+        )
+    finally:
+        db.close()
+
 @app.get("/api/accounts/{account_id}")
 def api_get_account(account_id: int):
     db = SessionLocal()
