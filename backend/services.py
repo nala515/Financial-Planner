@@ -202,8 +202,8 @@ def create_income_event(db: Session, income_data: IncomeEventCreate):
         "status": "created"
     }
 
-def create_account(db: Session, source_data: IncomeSourceCreate):
-    source = income_repository.db_create_source(db, source_data)
+def create_income_source(db: Session, source_data: IncomeSourceCreate):
+    source = income_repository.db_create_income_source(db, source_data)
 
     return {
         "id": source.id,
@@ -258,11 +258,19 @@ def delete_income_event(db: Session, event_id: int):
     }
 
 def delete_income_source(db: Session, source_id: int):
-    deleted = income_repository.db_delete_source(db, source_id)
+    deleted = income_repository.db_delete_income_source(db, source_id)
 
     return {
         "id": source_id,
         "status": "deleted" if deleted else "not_found",
+    }
+
+def delete_all_income_sources(db: Session):
+    deleted_count = income_repository.db_delete_all_income_sources(db)
+
+    return {
+        "status": "deleted",
+        "deleted_count": deleted_count,
     }
 
 ##-----------------------------------------------------
@@ -280,5 +288,17 @@ def update_account(db: Session, account_id: int, account_data):
         "name": account.name,
         "shared": account.shared,
         "category": account.category,
+        "status": "updated",
+    }
+
+def update_income_source(db: Session, source_id: int, source_data):
+    source = income_repository.db_update_income_source(db, source_id, source_data)
+
+    if source is None:
+        return {"id": source_id, "status": "not_found"}
+
+    return {
+        "id": source.id,
+        "name": source.name,
         "status": "updated",
     }
