@@ -71,7 +71,7 @@ def api_get_dashboard_summary():
     finally:
         db.close()
 
-@app.get("/api/balances", response_model=list[schemas.MonthlyBalance])
+@app.get("/api/balances", response_model=list[schemas.Balance])
 def api_get_all_balances(
     start: date | None = None,
     end: date | None = None
@@ -121,7 +121,7 @@ def api_get_balances(
     db = SessionLocal()
 
     try:
-        return services.get_monthly_balances(
+        return services.get_account_balances(
             db,
             account_id,
             start,
@@ -139,7 +139,7 @@ def api_get_contributions(
     db = SessionLocal()
 
     try:
-        return services.get_monthly_contributions(
+        return services.get_account_contributions(
             db,
             account_id,
             start,
@@ -197,12 +197,12 @@ def create_account(account_data: schemas.AccountCreate):
     finally:
         db.close()
 
-@app.post("/api/monthly_balance")
-def create_monthly_balance(balance_data: schemas.MonthlyBalanceCreate):
+@app.post("/api/balance")
+def create_balance(balance_data: schemas.BalanceCreate):
     db = SessionLocal()
 
     try:
-        return services.create_monthly_balance(db, balance_data)
+        return services.create_balance(db, balance_data)
     finally:
         db.close()
 
@@ -268,12 +268,12 @@ def delete_all_accounts():
     finally:
         db.close()
 
-@app.delete("/api/monthly_balance/{balance_id}")
-def delete_monthly_balance(balance_id: int):
+@app.delete("/api/balance/{balance_id}")
+def delete_balance(balance_id: int):
     db = SessionLocal()
 
     try:
-        return services.delete_monthly_balance(db, balance_id)
+        return services.delete_balance(db, balance_id)
     finally:
         db.close()
 
