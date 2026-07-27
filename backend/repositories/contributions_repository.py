@@ -34,7 +34,7 @@ def db_get_all_contributions(
     return query.order_by(Contribution.date).all()
 
 
-def db_get_contributions(
+def db_get_account_contributions(
     db: Session,
     account_id: int,
     start: date | None = None,
