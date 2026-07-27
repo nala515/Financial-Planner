@@ -150,6 +150,9 @@ def get_monthly_balances(db: Session, account_id: int, start: date | None = None
 def get_monthly_contributions(db: Session, account_id: int, start: date | None = None, end: date | None = None):
     return contributions_repository.db_get_contributions(db, account_id, start, end)
 
+def get_income_events(db: Session, start: date | None = None, end: date | None = None):
+    return income_repository.db_get_income_events(db, start, end)
+
 ##-----------------------------------------------------
 ## Creates
 ##-----------------------------------------------------
@@ -177,6 +180,15 @@ def create_contribution(db: Session, contribution_data: ContributionCreate):
 
     return {
         "id": contribution.id,
+        "status": "created"
+    }
+
+def create_income_event(db: Session, income_data: IncomeEventCreate):
+
+    income_event = income_repository.db_create_income_event(db, income_data)
+
+    return {
+        "id": income_event.id,
         "status": "created"
     }
 
@@ -216,6 +228,14 @@ def delete_contribution(db: Session, contribution_id: int):
 
     return {
         "id": contribution_id,
+        "status": "deleted" if deleted else "not_found",
+    }
+
+def delete_income_event(db: Session, event_id: int):
+    deleted = income_repository.db_delete_income_event(db, event_id)
+
+    return {
+        "id": event_id,
         "status": "deleted" if deleted else "not_found",
     }
 
