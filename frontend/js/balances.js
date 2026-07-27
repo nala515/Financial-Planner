@@ -4,105 +4,95 @@
 
 async function loadBalances() {
     const container = document.getElementById("balances");
-    const selector = document.getElementById("account-selector");
-
-    if (!container || !selector) {
-        return;
-    }
+    if (!container) return;
 
     try {
-        const response = await fetch(`/api/accounts`);
+        // 1. Fetch active accounts (for headers) AND all balances in parallel
+        const [accountsRes, balancesRes] = await Promise.all([
+            fetch('/api/accounts'),
+            fetch('/api/balances') // Assumes an endpoint returning all MonthlyBalance records
+        ]);
 
-        if (!response.ok) {
-            throw new Error("Unable to load accounts");
+        if (!accountsRes.ok || !balancesRes.ok) {
+            throw new Error("Unable to load balance data");
         }
 
-        const accounts = await response.json();
-        selector.innerHTML = "";
+        const accounts = await accountsRes.json();
+        const balances = await balancesRes.json();
 
         if (!Array.isArray(accounts) || accounts.length === 0) {
-            selector.innerHTML = '<option value="">No accounts available</option>';
-            container.innerHTML = "<p>No accounts found yet.</p>";
+            container.innerHTML = "<p>No accounts found.</p>";
             return;
         }
 
-        const defaultOption = document.createElement("option");
-        defaultOption.value = "";
-        defaultOption.textContent = "Select an account";
-        selector.appendChild(defaultOption);
-
-        accounts.forEach(account => {
-            const option = document.createElement("option");
-            option.value = account.id;
-            option.textContent = account.name;
-            selector.appendChild(option);
+        // 2. Map balances by snapshot_date: { "YYYY-MM": { account_id: balance_cents } }
+        const rowsByDate = {};
+        balances.forEach(b => {
+            const dateKey = b.snapshot_date;
+            if (!rowsByDate[dateKey]) {
+                rowsByDate[dateKey] = {};
+            }
+            rowsByDate[dateKey][b.account_id] = b.balance_cents;
         });
 
-        const params = new URLSearchParams(window.location.search);
-        const accountId = getSelectedAccountId();
-
-        if (accountId) {
-            selector.value = accountId;
-            await loadBalancesForAccount(accountId, container);
-        }
-    } catch (error) {
-        container.innerHTML = `<p>${error.message}</p>`;
-    }
-}
-
-async function loadBalancesForAccount(accountId, container) {
-    if (!accountId) {
-        container.innerHTML = "<p>No account selected.</p>";
-        return;
-    }
-
-    try {
-        const response = await fetch(`/api/accounts/${accountId}/balances`);
-
-        if (!response.ok) {
-            throw new Error("Unable to load balances");
-        }
-
-        const balances = await response.json();
-        container.innerHTML = "";
-
-        if (!Array.isArray(balances) || balances.length === 0) {
-            container.innerHTML = "<p>No monthly balances found.</p>";
-            return;
-        }
-
-        const sortedBalances = [...balances].sort((a, b) => new Date(b.snapshot_date) - new Date(a.snapshot_date));
-        const groupedBalances = sortedBalances.reduce((groups, balance) => {
-            const year = formatYearLabel(balance.snapshot_date);
-            if (!groups[year]) {
-                groups[year] = [];
-            }
-            groups[year].push(balance);
+        // 3. Group dates by Year for section headers
+        const sortedDates = Object.keys(rowsByDate).sort((a, b) => new Date(b) - new Date(a));
+        const groupedByYear = sortedDates.reduce((groups, dateStr) => {
+            const year = formatYearLabel(dateStr);
+            if (!groups[year]) groups[year] = [];
+            groups[year].push(dateStr);
             return groups;
         }, {});
 
-        const years = Object.keys(groupedBalances).sort((a, b) => Number(b) - Number(a));
-        const list = document.createElement("ul");
-        list.className = "account-list";
+        // 4. Build Table DOM
+        const table = document.createElement("table");
+        table.className = "balances-table";
+
+        // Build Header
+        let thHtml = `<thead><tr><th>Month</th>`;
+        accounts.forEach(acc => {
+            thHtml += `<th>${acc.name}</th>`;
+        });
+        thHtml += `<th>Total</th></tr></thead>`;
+        table.innerHTML = thHtml;
+
+        const tbody = document.createElement("tbody");
+
+        // Populate Rows with Year Dividers
+        const years = Object.keys(groupedByYear).sort((a, b) => Number(b) - Number(a));
+        const colCount = accounts.length + 2; // Month + Accounts + Total
 
         years.forEach(year => {
-            const yearSection = document.createElement("li");
-            yearSection.className = "account-card year-section";
-            yearSection.innerHTML = `<strong>${year}</strong>`;
-            list.appendChild(yearSection);
+            // Year Section Row
+            const yearRow = document.createElement("tr");
+            yearRow.className = "summary-year-row";
+            yearRow.innerHTML = `<td colspan="${colCount}">${year}</td>`;
+            tbody.appendChild(yearRow);
 
-            groupedBalances[year].forEach(balance => {
-                const item = document.createElement("li");
-                item.className = "account-card balance-row";
-                item.innerHTML = `
-                    <span>${formatMonthLabel(balance.snapshot_date)}</span>
-                    <span>${formatCurrency(balance.balance_cents)}</span>
-                `;
-                list.appendChild(item);
+            // Monthly Rows
+            groupedByYear[year].forEach(dateStr => {
+                const tr = document.createElement("tr");
+                tr.className = "summary-data-row";
+
+                let rowHtml = `<td>${formatMonthLabel(dateStr)}</td>`;
+                let monthTotal = 0;
+
+                accounts.forEach(acc => {
+                    const amount = rowsByDate[dateStr][acc.id] || 0;
+                    monthTotal += amount;
+                    rowHtml += `<td>${amount ? formatCurrency(amount) : '-'}</td>`;
+                });
+
+                rowHtml += `<td><strong>${formatCurrency(monthTotal)}</strong></td>`;
+                tr.innerHTML = rowHtml;
+                tbody.appendChild(tr);
             });
         });
 
-        container.appendChild(list);
+        table.appendChild(tbody);
+        container.innerHTML = "";
+        container.appendChild(table);
+
     } catch (error) {
         container.innerHTML = `<p>${error.message}</p>`;
     }
