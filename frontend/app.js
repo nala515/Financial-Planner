@@ -533,7 +533,7 @@ async function loadSummaryForAccount(accountId) {
                     <td>${formatMonthLabel(row.month)}</td>
                     <td>${formatCurrency(row.ending_balance)}</td>
                     <td>${formatCurrency(row.contributions)}</td>
-		    <td class="${growthClass}">${formatCurrency(row.growth)}</td>
+                    <td class="${growthClass}">${formatCurrency(row.growth)}</td>
                     <td class="${growthClass}">${formatCurrency(row.investment_return)}</td>
                 `;
                 tbody.appendChild(tr);
