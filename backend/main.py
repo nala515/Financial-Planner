@@ -143,6 +143,15 @@ def api_get_income_events():
     finally:
         db.close()
 
+@app.get("/api/income_sources")
+def api_get_income_sources():
+    db = SessionLocal()
+
+    try:
+        return services.get_income_sources(db)
+    finally:
+        db.close()
+
 ##-----------------------------------------------------
 ## Posts
 ##-----------------------------------------------------
@@ -180,6 +189,15 @@ def create_income_data(income_data: schemas.IncomeEventCreate):
 
     try:
         return services.create_income_data(db, income_data)
+    finally:
+        db.close()
+
+@app.post("/api/income_source")
+def create_income_source(source_data: schemas.IncomeSourceCreate):
+    db = SessionLocal()
+
+    try:
+        return services.create_income_source(db, source_data)
     finally:
         db.close()
 
