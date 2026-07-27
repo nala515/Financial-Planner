@@ -87,7 +87,7 @@ def api_get_all_balances(
     finally:
         db.close()
 
-@app.get("/api/contributions", response_model=list[schemas.Contribution])
+@app.get("/api/contributions")
 def api_get_all_contributions(
     start: date | None = None,
     end: date | None = None
