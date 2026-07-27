@@ -134,6 +134,15 @@ def api_get_growth(
     finally:
         db.close()
 
+@app.get("/api/income_events")
+def api_get_income_events():
+    db = SessionLocal()
+
+    try:
+        return services.get_income_events(db)
+    finally:
+        db.close()
+
 ##-----------------------------------------------------
 ## Posts
 ##-----------------------------------------------------
