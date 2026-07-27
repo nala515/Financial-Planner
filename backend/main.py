@@ -165,6 +165,15 @@ def create_contribution(contribution_data: schemas.ContributionCreate):
     finally:
         db.close()
 
+@app.post("/api/income_event")
+def create_income_data(income_data: schemas.IncomeEventCreate):
+    db = SessionLocal()
+
+    try:
+        return services.create_income_data(db, income_data)
+    finally:
+        db.close()
+
 ##-----------------------------------------------------
 ## Patches
 ##-----------------------------------------------------
