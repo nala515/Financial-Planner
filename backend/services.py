@@ -144,6 +144,30 @@ def get_accounts(db: Session):
         for account in accounts
     ]
 
+def get_all_balances(db: Session):
+    balances = balances_repository.db_get_all_balances(db)
+    return [
+        {
+            "id": balance.id,
+            "account_id": balance.account_id,
+            "snapshot_date": balance.snapshot_date,
+            "balance_cents": balance.balance_cents,
+        }
+        for balance in balances
+    ]
+
+def get_all_contributions(db: Session):
+    contributions = contributions_repository.db_get_all_contributions(db)
+    return [
+        {
+            "id": contribution.id,
+            "account_id": contribution.account_id,
+            "date": contribution.date,
+            "amount_cents": contribution.amount_cents,
+        }
+        for contribution in contributions
+    ]
+
 def get_monthly_balances(db: Session, account_id: int, start: date | None = None, end: date | None = None):
     return balances_repository.db_get_monthly_balances(db, account_id, start, end)
 
