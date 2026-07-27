@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 from datetime import date
 
-from .schemas import AccountCreate, MonthlyBalanceCreate, ContributionCreate, IncomeEventCreate, IncomeSourceCreate
+from .schemas import AccountCreate, BalanceCreate, ContributionCreate, IncomeEventCreate, IncomeSourceCreate
 from .repositories import accounts_repository, balances_repository, contributions_repository, income_repository
 from .account_categories import get_category_attributes
 
@@ -30,7 +30,7 @@ def calculate_growth(
     start: date,
     end: date,
 ):
-    balances = balances_repository.db_get_monthly_balances(
+    balances = balances_repository.db_get_account_balances(
         db,
         account_id,
         start,
@@ -39,7 +39,7 @@ def calculate_growth(
 
     # Ensure ascending order by date so month-over-month pairs are correct,
     # regardless of what order the repository returns them in.
-    balances = sorted(balances, key=lambda b: b.snapshot_date)
+    balances = sorted(balances, key=lambda b: b.date)
 
     if len(balances) < 2:
         return []
@@ -53,15 +53,15 @@ def calculate_growth(
         contributions = calculate_total_contributions(
             db,
             account_id,
-            prev_balance.snapshot_date,
-            curr_balance.snapshot_date,
+            prev_balance.date,
+            curr_balance.date,
         )
 
         growth = curr_balance.balance_cents - prev_balance.balance_cents
         investment_return = growth - contributions
 
         results.append({
-            "month": curr_balance.snapshot_date,
+            "month": curr_balance.date,
             "starting_balance": prev_balance.balance_cents,
             "ending_balance": curr_balance.balance_cents,
             "growth": growth,
@@ -80,7 +80,7 @@ def get_dashboard_summary(db: Session):
     latest_balances = []
 
     for account in accounts:
-        balances = balances_repository.db_get_monthly_balances(db, account.id)
+        balances = balances_repository.db_get_account_balances(db, account.id)
         latest_balance = balances[-1].balance_cents if balances else 0
         latest_balances.append((account, latest_balance))
 
@@ -150,7 +150,7 @@ def get_all_balances(db: Session):
         {
             "id": balance.id,
             "account_id": balance.account_id,
-            "snapshot_date": balance.snapshot_date,
+            "date": balance.date,
             "balance_cents": balance.balance_cents,
         }
         for balance in balances
@@ -168,10 +168,10 @@ def get_all_contributions(db: Session):
         for contribution in contributions
     ]
 
-def get_monthly_balances(db: Session, account_id: int, start: date | None = None, end: date | None = None):
-    return balances_repository.db_get_monthly_balances(db, account_id, start, end)
+def get_account_balances(db: Session, account_id: int, start: date | None = None, end: date | None = None):
+    return balances_repository.db_get_account_balances(db, account_id, start, end)
 
-def get_monthly_contributions(db: Session, account_id: int, start: date | None = None, end: date | None = None):
+def get_account_contributions(db: Session, account_id: int, start: date | None = None, end: date | None = None):
     return contributions_repository.db_get_contributions(db, account_id, start, end)
 
 def get_income_events(db: Session, start: date | None = None, end: date | None = None):
@@ -199,9 +199,9 @@ def create_account(db: Session, account_data: AccountCreate):
         "status": "created"
     }
 
-def create_monthly_balance(db: Session, balance_data: MonthlyBalanceCreate):
+def create_balance(db: Session, balance_data: BalanceCreate):
 
-    balance = balances_repository.db_create_monthly_balance(db, balance_data)
+    balance = balances_repository.db_create_balance(db, balance_data)
 
     return {
         "id": balance.id,
@@ -256,8 +256,8 @@ def delete_all_accounts(db: Session):
     }
 
 
-def delete_monthly_balance(db: Session, balance_id: int):
-    deleted = balances_repository.db_delete_monthly_balance(db, balance_id)
+def delete_balance(db: Session, balance_id: int):
+    deleted = balances_repository.db_delete_balance(db, balance_id)
 
     return {
         "id": balance_id,
