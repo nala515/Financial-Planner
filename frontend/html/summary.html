@@ -44,7 +44,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const selector = document.getElementById("account-selector");
 
     selector.addEventListener("change", async (event) => {
-        setSelectedAccountId(accountId);
+        setSelectedAccountId(event.target.value);
         await loadSummaryForAccount(event.target.value);
     });
 });

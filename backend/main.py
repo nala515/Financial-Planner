@@ -31,23 +31,23 @@ app.mount(
 
 @app.get("/")
 def home():
-    return FileResponse("frontend/index.html")
+    return FileResponse("frontend/html/index.html")
 
 @app.get("/accounts")
 def get_accounts():
-    return FileResponse("frontend/accounts.html")
+    return FileResponse("frontend/html/accounts.html")
 
 @app.get("/balances")
 def get_balances():
-    return FileResponse("frontend/balances.html")
+    return FileResponse("frontend/html/balances.html")
 
 @app.get("/contributions")
 def get_contributions():
-    return FileResponse("frontend/contributions.html")
+    return FileResponse("frontend/html/contributions.html")
 
 @app.get("/summary")
 def get_summary():
-    return FileResponse("frontend/summary.html")
+    return FileResponse("frontend/html/summary.html")
 
 ##-----------------------------------------------------
 ## API Gets

@@ -22,7 +22,7 @@
 <div id="balances"></div>
 
 <script src="/static/js/app.js"></script>
-<script src="/static/js/balances.html"></script>
+<script src="/static/js/balances.js"></script>
 
 <script>
 document.addEventListener("DOMContentLoaded", () => {
@@ -32,7 +32,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const balances = document.getElementById("balances");
 
     selector.addEventListener("change", async (event) => {
-        setSelectedAccountId(accountId);
+        setSelectedAccountId(event.target.value);
         await loadBalancesForAccount(
             event.target.value,
             balances

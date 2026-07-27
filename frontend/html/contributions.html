@@ -32,7 +32,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const contributions = document.getElementById("contributions");
 
     selector.addEventListener("change", async (event) => {
-        setSelectedAccountId(accountId);
+        setSelectedAccountId(event.target.value);
         await loadContributionsForAccount(
             event.target.value,
             contributions
