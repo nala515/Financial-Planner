@@ -142,7 +142,6 @@ async function handleAccountUpdate(event) {
         if (!response.ok) {
             throw new Error("Unable to update account");
         }
-
         status.textContent = "Account updated.";
         await loadAccounts();
     } catch (error) {
@@ -233,7 +232,7 @@ async function loadBalances() {
         });
 
         const params = new URLSearchParams(window.location.search);
-        const accountId = params.get("accountId");
+        const accountId = getSelectedAccountId();
 
         if (accountId) {
             selector.value = accountId;
@@ -343,7 +342,7 @@ async function loadContributions() {
         });
 
         const params = new URLSearchParams(window.location.search);
-        const accountId = params.get("accountId");
+        const accountId = getSelectedAccountId();
 
         if (accountId) {
             selector.value = accountId;
@@ -453,7 +452,7 @@ async function loadSummary() {
         });
 
         const params = new URLSearchParams(window.location.search);
-        const accountId = params.get("accountId");
+        const accountId = getSelectedAccountId();
 
         if (accountId) {
             selector.value = accountId;
@@ -547,6 +546,14 @@ async function loadSummaryForAccount(accountId) {
 //-----------------------------------------------------
 // Utilities
 //-----------------------------------------------------
+
+function getSelectedAccountId() {
+    return localStorage.getItem("selectedAccount");
+}
+
+function setSelectedAccountId(accountId) {
+    localStorage.setItem("selectedAccount", accountId);
+}
 
 function formatCurrency(cents) {
     return (cents / 100).toLocaleString("en-US", {
