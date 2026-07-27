@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 def db_create_contribution(db: Session, contribution_data: ContributionCreate):
     contribution = Contribution(
         account_id=contribution_data.account_id,
-        date=contribution_data.snapshot_date,
+        date=contribution_data.date,
         amount_cents=contribution_data.amount_cents,
     )
 
