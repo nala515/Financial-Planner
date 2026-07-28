@@ -16,9 +16,6 @@
 
 <h1>Monthly Contributions</h1>
 
-<label for="account-selector">Select account</label>
-<select id="account-selector"></select>
-
 <div id="contributions"></div>
 
 <script src="/static/js/app.js"></script>
@@ -27,17 +24,6 @@
 <script>
 document.addEventListener("DOMContentLoaded", () => {
     loadContributions();
-
-    const selector = document.getElementById("account-selector");
-    const contributions = document.getElementById("contributions");
-
-    selector.addEventListener("change", async (event) => {
-        setSelectedAccountId(event.target.value);
-        await loadContributionsForAccount(
-            event.target.value,
-            contributions
-        );
-    });
 });
 </script>
 

@@ -5,9 +5,9 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from ..database import SessionLocal, initialize_database
-from ..models import Account, Contribution, MonthlyBalance
-from ..account_categories import normalize_category
+from ...database import SessionLocal, initialize_database
+from ...models import Account, Contribution, Balance
+from ...account_categories import normalize_category
 
 
 def _get_existing_account(db, name: str, category: str, shared: bool):
@@ -61,14 +61,14 @@ def import_csv(csv_path: str):
             else:
                 contribution_cents = 0
 
-            snapshot_date = date(year, month, 1)
+            balance_date = date(year, month, 1)
 
             # check for existing balance, add one if none exists
             existing_balance = (
-                db.query(MonthlyBalance)
+                db.query(Balance)
                 .filter(
-                    MonthlyBalance.account_id == account.id,
-                    MonthlyBalance.snapshot_date == snapshot_date,
+                    Balance.account_id == account.id,
+                    Balance.date == balance_date,
                 )
                 .first()
             )
@@ -76,9 +76,9 @@ def import_csv(csv_path: str):
                 existing_balance.balance_cents = balance_cents
                 continue
 
-            balance = MonthlyBalance(
+            balance = Balance(
                 account_id=account.id,
-                snapshot_date=snapshot_date,
+                date=balance_date,
                 balance_cents=balance_cents,
             )
             db.add(balance)
@@ -91,7 +91,7 @@ def import_csv(csv_path: str):
                 db.query(Contribution)
                 .filter(
                     Contribution.account_id == account.id,
-                    Contribution.date == snapshot_date,
+                    Contribution.date == balance_date,
                 )
                 .first()
             )
@@ -100,7 +100,7 @@ def import_csv(csv_path: str):
             else:
                 contribution = Contribution(
                     account_id=account.id,
-                    date=snapshot_date,
+                    date=balance_date,
                     amount_cents=contribution_cents,
                 )
                 db.add(contribution)
@@ -113,7 +113,7 @@ def import_csv(csv_path: str):
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
-        print("Usage: python backend/importer/import_accounts.py <path-to-csv>")
+        print("Usage: python -m backend/importer/import_accounts <path-to-csv>")
         sys.exit(1)
 
     account_id = import_csv(sys.argv[1])

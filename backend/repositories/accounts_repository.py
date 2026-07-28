@@ -1,4 +1,4 @@
-from ..models import Account, MonthlyBalance, Contribution
+from ..models import Account, Balance, Contribution
 from ..schemas import AccountCreate, AccountUpdate
 from ..account_categories import normalize_category
 
@@ -60,7 +60,7 @@ def db_delete_account(db: Session, account_id: int):
     if account is None:
         return False
 
-    db.query(MonthlyBalance).filter(MonthlyBalance.account_id == account_id).delete(synchronize_session=False)
+    db.query(Balance).filter(Balance.account_id == account_id).delete(synchronize_session=False)
     db.query(Contribution).filter(Contribution.account_id == account_id).delete(synchronize_session=False)
     db.query(Account).filter(Account.id == account_id).delete(synchronize_session=False)
     db.commit()
@@ -74,7 +74,7 @@ def db_delete_all_accounts(db: Session):
         return 0
 
     for account_id in account_ids:
-        db.query(MonthlyBalance).filter(MonthlyBalance.account_id == account_id).delete(synchronize_session=False)
+        db.query(Balance).filter(Balance.account_id == account_id).delete(synchronize_session=False)
         db.query(Contribution).filter(Contribution.account_id == account_id).delete(synchronize_session=False)
 
     db.query(Account).delete(synchronize_session=False)

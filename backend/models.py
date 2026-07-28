@@ -15,15 +15,15 @@ class Account(Base):
     shared = Column(Boolean, nullable=False)
     category = Column(String, nullable=False, default="Cash")
 
-class MonthlyBalance(Base):
+class Balance(Base):
     __tablename__ = "balances"
     __table_args__ = (
-        UniqueConstraint("account_id", "snapshot_date"),
+        UniqueConstraint("account_id", "date"),
     )
 
     id = Column(Integer, primary_key=True)
     account_id = Column(Integer, ForeignKey("accounts.id"), nullable=False)
-    snapshot_date = Column(Date, nullable=False)
+    date = Column(Date, nullable=False)
     balance_cents = Column(Integer, nullable=False)
 
 class Contribution(Base):
@@ -39,7 +39,13 @@ class IncomeEvent(Base):
     __tablename__ = "income_event"
 
     id = Column(Integer, primary_key=True)
-    #income_source = Column(Integer, nullable=False)
+    source_id = Column(Integer, nullable=False)
     date = Column(Date, nullable=False)
     amount_cents = Column(Integer, nullable=False)
     notes = Column(String, nullable=True)
+
+class IncomeSource(Base):
+    __tablename__ = "income_source"
+
+    id = Column(Integer, primary_key=True)
+    name = Column(String, nullable=False)

@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 def db_create_contribution(db: Session, contribution_data: ContributionCreate):
     contribution = Contribution(
         account_id=contribution_data.account_id,
-        date=contribution_data.snapshot_date,
+        date=contribution_data.date,
         amount_cents=contribution_data.amount_cents,
     )
 
@@ -18,7 +18,23 @@ def db_create_contribution(db: Session, contribution_data: ContributionCreate):
     return contribution
 
 
-def db_get_contributions(
+def db_get_all_contributions(
+    db: Session,
+    start: date | None = None,
+    end: date | None = None,
+):
+    query = db.query(Contribution)
+
+    if start is not None:
+        query = query.filter(Contribution.date >= start)
+
+    if end is not None:
+        query = query.filter(Contribution.date <= end)
+
+    return query.order_by(Contribution.date).all()
+
+
+def db_get_account_contributions(
     db: Session,
     account_id: int,
     start: date | None = None,

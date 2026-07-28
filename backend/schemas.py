@@ -11,15 +11,24 @@ class AccountUpdate(BaseModel):
     shared: bool | None = None
     category: str | None = None
 
-class MonthlyBalanceCreate(BaseModel):
+class BalanceCreate(BaseModel):
     account_id: int
-    snapshot_date: date
+    date: date
     balance_cents: int
 
 class ContributionCreate(BaseModel):
     account_id: int
-    snapshot_date: date
+    date: date
     amount_cents: int
 
-#class IncomeCreate(BaseModel):
+class IncomeEventCreate(BaseModel):
+    source_id: int
+    date: date
+    amount_cents: int
+
+class IncomeSourceCreate(BaseModel):
+    name: str
+
+class IncomeSourceUpdate(BaseModel):
+    name: str | None = None
     
