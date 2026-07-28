@@ -113,7 +113,7 @@ def api_get_account(account_id: int):
         db.close()
 
 @app.get("/api/accounts/{account_id}/balances")
-def api_get_balances(
+def api_get_account_balances(
     account_id: int,
     start: date | None = None,
     end: date | None = None,
@@ -131,7 +131,7 @@ def api_get_balances(
         db.close()
 
 @app.get("/api/accounts/{account_id}/contributions")
-def api_get_contributions(
+def api_get_account_contributions(
     account_id: int,
     start: date | None = None,
     end: date | None = None,

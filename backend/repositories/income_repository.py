@@ -11,7 +11,7 @@ from sqlalchemy.orm import Session
 def db_create_income_event(db: Session, income_data: IncomeEventCreate):
     income_event = IncomeEvent(
         source_id=income_data.source_id,
-        date=income_data.snapshot_date,
+        date=income_data.date,
         amount_cents=income_data.amount_cents,
     )
 

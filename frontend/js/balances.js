@@ -28,7 +28,7 @@ async function loadBalances() {
         // 2. Map balances by snapshot_date: { "YYYY-MM": { account_id: balance_cents } }
         const rowsByDate = {};
         balances.forEach(b => {
-            const dateKey = b.snapshot_date;
+            const dateKey = b.date;
             if (!rowsByDate[dateKey]) {
                 rowsByDate[dateKey] = {};
             }

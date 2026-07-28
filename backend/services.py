@@ -15,7 +15,7 @@ def calculate_total_contributions(
     start: date,
     end: date,
 ):
-    contributions = contributions_repository.db_get_contributions(
+    contributions = contributions_repository.db_get_account_contributions(
         db,
         account_id,
         start,
@@ -144,8 +144,8 @@ def get_accounts(db: Session):
         for account in accounts
     ]
 
-def get_all_balances(db: Session):
-    balances = balances_repository.db_get_all_balances(db)
+def get_all_balances(db: Session, start: date | None = None, end: date | None = None):
+    balances = balances_repository.db_get_all_balances(db, start, end)
     return [
         {
             "id": balance.id,
@@ -156,8 +156,8 @@ def get_all_balances(db: Session):
         for balance in balances
     ]
 
-def get_all_contributions(db: Session):
-    contributions = contributions_repository.db_get_all_contributions(db)
+def get_all_contributions(db: Session, start: date | None = None, end: date | None = None):
+    contributions = contributions_repository.db_get_all_contributions(db, start, end)
     return [
         {
             "id": contribution.id,
@@ -172,7 +172,7 @@ def get_account_balances(db: Session, account_id: int, start: date | None = None
     return balances_repository.db_get_account_balances(db, account_id, start, end)
 
 def get_account_contributions(db: Session, account_id: int, start: date | None = None, end: date | None = None):
-    return contributions_repository.db_get_contributions(db, account_id, start, end)
+    return contributions_repository.db_get_account_contributions(db, account_id, start, end)
 
 def get_income_events(db: Session, start: date | None = None, end: date | None = None):
     return income_repository.db_get_income_events(db, start, end)

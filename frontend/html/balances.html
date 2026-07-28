@@ -16,9 +16,6 @@
 
 <h1>Monthly Balances</h1>
 
-<label for="account-selector">Select account</label>
-<select id="account-selector"></select>
-
 <div id="balances"></div>
 
 <script src="/static/js/app.js"></script>
@@ -27,17 +24,6 @@
 <script>
 document.addEventListener("DOMContentLoaded", () => {
     loadBalances();
-
-    const selector = document.getElementById("account-selector");
-    const balances = document.getElementById("balances");
-
-    selector.addEventListener("change", async (event) => {
-        setSelectedAccountId(event.target.value);
-        await loadBalancesForAccount(
-            event.target.value,
-            balances
-        );
-    });
 });
 </script>
 
