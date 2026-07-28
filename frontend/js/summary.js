@@ -5,7 +5,7 @@
 
 async function loadSummary() {
     const selector = document.getElementById("account-selector");
-    const tbody = document.getElementById("summary-body");
+    const tbody = document.getElementById("table-body");
 
     if (!selector || !tbody) {
         return;
@@ -52,7 +52,7 @@ async function loadSummary() {
 }
 
 async function loadSummaryForAccount(accountId) {
-    const tbody = document.getElementById("summary-body");
+    const tbody = document.getElementById("table-body");
 
     if (!tbody) {
         return;
@@ -103,13 +103,13 @@ async function loadSummaryForAccount(accountId) {
 
         years.forEach(year => {
             const yearRow = document.createElement("tr");
-            yearRow.className = "summary-year-row";
+            yearRow.className = "table-year-row";
             yearRow.innerHTML = `<td colspan="4">${year}</td>`;
             tbody.appendChild(yearRow);
 
             groupedRows[year].forEach(row => {
                 const tr = document.createElement("tr");
-                tr.className = "summary-data-row";
+                tr.className = "table-data-row";
 
                 const growthClass =
                     row.investment_return > 0 ? "growth-positive" :
