@@ -6,7 +6,7 @@ from datetime import date
 from .database import engine, SessionLocal
 from .models import Base
 from . import services, schemas
-from account_categories import ACCOUNT_CATEGORIES
+from .account_categories import ACCOUNT_CATEGORIES
 
 app = FastAPI()
 
