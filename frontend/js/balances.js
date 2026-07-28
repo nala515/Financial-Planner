@@ -1,5 +1,29 @@
 //-----------------------------------------------------
-// Balances
+// Utility functions
+//-----------------------------------------------------
+
+let accountCategories = null; // cache so we don't refetch on every dropdown change
+
+async function getAccountCategories() {
+    if (accountCategories) {
+        return accountCategories;
+    }
+    const response = await fetch(`/api/account-categories`);
+    accountCategories = await response.json();
+    return accountCategories;
+}
+
+function filterAccountsByType(accounts, categories, type) {
+    return accounts.filter(acc => {
+        const categoryInfo = categories[acc.category];
+        // If an account's category isn't in the mapping for some reason,
+        // exclude it rather than crash or silently include it.
+        return categoryInfo ? categoryInfo[type] === true : false;
+    });
+}
+
+//-----------------------------------------------------
+// Main function
 //-----------------------------------------------------
 
 async function loadBalances() {
@@ -17,14 +41,25 @@ async function loadBalances() {
             throw new Error("Unable to load balance data");
         }
 
-        const accounts = await accountsRes.json();
+        const allAccounts = await accountsRes.json();
         const balances = await balancesRes.json();
-
-        if (!Array.isArray(accounts) || accounts.length === 0) {
+        
+        if (!Array.isArray(allAccounts) || allAccounts.length === 0) {
             container.innerHTML = "<p>No accounts found.</p>";
             return;
         }
 
+        // set up type filtering dropdown
+        const categories = await getAccountCategories();
+        const typeSelector = document.getElementById("type-selector");
+        const selectedType = typeSelector ? typeSelector.value : "net_worth";
+        const typeFilteredAccounts = filterAccountsByType(allAccounts, categories, selectedType);
+
+        if (!Array.isArray(typeFilteredAccounts) || typeFilteredAccounts.length === 0) {
+            container.innerHTML = "<p>No accounts matching this filter.</p>";
+            return;
+        }
+        
         // 2. Map balances by snapshot_date: { "YYYY-MM": { account_id: balance_cents } }
         const rowsByDate = {};
         balances.forEach(b => {
@@ -50,7 +85,7 @@ async function loadBalances() {
 
         // Build Header
         let thHtml = `<thead><tr><th>Month</th>`;
-        accounts.forEach(acc => {
+        typeFilteredAccounts.forEach(acc => {
             thHtml += `<th>${acc.name}</th>`;
         });
         thHtml += `<th>Total</th></tr></thead>`;
@@ -60,7 +95,7 @@ async function loadBalances() {
 
         // Populate Rows with Year Dividers
         const years = Object.keys(groupedByYear).sort((a, b) => Number(b) - Number(a));
-        const colCount = accounts.length + 2; // Month + Accounts + Total
+        const colCount = typeFilteredAccounts.length + 2; // Month + Accounts + Total
 
         years.forEach(year => {
             // Year Section Row
@@ -77,7 +112,7 @@ async function loadBalances() {
                 let rowHtml = `<td>${formatMonthLabel(dateStr)}</td>`;
                 let monthTotal = 0;
 
-                accounts.forEach(acc => {
+                typeFilteredAccounts.forEach(acc => {
                     const amount = rowsByDate[dateStr][acc.id] || 0;
                     monthTotal += amount;
                     rowHtml += `<td>${amount ? formatCurrency(amount) : '-'}</td>`;
