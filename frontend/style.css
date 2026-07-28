@@ -143,10 +143,19 @@ button {
     margin: 0 auto;
 }
 
+.table-wrapper.wide {
+    width: 100%;
+}
+
 .data-table {
     width: 100%;
     border-collapse: collapse;
     table-layout: fixed;
+}
+
+.data-table.wide {
+    width: auto; /* this overrides the width from the section above, if wide is defined */
+    min-width: 100%;
 }
 
 .data-table th,
@@ -173,6 +182,10 @@ button {
     font-weight: bold;
     background: #111827;
     color: #f9fafb;
+}
+
+.table-data-row:hover {
+    background: #1f2937;
 }
 
 .data-table td.growth-positive {
