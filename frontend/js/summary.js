@@ -5,7 +5,7 @@
 
 async function loadSummary() {
     const selector = document.getElementById("account-selector");
-    const tbody = document.getElementById("table-body");
+    const tbody = document.getElementById("summary-body");
 
     if (!selector || !tbody) {
         return;
@@ -52,7 +52,7 @@ async function loadSummary() {
 }
 
 async function loadSummaryForAccount(accountId) {
-    const tbody = document.getElementById("table-body");
+    const tbody = document.getElementById("summary-body");
 
     if (!tbody) {
         return;
