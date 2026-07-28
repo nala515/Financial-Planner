@@ -46,7 +46,7 @@ async function loadBalances() {
 
         // 4. Build Table DOM
         const table = document.createElement("table");
-        table.className = "balances-table";
+        table.className = "data-table wide";
 
         // Build Header
         let thHtml = `<thead><tr><th>Month</th>`;
@@ -65,14 +65,14 @@ async function loadBalances() {
         years.forEach(year => {
             // Year Section Row
             const yearRow = document.createElement("tr");
-            yearRow.className = "summary-year-row";
+            yearRow.className = "table-year-row";
             yearRow.innerHTML = `<td colspan="${colCount}">${year}</td>`;
             tbody.appendChild(yearRow);
 
             // Monthly Rows
             groupedByYear[year].forEach(dateStr => {
                 const tr = document.createElement("tr");
-                tr.className = "summary-data-row";
+                tr.className = "table-data-row";
 
                 let rowHtml = `<td>${formatMonthLabel(dateStr)}</td>`;
                 let monthTotal = 0;

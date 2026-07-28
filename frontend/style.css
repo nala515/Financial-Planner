@@ -117,22 +117,31 @@ button {
     position: relative;
     border: 1px solid #374151;
     border-radius: 8px;
-    width: 75%;
-    /* margin: 0 auto; */   /* add this back in if you want it center aligned */
+    width: 50%;
+    margin: 0 auto;
 }
 
-.account-table {
+.table-wrapper.wide {
+    width: 100%;
+}
+
+.data-table {
     width: 100%;
     border-collapse: collapse;
     table-layout: fixed;
 }
 
-.account-table th,
-.account-table td {
-    border: 1px solid #374151;   /* visible cell borders, not just row dividers */
+.data-table.wide {
+    width: auto; /* this overrides the width from the section above, if wide is defined */
+    min-width: 100%;
 }
 
-.account-table thead th {
+.data-table th,
+.data-table td {
+    border: 1px solid #374151;
+}
+
+.data-table thead th {
     position: sticky;
     top: 0;
     background: #1f2937;
@@ -142,27 +151,31 @@ button {
     padding: 8px 12px;
 }
 
-.account-table td {
+.data-table td {
     padding: 6px 12px;
     color: #d1d5db;
 }
 
-.summary-year-row td {
+.table-year-row td {
     font-weight: bold;
     background: #111827;
     color: #f9fafb;
 }
 
-.account-table td.growth-positive {
+.table-data-row:hover {
+    background: #1f2937;
+}
+
+.data-table td.growth-positive {
     color: #4ade80;
     font-weight: 600;
 }
 
-.account-table td.growth-negative {
+.data-table td.growth-negative {
     color: #f87171;
     font-weight: 600;
 }
 
-.account-table td.growth-neutral {
+.data-table td.growth-neutral {
     color: #d1d5db;
 }

@@ -36,6 +36,14 @@ async function loadContributions() {
             rowsByDate[dateKey][c.account_id] = c.amount_cents;
         });
 
+        // Filter out accounts with no contribution entries at all
+        const accountsWithData = accounts.filter(acc => {
+            return Object.values(rowsByDate).some(dateRow => {
+                const amount = dateRow[acc.id];
+                return amount !== undefined && amount !== null && amount !== 0;
+            });
+        });
+
         // 3. Group dates by Year for section headers
         const sortedDates = Object.keys(rowsByDate).sort((a, b) => new Date(b) - new Date(a));
         const groupedByYear = sortedDates.reduce((groups, dateStr) => {
@@ -47,11 +55,11 @@ async function loadContributions() {
 
         // 4. Build Table DOM
         const table = document.createElement("table");
-        table.className = "contributions-table";
+        table.className = "data-table wide";
 
         // Build Header
         let thHtml = `<thead><tr><th>Month</th>`;
-        accounts.forEach(acc => {
+        accountsWithData.forEach(acc => {
             thHtml += `<th>${acc.name}</th>`;
         });
         thHtml += `<th>Total</th></tr></thead>`;
@@ -61,24 +69,24 @@ async function loadContributions() {
 
         // Populate Rows with Year Dividers
         const years = Object.keys(groupedByYear).sort((a, b) => Number(b) - Number(a));
-        const colCount = accounts.length + 2; // Month + Accounts + Total
+        const colCount = accountsWithData.length + 2; // Month + Accounts + Total
 
         years.forEach(year => {
             // Year Section Row
             const yearRow = document.createElement("tr");
-            yearRow.className = "summary-year-row";
+            yearRow.className = "table-year-row";
             yearRow.innerHTML = `<td colspan="${colCount}">${year}</td>`;
             tbody.appendChild(yearRow);
 
             // Monthly Rows
             groupedByYear[year].forEach(dateStr => {
                 const tr = document.createElement("tr");
-                tr.className = "summary-data-row";
+                tr.className = "table-data-row";
 
                 let rowHtml = `<td>${formatMonthLabel(dateStr)}</td>`;
                 let monthTotal = 0;
 
-                accounts.forEach(acc => {
+                accountsWithData.forEach(acc => {
                     const amount = rowsByDate[dateStr][acc.id] || 0;
                     monthTotal += amount;
                     rowHtml += `<td>${amount ? formatCurrency(amount) : '-'}</td>`;
