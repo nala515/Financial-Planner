@@ -22,6 +22,35 @@ function filterAccountsByType(accounts, categories, type) {
     });
 }
 
+function formatTypeLabel(key) {
+    // net_worth -> "Net Worth", spendable -> "Spendable"
+    return key
+        .split("_")
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(" ");
+}
+
+async function populateTypeSelector() {
+    const categories = await getAccountCategories();
+    const typeSelector = document.getElementById("type-selector");
+
+    // Derive descriptor keys from any one category entry, since all
+    // entries share the same shape (retirement, spendable, invested, net_worth)
+    const firstCategory = Object.values(categories)[0];
+    const descriptorKeys = Object.keys(firstCategory || {});
+
+    typeSelector.innerHTML = "";
+    descriptorKeys.forEach(key => {
+        const option = document.createElement("option");
+        option.value = key;
+        option.textContent = formatTypeLabel(key);
+        if (key === "net_worth") {
+            option.selected = true;
+        }
+        typeSelector.appendChild(option);
+    });
+}
+
 //-----------------------------------------------------
 // Main function
 //-----------------------------------------------------
