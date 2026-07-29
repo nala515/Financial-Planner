@@ -6,6 +6,7 @@ from datetime import date
 from .database import engine, SessionLocal
 from .models import Base
 from . import services, schemas
+from .account_categories import ACCOUNT_CATEGORIES
 
 app = FastAPI()
 
@@ -103,6 +104,10 @@ def api_get_all_contributions(
     finally:
         db.close()
 
+@app.get("/api/account-categories")
+def api_get_account_categories():
+    return ACCOUNT_CATEGORIES
+
 @app.get("/api/accounts/{account_id}")
 def api_get_account(account_id: int):
     db = SessionLocal()
@@ -111,6 +116,10 @@ def api_get_account(account_id: int):
         return services.get_account(db, account_id)
     finally:
         db.close()
+
+##-----------------------------------------------------
+## Account-specific Gets
+##-----------------------------------------------------
 
 @app.get("/api/accounts/{account_id}/balances")
 def api_get_account_balances(
@@ -165,6 +174,10 @@ def api_get_growth(
         )
     finally:
         db.close()
+
+##-----------------------------------------------------
+## Income related Gets
+##-----------------------------------------------------
 
 @app.get("/api/income_events")
 def api_get_income_events():

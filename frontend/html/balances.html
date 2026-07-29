@@ -16,14 +16,23 @@
 
 <h1>Monthly Balances</h1>
 
+<label for="type-selector">Type</label>
+<select id="type-selector"></select>
+
 <div id="balances"></div>
 
 <script src="/static/js/app.js"></script>
 <script src="/static/js/balances.js"></script>
 
 <script>
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
+    await populateTypeSelector();
     loadBalances();
+
+    const typeSelector = document.getElementById("type-selector");
+    typeSelector.addEventListener("change", () => {
+        loadBalances();    
+    });
 });
 </script>
 
