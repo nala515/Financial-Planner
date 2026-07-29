@@ -118,64 +118,6 @@ def api_get_account(account_id: int):
         db.close()
 
 ##-----------------------------------------------------
-## Account-specific Gets
-##-----------------------------------------------------
-
-@app.get("/api/accounts/{account_id}/balances")
-def api_get_account_balances(
-    account_id: int,
-    start: date | None = None,
-    end: date | None = None,
-):
-    db = SessionLocal()
-
-    try:
-        return services.get_account_balances(
-            db,
-            account_id,
-            start,
-            end,
-        )
-    finally:
-        db.close()
-
-@app.get("/api/accounts/{account_id}/contributions")
-def api_get_account_contributions(
-    account_id: int,
-    start: date | None = None,
-    end: date | None = None,
-):
-    db = SessionLocal()
-
-    try:
-        return services.get_account_contributions(
-            db,
-            account_id,
-            start,
-            end,
-        )
-    finally:
-        db.close()
-
-@app.get("/api/accounts/{account_id}/summary")
-def api_get_growth(
-    account_id: int,
-    start: date,
-    end: date,
-):
-    db = SessionLocal()
-
-    try:
-        return services.calculate_growth(
-            db,
-            account_id,
-            start,
-            end,
-        )
-    finally:
-        db.close()
-
-##-----------------------------------------------------
 ## Income related Gets
 ##-----------------------------------------------------
 
