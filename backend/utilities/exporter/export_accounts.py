@@ -1,8 +1,8 @@
 import csv
 from pathlib import Path
 
-from ..database import SessionLocal, initialize_database
-from ..models import Account, MonthlyBalance, Contribution
+from ...database import SessionLocal, initialize_database
+from ...models import Account, Balance, Contribution
 
 def export_accounts():
     initialize_database()
@@ -22,9 +22,9 @@ def export_accounts():
         
             # read balances
             balances = (
-                db.query(MonthlyBalance)
-                .filter(MonthlyBalance.account_id == account.id)
-                .order_by(MonthlyBalance.snapshot_date)
+                db.query(Balance)
+                .filter(Balance.account_id == account.id)
+                .order_by(Balance.date)
                 .all()
             )
         
@@ -46,12 +46,12 @@ def export_accounts():
             # build the row
             for balance in balances:
                 row = [
-                    balance.snapshot_date.year,
-                    balance.snapshot_date.month,
+                    balance.date.year,
+                    balance.date.month,
                     f"{balance.balance_cents / 100:.2f}",
                 ]
         
-                contribution = contributions.get(balance.snapshot_date)
+                contribution = contributions.get(balance.date)
                 if contribution is not None:
                     row.append(contribution / 100)
           
