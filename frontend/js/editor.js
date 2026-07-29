@@ -2,6 +2,8 @@
 // Editor
 //-----------------------------------------------------
 
+let accountCache = [];
+
 function populateAccountForm(account) {
     const selector = document.getElementById("account-selector");
     const nameInput = document.getElementById("account-name");
@@ -57,8 +59,61 @@ async function handleAccountUpdate(event) {
             throw new Error("Unable to update account");
         }
         status.textContent = "Account updated.";
-        await loadAccounts();
+        await loadAccountEditor();
     } catch (error) {
         status.textContent = error.message;
+    }
+}
+
+
+async function loadAccountEditor() {
+    const div = document.getElementById("accounts");
+    const selector = document.getElementById("account-selector");
+
+    if (!div) {
+        return;
+    }
+
+    try {
+        const response = await fetch(`/api/accounts`);
+
+        if (!response.ok) {
+            throw new Error("Unable to load accounts");
+        }
+
+        const accounts = await response.json();
+        accountCache = Array.isArray(accounts) ? accounts : [];
+        div.innerHTML = "";
+
+        if (!Array.isArray(accounts) || accounts.length === 0) {
+            div.innerHTML = "<p>No accounts found yet.</p>";
+            if (selector) {
+                selector.innerHTML = '<option value="">Select an account</option>';
+            }
+            return;
+        }
+
+        const list = document.createElement("ul");
+        list.className = "account-list";
+
+        if (selector) {
+            selector.innerHTML = '<option value="">Select an account</option>';
+            populateAccountCategoryOptions(document.getElementById("account-category"));
+
+            accounts.forEach(account => {
+                const option = document.createElement("option");
+                option.value = account.id;
+                option.textContent = account.name;
+                selector.appendChild(option);
+            });
+
+            const selectedAccountId = selector.value || accountCache[0]?.id;
+            if (selectedAccountId) {
+                const selectedAccount = accountCache.find(account => account.id === Number(selectedAccountId));
+                if (selectedAccount) {
+                    populateAccountForm(selectedAccount);
+                }
+            }
+        }
     }
 }
