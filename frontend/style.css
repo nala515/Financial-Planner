@@ -155,8 +155,9 @@ button {
     position: relative;
     border: 1px solid #374151;
     border-radius: 8px;
-    width: 50%;
-    margin: 0 auto;
+    width: 75%;
+    margin-left: 0;
+    margin-right: auto;
 }
 
 .table-wrapper.wide {
