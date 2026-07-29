@@ -48,22 +48,29 @@ async function loadSummary() {
             const option = document.createElement("option");
             option.value = account.id;
             option.textContent = account.name;
+            option.dataset.category = account.category
             selector.appendChild(option);
         });
 
         const params = new URLSearchParams(window.location.search);
         const accountId = getSelectedAccountId();
 
+        // call function to load account summary
         if (accountId) {
             selector.value = accountId;
-            await loadSummaryForAccount(accountId);
+
+            // grab category
+            const selectedOption = selector.options[selector.selectedIndex];
+            const category = selectedOption?.dataset.category;
+            
+            await loadSummaryForAccount(accountId, category);
         }
     } catch (error) {
         tbody.innerHTML = `<tr><td colspan="4">${error.message}</td></tr>`;
     }
 }
 
-async function loadSummaryForAccount(accountId) {
+async function loadSummaryForAccount(accountId, category) {
     const tbody = document.getElementById("summary-body");
 
     if (!tbody) {
@@ -76,11 +83,6 @@ async function loadSummaryForAccount(accountId) {
     }
 
     try {
-        // get the account so we can know its details
-        const accountResponse = await fetch(`/api/accounts/${accountId}`);
-        const account = await accountResponse.json();
-        const category = account?.category;
-
         // determine which header to use and render it
         const showInvestmentReturn = category === "Investment" || category === "Retirement";
         const colCount = showInvestmentReturn ? 5 : 4;
