@@ -21,15 +21,7 @@
 
 <div class="table-wrapper">
     <table class="data-table">
-        <thead>
-            <tr>
-                <th>Month</th>
-                <th>Balance</th>
-                <th>Contributions</th>
-                <th>Growth</th>
-                <th>Returns</th>
-            </tr>
-        </thead>
+        <thead id="summary-thead"></thead>
         <tbody id="summary-body"></tbody>
     </table>
 </div>
@@ -44,11 +36,16 @@ document.addEventListener("DOMContentLoaded", () => {
     const selector = document.getElementById("account-selector");
 
     selector.addEventListener("change", async (event) => {
-        setSelectedAccountId(event.target.value);
-        await loadSummaryForAccount(event.target.value);
+        const accountId = event.target.value;
+        setSelectedAccountId(accountId);
+
+        // Get the selected <option> element to read the data-category attribute
+        const selectedOption = event.target.selectedOptions[0];
+        const category = selectedOption ? selectedOption.dataset.category : null;
+
+        await loadSummaryForAccount(accountId, category);
     });
 });
 </script>
-
 </body>
 </html>

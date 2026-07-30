@@ -3,6 +3,18 @@
 // Summary (Balance + Contributions + Growth)
 //-----------------------------------------------------
 
+function renderSummaryHeader(showInvestmentReturn) {
+    const thead = document.getElementById("summary-thead");
+
+    let headerHtml = `<tr><th>Month</th><th>Balance</th><th>Contributions</th><th>Growth</th>`;
+    if (showInvestmentReturn) {
+        headerHtml += `<th>Investment Return</th>`;
+    }
+    headerHtml += `</tr>`;
+
+    thead.innerHTML = headerHtml;
+}
+
 async function loadSummary() {
     const selector = document.getElementById("account-selector");
     const tbody = document.getElementById("summary-body");
@@ -36,22 +48,29 @@ async function loadSummary() {
             const option = document.createElement("option");
             option.value = account.id;
             option.textContent = account.name;
+            option.dataset.category = account.category
             selector.appendChild(option);
         });
 
         const params = new URLSearchParams(window.location.search);
         const accountId = getSelectedAccountId();
 
+        // call function to load account summary
         if (accountId) {
             selector.value = accountId;
-            await loadSummaryForAccount(accountId);
+
+            // grab category
+            const selectedOption = selector.options[selector.selectedIndex];
+            const category = selectedOption?.dataset.category;
+            
+            await loadSummaryForAccount(accountId, category);
         }
     } catch (error) {
         tbody.innerHTML = `<tr><td colspan="4">${error.message}</td></tr>`;
     }
 }
 
-async function loadSummaryForAccount(accountId) {
+async function loadSummaryForAccount(accountId, category) {
     const tbody = document.getElementById("summary-body");
 
     if (!tbody) {
@@ -64,9 +83,14 @@ async function loadSummaryForAccount(accountId) {
     }
 
     try {
-        // Assumption: pull full history. Adjust the start date if you'd
-        // rather default to something like "this year" or the account's
-        // creation date.
+        // determine which header to use and render it
+        const showInvestmentReturn = category === "Investment" || category === "Retirement";
+        const colCount = showInvestmentReturn ? 5 : 4;
+        renderSummaryHeader(showInvestmentReturn);
+
+        // Pull full history for the account
+        // Adjust the start date if you'd rather default to something
+        // like "this year" or the account's creation date.
         const start = "2000-01-01";
         const end = new Date().toISOString().split("T")[0];
 
@@ -82,7 +106,7 @@ async function loadSummaryForAccount(accountId) {
         tbody.innerHTML = "";
 
         if (!Array.isArray(rows) || rows.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="4">No monthly data found.</td></tr>';
+            tbody.innerHTML = `<tr><td colspan="${colCount}">No monthly data found.</td></tr>`;
             return;
         }
 
@@ -104,7 +128,7 @@ async function loadSummaryForAccount(accountId) {
         years.forEach(year => {
             const yearRow = document.createElement("tr");
             yearRow.className = "table-year-row";
-            yearRow.innerHTML = `<td colspan="4">${year}</td>`;
+            yearRow.innerHTML = `<td colspan="${colCount}">${year}</td>`;
             tbody.appendChild(yearRow);
 
             groupedRows[year].forEach(row => {
@@ -116,12 +140,16 @@ async function loadSummaryForAccount(accountId) {
                     row.investment_return < 0 ? "growth-negative" :
                     "growth-neutral";
 
+                const investmentReturnCell = showInvestmentReturn
+                    ? `<td class="${growthClass}">${formatCurrency(row.investment_return)}</td>`
+                    : "";
+                
                 tr.innerHTML = `
                     <td>${formatMonthLabel(row.month)}</td>
                     <td>${formatCurrency(row.ending_balance)}</td>
                     <td>${formatCurrency(row.contributions)}</td>
                     <td class="${growthClass}">${formatCurrency(row.growth)}</td>
-                    <td class="${growthClass}">${formatCurrency(row.investment_return)}</td>
+                    ${investmentReturnCell}
                 `;
                 tbody.appendChild(tr);
             });
