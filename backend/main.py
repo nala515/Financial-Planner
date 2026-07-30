@@ -50,6 +50,10 @@ def get_contributions():
 def get_summary():
     return FileResponse("frontend/html/summary.html")
 
+@app.get("/editor")
+def get_editor():
+    return FileResponse("frontend/html/editor.html")
+
 ##-----------------------------------------------------
 ## API Gets
 ##-----------------------------------------------------
