@@ -136,18 +136,19 @@ async function loadSummaryForAccount(accountId, category) {
                 tr.className = "table-data-row";
 
                 // set up investment return column, if applicable
-                const investmentReturnCell = ""
-                if showInvestmentReturn:
+                let investmentReturnCell = ""
+                if (showInvestmentReturn) {
                     const returnColorClass =
                         row.investment_return > 0 ? "growth-positive" :
                         row.investment_return < 0 ? "growth-negative" :
                         "growth-neutral";
                     investmentReturnCell = `<td class="${returnColorClass}">${formatCurrency(row.investment_return)}</td>`
+                }
 
                 // set up color for growth column
                 const growthColorClass =
-                    row.investment_return > 0 ? "growth-positive" :
-                    row.investment_return < 0 ? "growth-negative" :
+                    row.growth > 0 ? "growth-positive" :
+                    row.growth < 0 ? "growth-negative" :
                     "growth-neutral";
 
                 // put it all together
