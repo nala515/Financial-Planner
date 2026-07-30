@@ -135,20 +135,28 @@ async function loadSummaryForAccount(accountId, category) {
                 const tr = document.createElement("tr");
                 tr.className = "table-data-row";
 
-                const growthClass =
-                    row.investment_return > 0 ? "growth-positive" :
-                    row.investment_return < 0 ? "growth-negative" :
+                // set up investment return column, if applicable
+                let investmentReturnCell = ""
+                if (showInvestmentReturn) {
+                    const returnColorClass =
+                        row.investment_return > 0 ? "growth-positive" :
+                        row.investment_return < 0 ? "growth-negative" :
+                        "growth-neutral";
+                    investmentReturnCell = `<td class="${returnColorClass}">${formatCurrency(row.investment_return)}</td>`
+                }
+
+                // set up color for growth column
+                const growthColorClass =
+                    row.growth > 0 ? "growth-positive" :
+                    row.growth < 0 ? "growth-negative" :
                     "growth-neutral";
 
-                const investmentReturnCell = showInvestmentReturn
-                    ? `<td class="${growthClass}">${formatCurrency(row.investment_return)}</td>`
-                    : "";
-                
+                // put it all together
                 tr.innerHTML = `
                     <td>${formatMonthLabel(row.month)}</td>
                     <td>${formatCurrency(row.ending_balance)}</td>
                     <td>${formatCurrency(row.contributions)}</td>
-                    <td class="${growthClass}">${formatCurrency(row.growth)}</td>
+                    <td class="${growthColorClass}">${formatCurrency(row.growth)}</td>
                     ${investmentReturnCell}
                 `;
                 tbody.appendChild(tr);
