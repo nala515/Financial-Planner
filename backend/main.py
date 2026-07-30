@@ -121,6 +121,24 @@ def api_get_account(account_id: int):
     finally:
         db.close()
 
+@app.get("/api/accounts/{account_id}/summary")
+def api_get_growth(
+    account_id: int,
+    start: date,
+    end: date,
+):
+    db = SessionLocal()
+
+    try:
+        return services.calculate_growth(
+            db,
+            account_id,
+            start,
+            end,
+        )
+    finally:
+        db.close()
+
 ##-----------------------------------------------------
 ## Income related Gets
 ##-----------------------------------------------------
