@@ -142,7 +142,7 @@ async function loadSummaryForAccount(accountId, category) {
                         row.investment_return > 0 ? "growth-positive" :
                         row.investment_return < 0 ? "growth-negative" :
                         "growth-neutral";
-                    investmentReturnCell = `<td class="${growthClass}">${formatCurrency(row.investment_return)}</td>`
+                    investmentReturnCell = `<td class="${returnColorClass}">${formatCurrency(row.investment_return)}</td>`
 
                 // set up color for growth column
                 const growthColorClass =
