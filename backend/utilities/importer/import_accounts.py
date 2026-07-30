@@ -20,18 +20,12 @@ def _get_existing_account(db, name: str, category: str, shared: bool):
 def parse_bool(value: str) -> bool:
     return str(value).strip().lower() in {"true", "1", "yes", "y"}
 
-
-def import_csv(csv_path: str):
-    initialize_database()
-
-    csv_path = Path(csv_path)
+def import_csv(csv_path):
     if not csv_path.exists():
         raise FileNotFoundError(f"CSV file not found: {csv_path}")
 
-    db = SessionLocal()
-    try:
-        with csv_path.open(newline="", encoding="utf-8") as handle:
-            rows = list(csv.reader(handle))
+    with csv_path.open(newline="", encoding="utf-8") as handle:
+        rows = list(csv.reader(handle))
 
         if not rows:
             raise ValueError("CSV file is empty")
@@ -105,10 +99,32 @@ def import_csv(csv_path: str):
                 )
                 db.add(contribution)
 
-        db.commit()
-        return account.id
+    db.commit()
+    return account.id
+
+def import_all_csvs():
+    initialize_database()
+
+    cur_dir = Path(__file__).resolve().parent
+    csv_dir = cur_dir / "myAccounts"
+    csv_files = list(csv_dir.glob("*.csv"))
+    num_imported = 0
+
+    if len(csv_files) > 0:
+        print(f"Found {len(csv_files)} CSV file(s) to import")
+    else:
+        raise FileNotFoundError(f"CSV files not found at {csv_dir}")
+
+    db = SessionLocal()
+    try:
+        for csv_path in csv_files:
+            accountId = import_csv(csv_path)
+            print(f"Imported CSV at {csv_path} as account {accountId}")
+            num_imported += 1
     finally:
         db.close()
+
+    return num_imported
 
 
 if __name__ == "__main__":
@@ -116,5 +132,5 @@ if __name__ == "__main__":
         print("Usage: python -m backend/importer/import_accounts <path-to-csv>")
         sys.exit(1)
 
-    account_id = import_csv(sys.argv[1])
-    print(f"Imported account with id {account_id}")
+    count = import_all_csvs()
+    print(f"Imported {count} account(s)")
