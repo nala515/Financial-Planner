@@ -146,7 +146,7 @@ button {
 }
 
 /* The container that holds the three cards */
-.editor-container {
+.editor-dashboard {
     display: flex;             /* This forces children into a row */
     flex-direction: row;       /* Ensures horizontal alignment */
     gap: 1.5rem;               /* Adds space between the cards */
