@@ -72,3 +72,8 @@ async function loadAccounts() {
         div.innerHTML = `<p>${error.message}</p>`;
     }
 }
+
+document.addEventListener("DOMContentLoaded", async () => {
+    await loadNav();
+    loadAccounts();
+});
