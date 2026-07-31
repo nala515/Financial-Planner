@@ -10,6 +10,22 @@ function setSelectedAccountId(accountId) {
     localStorage.setItem("selectedAccount", accountId);
 }
 
+function populateAccountCategoryOptions(select) {
+    if (!select) {
+        return;
+    }
+
+    const categories = ["Cash", "Investment", "Retirement", "HSA", "529"];
+    select.innerHTML = "";
+
+    categories.forEach(category => {
+        const option = document.createElement("option");
+        option.value = category;
+        option.textContent = category;
+        select.appendChild(option);
+    });
+}
+
 function formatCurrency(cents) {
     return (cents / 100).toLocaleString("en-US", {
         style: "currency",
