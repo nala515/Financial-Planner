@@ -166,3 +166,21 @@ async function loadSummaryForAccount(accountId, category) {
         tbody.innerHTML = `<tr><td colspan="4">${error.message}</td></tr>`;
     }
 }
+
+document.addEventListener("DOMContentLoaded", async () => {
+    await loadNav();
+    loadSummary();
+
+    const selector = document.getElementById("account-selector");
+
+    selector.addEventListener("change", async (event) => {
+        const accountId = event.target.value;
+        setSelectedAccountId(accountId);
+
+        // Get the selected <option> element to read the data-category attribute
+        const selectedOption = event.target.selectedOptions[0];
+        const category = selectedOption ? selectedOption.dataset.category : null;
+
+        await loadSummaryForAccount(accountId, category);
+    });
+});
