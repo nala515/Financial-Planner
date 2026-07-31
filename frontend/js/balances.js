@@ -161,3 +161,14 @@ async function loadBalances() {
         container.innerHTML = `<p>${error.message}</p>`;
     }
 }
+
+document.addEventListener("DOMContentLoaded", async () => {
+    await loadNav();
+    await populateTypeSelector();
+    loadBalances();
+
+    const typeSelector = document.getElementById("type-selector");
+    typeSelector.addEventListener("change", () => {
+        loadBalances();    
+    });
+});
