@@ -153,7 +153,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const selector = document.getElementById("account-selector");
     if (selector) {
         selector.addEventListener("change", async (event) => {
-            loadAccountsEditor();
+            loadAccountEditor();
         });
     }
 });
