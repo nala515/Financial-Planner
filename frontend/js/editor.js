@@ -67,12 +67,7 @@ async function handleAccountUpdate(event) {
 
 
 async function loadAccountEditor() {
-    const div = document.getElementById("accounts");
     const selector = document.getElementById("account-selector");
-
-    if (!div) {
-        return;
-    }
 
     try {
         const response = await fetch(`/api/accounts`);
@@ -83,12 +78,10 @@ async function loadAccountEditor() {
 
         const accounts = await response.json();
         accountCache = Array.isArray(accounts) ? accounts : [];
-        div.innerHTML = "";
 
         if (!Array.isArray(accounts) || accounts.length === 0) {
-            div.innerHTML = "<p>No accounts found yet.</p>";
             if (selector) {
-                selector.innerHTML = '<option value="">Select an account</option>';
+                selector.innerHTML = '<option value="">No accounts</option>';
             }
             return;
         }
@@ -115,5 +108,7 @@ async function loadAccountEditor() {
                 }
             }
         }
+    } catch (error) {
+        console.error(error);
     }
 }
