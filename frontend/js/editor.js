@@ -140,3 +140,23 @@ async function loadAccountEditor() {
         console.error(error);
     }
 }
+
+document.addEventListener("DOMContentLoaded", async () => {
+    await loadNav();
+    loadAccountEditor();
+    const form = document.getElementById("account-form");
+
+    if (form) {
+        form.addEventListener("submit", handleAccountUpdate);
+    }
+    
+    const selector = document.getElementById("account-selector");
+    if (selector) {
+        selector.addEventListener("change", async (event) => {
+            const accountId = event.target.value;
+            if (accountId) {
+                await populateAccountForm(accountId);
+            }
+        });
+    }
+});
