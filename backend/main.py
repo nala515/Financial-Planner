@@ -50,10 +50,6 @@ def get_contributions():
 def get_summary():
     return FileResponse("frontend/html/summary.html")
 
-@app.get("/editor")
-def get_editor():
-    return FileResponse("frontend/html/editor.html")
-
 ##-----------------------------------------------------
 ## API Gets
 ##-----------------------------------------------------
@@ -118,6 +114,50 @@ def api_get_account(account_id: int):
 
     try:
         return services.get_account(db, account_id)
+    finally:
+        db.close()
+
+@app.get("/editor")
+def get_editor():
+    return FileResponse("frontend/html/editor.html")
+
+##-----------------------------------------------------
+## Account-specific Gets
+##-----------------------------------------------------
+
+@app.get("/api/accounts/{account_id}/balances")
+def api_get_account_balances(
+    account_id: int,
+    start: date | None = None,
+    end: date | None = None,
+):
+    db = SessionLocal()
+
+    try:
+        return services.get_account_balances(
+            db,
+            account_id,
+            start,
+            end,
+        )
+    finally:
+        db.close()
+
+@app.get("/api/accounts/{account_id}/contributions")
+def api_get_account_contributions(
+    account_id: int,
+    start: date | None = None,
+    end: date | None = None,
+):
+    db = SessionLocal()
+
+    try:
+        return services.get_account_contributions(
+            db,
+            account_id,
+            start,
+            end,
+        )
     finally:
         db.close()
 
