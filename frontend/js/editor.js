@@ -157,7 +157,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     // Account selector logic
     if (selector) {
-        selector.addEventListener("change", (event) => {
+        selector.addEventListener("change", async (event) => {
             const accountId = Number(event.target.value);
             if (!accoundId) return;
             
