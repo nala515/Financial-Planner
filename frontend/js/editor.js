@@ -91,10 +91,10 @@ async function handleAccountUpdate(event) {
 
 
 //-----------------------------------------------------
-// Loading page
+// Page setup
 //-----------------------------------------------------
 
-async function loadAccountEditor() {
+async function initializeEditor() {
     const selector = document.getElementById("account-selector");
 
     try {
@@ -127,14 +127,6 @@ async function loadAccountEditor() {
                 option.textContent = account.name;
                 selector.appendChild(option);
             });
-
-            const selectedAccountId = selector.value || accountCache[0]?.id;
-            if (selectedAccountId) {
-                const selectedAccount = accountCache.find(account => account.id === Number(selectedAccountId));
-                if (selectedAccount) {
-                    populateAccountForm(selectedAccount);
-                }
-            }
         }
     } catch (error) {
         console.error(error);
@@ -143,17 +135,21 @@ async function loadAccountEditor() {
 
 document.addEventListener("DOMContentLoaded", async () => {
     await loadNav();
-    loadAccountEditor();
+    await initializeEditor();
     const form = document.getElementById("account-form");
-
-    if (form) {
-        form.addEventListener("submit", handleAccountUpdate);
-    }
-    
     const selector = document.getElementById("account-selector");
+
     if (selector) {
-        selector.addEventListener("change", async (event) => {
-            loadAccountEditor();
+        selector.addEventListener("change", (event) => {
+            const selectedAccount = accountCache.find(a => a.id === accountId);
+            if (selectedAccount) {
+                populateAccountForm(selectedAccount);
+            } else {
+                form.reset(); // Clear if "Select an account" is chosen
+            }
         });
     }
+    if (form) {
+        form.addEventListener("submit", handleAccountUpdate);
+    }    
 });
