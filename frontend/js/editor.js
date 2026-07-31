@@ -44,7 +44,7 @@ async function loadBalancesEditor(accountId) {
     `).join('');
 }
 
-async function loadConributionsEditor(accountId) {
+async function loadContributionsEditor(accountId) {
     const container = document.getElementById("contributions-list-container");
     const response = await fetch(`/api/accounts/${accountId}/contributions`);
     const contributions = await response.json();
