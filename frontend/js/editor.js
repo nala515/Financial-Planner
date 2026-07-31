@@ -141,6 +141,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     if (selector) {
         selector.addEventListener("change", (event) => {
+            const accountId = Number(event.target.value);
             const selectedAccount = accountCache.find(a => a.id === accountId);
             if (selectedAccount) {
                 populateAccountForm(selectedAccount);
