@@ -145,6 +145,22 @@ button {
     font-weight: 600;
 }
 
+.editor-container {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start; /* Keeps cards at the top */
+    overflow-x: auto; /* Adds scrollbar if screen is too narrow */
+}
+
+.editor-card {
+    flex: 1; /* Makes all cards equal width */
+    min-width: 300px;
+    background: #fff;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
 /*-----------------------------------------------------
 // Tables
 //---------------------------------------------------*/
