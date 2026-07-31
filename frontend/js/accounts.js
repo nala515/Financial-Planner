@@ -4,24 +4,6 @@
 
 let accountCache = [];
 
-function populateAccountCategoryOptions(select) {
-    if (!select) {
-        return;
-    }
-
-    const categories = ["Cash", "Investment", "Retirement", "HSA", "529"];
-    select.innerHTML = "";
-
-    categories.forEach(category => {
-        const option = document.createElement("option");
-        option.value = category;
-        option.textContent = category;
-        select.appendChild(option);
-    });
-}
-
-
-
 async function loadAccounts() {
     const div = document.getElementById("accounts");
     if (!div) {
