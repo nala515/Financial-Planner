@@ -39,3 +39,8 @@ async function loadDashboard() {
         container.innerHTML = `<p>${error.message}</p>`;
     }
 }
+
+document.addEventListener("DOMContentLoaded", async () => {
+    await loadNav();
+    loadDashboard();
+});

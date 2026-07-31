@@ -106,3 +106,8 @@ async function loadContributions() {
         container.innerHTML = `<p>${error.message}</p>`;
     }
 }
+
+document.addEventListener("DOMContentLoaded", async () => {
+    await loadNav();
+    loadContributions();
+});

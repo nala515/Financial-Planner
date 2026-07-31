@@ -117,6 +117,10 @@ def api_get_account(account_id: int):
     finally:
         db.close()
 
+@app.get("/editor")
+def get_editor():
+    return FileResponse("frontend/html/editor.html")
+
 ##-----------------------------------------------------
 ## Account-specific Gets
 ##-----------------------------------------------------

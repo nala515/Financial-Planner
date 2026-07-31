@@ -6,14 +6,7 @@
 </head>
 <body>
 
-<nav>
-    <a href="/">Home</a>
-    <a href="/accounts">Accounts</a>
-    <a href="/balances">Balances</a>
-    <a href="/contributions">Contributions</a>
-    <a href="/summary">Summary</a>
-</nav>
-
+<div id="nav-placeholder"></div>
 <h1>Monthly Balances</h1>
 
 <label for="type-selector">Type</label>
@@ -23,18 +16,6 @@
 
 <script src="/static/js/app.js"></script>
 <script src="/static/js/balances.js"></script>
-
-<script>
-document.addEventListener("DOMContentLoaded", async () => {
-    await populateTypeSelector();
-    loadBalances();
-
-    const typeSelector = document.getElementById("type-selector");
-    typeSelector.addEventListener("change", () => {
-        loadBalances();    
-    });
-});
-</script>
 
 </body>
 </html>

@@ -6,14 +6,7 @@
 </head>
 <body>
 
-<nav>
-    <a href="/">Home</a>
-    <a href="/accounts">Accounts</a>
-    <a href="/balances">Balances</a>
-    <a href="/contributions">Contributions</a>
-    <a href="/summary">Summary</a>
-</nav>
-
+<div id="nav-placeholder"></div>
 <h1>Monthly Summary</h1>
 
 <label for="account-selector">Select account</label>
@@ -29,23 +22,5 @@
 <script src="/static/js/app.js"></script>
 <script src="/static/js/summary.js"></script>
 
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-    loadSummary();
-
-    const selector = document.getElementById("account-selector");
-
-    selector.addEventListener("change", async (event) => {
-        const accountId = event.target.value;
-        setSelectedAccountId(accountId);
-
-        // Get the selected <option> element to read the data-category attribute
-        const selectedOption = event.target.selectedOptions[0];
-        const category = selectedOption ? selectedOption.dataset.category : null;
-
-        await loadSummaryForAccount(accountId, category);
-    });
-});
-</script>
 </body>
 </html>

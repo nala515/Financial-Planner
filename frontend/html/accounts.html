@@ -6,61 +6,12 @@
 </head>
 <body>
 
-<nav>
-    <a href="/">Home</a>
-    <a href="/accounts">Accounts</a>
-    <a href="/balances">Balances</a>
-    <a href="/contributions">Contributions</a>
-    <a href="/summary">Summary</a>
-</nav>
-
+<div id="nav-placeholder"></div>
 <h1>All Accounts</h1>
 
-<form id="account-form" class="account-form">
-    <h2>Edit account</h2>
-
-    <label for="account-selector">Select account</label>
-    <select id="account-selector" name="account_id">
-        <option value="">Select an account</option>
-    </select>
-
-    <label for="account-name">Name</label>
-    <input id="account-name" name="name" type="text" required>
-
-    <label for="account-category">Category</label>
-    <select id="account-category" name="category">
-        <option value="Cash">Cash</option>
-        <option value="Investment">Investment</option>
-        <option value="Retirement">Retirement</option>
-        <option value="HSA">HSA</option>
-        <option value="529">529</option>
-    </select>
-
-    <label class="checkbox-row">
-        <input id="account-shared" name="shared" type="checkbox">
-        Shared account
-    </label>
-
-    <button type="submit">Save changes</button>
-    <p id="account-form-status" class="form-status"></p>
-</form>
-
 <div id="accounts"></div>
-
 <script src="/static/js/app.js"></script>
 <script src="/static/js/accounts.js"></script>
-
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-    loadAccounts();
-
-    const form = document.getElementById("account-form");
-
-    if (form) {
-        form.addEventListener("submit", handleAccountUpdate);
-    }
-});
-</script>
 
 </body>
 </html>
