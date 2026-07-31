@@ -30,7 +30,7 @@ function populateAccountCategoryOptions(select) {
     });
 }
 
-function loadBalancesEditor(accountId) {
+async function loadBalancesEditor(accountId) {
     const container = document.getElementById("balances-list-container");
     const response = await fetch(`/api/accounts/${accountId}/balances`);
     const balances = await response.json();
@@ -44,7 +44,7 @@ function loadBalancesEditor(accountId) {
     `).join('');
 }
 
-function loadConributionsEditor(accountId) {
+async function loadConributionsEditor(accountId) {
     const container = document.getElementById("contributions-list-container");
     const response = await fetch(`/api/accounts/${accountId}/contributions`);
     const contributions = await response.json();
@@ -159,7 +159,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (selector) {
         selector.addEventListener("change", async (event) => {
             const accountId = Number(event.target.value);
-            if (!accoundId) return;
+            if (!accountId) return;
             
             const selectedAccount = accountCache.find(a => a.id === accountId);
             if (selectedAccount) {
