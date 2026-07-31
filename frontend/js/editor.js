@@ -37,9 +37,9 @@ async function loadBalancesEditor(accountId) {
 
     container.innerHTML = balances.map(b => `
         <div class="editor-row">
-            <span>${b.snapshot_date}</span>
+            <span>${b.date}</span>
             <input type="number" name="balance" value="${b.balance_cents / 100}" step="0.01">
-            <input type="hidden" name="date" value="${b.snapshot_date}">
+            <input type="hidden" name="date" value="${formatMonthLabel(b.date)} ${formatYearLabel(b.date)}">
         </div>
     `).join('');
 }
@@ -53,7 +53,7 @@ async function loadContributionsEditor(accountId) {
         <div class="editor-row">
             <span>${c.date}</span>
             <input type="number" name="amount" value="${c.amount_cents / 100}" step="0.01">
-            <input type="hidden" name="date" value="${c.date}">
+            <input type="hidden" name="date" value="${formatMonthLabel(c.date)} ${formatYearLabel(c.date)}">
         </div>
     `).join('');
 }
@@ -173,10 +173,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
     // Reset Button Logic
     if (resetButton) {
-        resetButton.addEventListener("click", () => {
+        resetButton.addEventListener("click", async () => {
             const accountId = Number(selector.value);
             const original = accountCache.find(a => a.id === accountId);
-            if (original) populateAccountForm(original);
+            if (original) {
+                populateAccountForm(original);
+                await loadBalancesEditor(accountId);
+                await loadContributionsEditor(accountId);
+            }
         });
     }
     // Update account logic
