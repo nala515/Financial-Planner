@@ -145,20 +145,35 @@ button {
     font-weight: 600;
 }
 
+/* The container that holds the three cards */
 .editor-container {
-    display: flex;
-    gap: 20px;
-    align-items: flex-start; /* Keeps cards at the top */
-    overflow-x: auto; /* Adds scrollbar if screen is too narrow */
+    display: flex;             /* This forces children into a row */
+    flex-direction: row;       /* Ensures horizontal alignment */
+    gap: 1.5rem;               /* Adds space between the cards */
+    align-items: flex-start;   /* Keeps cards aligned at the top */
+    padding: 1rem;
+    overflow-x: auto;          /* Allows scrolling if the screen is too narrow */
 }
 
+/* Individual card styling */
 .editor-card {
-    flex: 1; /* Makes all cards equal width */
-    min-width: 300px;
-    background: #fff;
-    padding: 1.5rem;
+    flex: 1;                   /* Makes all cards take up equal width */
+    min-width: 320px;          /* Prevents them from getting too squished */
+    background: #1f2937;       /* Dark background */
+    border: 1px solid #374151; /* Border color */
     border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    color: #f9fafb;            /* A light text for dark mode */
+}
+
+/* Optional: styling for rows inside the scrollable balance/contribution lists */
+.editor-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #374151;
 }
 
 /*-----------------------------------------------------
