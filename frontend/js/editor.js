@@ -4,6 +4,10 @@
 
 let accountCache = [];
 
+//-----------------------------------------------------
+// Populating forms
+//-----------------------------------------------------
+
 function populateAccountForm(account) {
     const selector = document.getElementById("account-selector");
     const nameInput = document.getElementById("account-name");
@@ -20,6 +24,26 @@ function populateAccountForm(account) {
     sharedInput.checked = Boolean(account.shared);
 }
 
+function populateAccountCategoryOptions(select) {
+    if (!select) {
+        return;
+    }
+
+    const categories = ["Cash", "Investment", "Retirement", "HSA", "529"];
+    select.innerHTML = "";
+
+    categories.forEach(category => {
+        const option = document.createElement("option");
+        option.value = category;
+        option.textContent = category;
+        select.appendChild(option);
+    });
+}
+
+
+//-----------------------------------------------------
+// Handling updates
+//-----------------------------------------------------
 
 async function handleAccountUpdate(event) {
     event.preventDefault();
@@ -65,6 +89,10 @@ async function handleAccountUpdate(event) {
     }
 }
 
+
+//-----------------------------------------------------
+// Loading page
+//-----------------------------------------------------
 
 async function loadAccountEditor() {
     const selector = document.getElementById("account-selector");
