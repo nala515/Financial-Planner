@@ -83,7 +83,7 @@ async function handleAccountUpdate(event) {
             throw new Error("Unable to update account");
         }
         status.textContent = "Account updated.";
-        await loadAccountEditor();
+        await initializeEditor();
     } catch (error) {
         status.textContent = error.message;
     }
