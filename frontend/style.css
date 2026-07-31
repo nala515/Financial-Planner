@@ -1,3 +1,7 @@
+/*-----------------------------------------------------
+// General
+//---------------------------------------------------*/
+
 body {
     font-family: Arial, sans-serif;
     margin: 2rem;
@@ -17,6 +21,40 @@ nav a {
     font-weight: 600;
 }
 
+.checkbox-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 500;
+}
+
+.checkbox-row input {
+    margin-bottom: 0;
+    min-width: auto;
+}
+
+label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
+
+select,
+input[type="text"],
+button {
+    margin-bottom: 1rem;
+    padding: 0.5rem;
+    min-width: 240px;
+    background: #374151;
+    color: #f9fafb;
+    border: 1px solid #4b5563;
+    border-radius: 6px;
+}
+
+/*-----------------------------------------------------
+// Dashboard
+//---------------------------------------------------*/
+
 .dashboard-card {
     border: 1px solid #374151;
     border-radius: 8px;
@@ -31,6 +69,10 @@ nav a {
     gap: 1rem;
     grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
 }
+
+/*-----------------------------------------------------
+// Accounts
+//---------------------------------------------------*/
 
 .account-list {
     list-style: none;
@@ -65,23 +107,29 @@ nav a {
     font-weight: 600;
 }
 
-label {
-    display: block;
-    margin-bottom: 0.5rem;
-    font-weight: 600;
+.account-card-row {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
 }
 
-select,
-input[type="text"],
-button {
-    margin-bottom: 1rem;
-    padding: 0.5rem;
-    min-width: 240px;
-    background: #374151;
-    color: #f9fafb;
-    border: 1px solid #4b5563;
-    border-radius: 6px;
+.account-card-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
 }
+
+.account-card-balance {
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: #f9fafb;
+    white-space: nowrap;
+    padding-left: 1rem;
+}
+
+/*-----------------------------------------------------
+// Editors
+//---------------------------------------------------*/
 
 .account-form {
     border: 1px solid #374151;
@@ -91,25 +139,15 @@ button {
     background: #1f2937;
 }
 
-.checkbox-row {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-weight: 500;
-}
-
-.checkbox-row input {
-    margin-bottom: 0;
-    min-width: auto;
-}
-
 .form-status {
     min-height: 1.25rem;
     color: #93c5fd;
     font-weight: 600;
 }
 
-/* from claude */
+/*-----------------------------------------------------
+// Tables
+//---------------------------------------------------*/
 
 .table-wrapper {
     max-height: 80vh;
@@ -117,8 +155,9 @@ button {
     position: relative;
     border: 1px solid #374151;
     border-radius: 8px;
-    width: 50%;
-    margin: 0 auto;
+    width: 75%;
+    margin-left: 0;
+    margin-right: auto;
 }
 
 .table-wrapper.wide {
