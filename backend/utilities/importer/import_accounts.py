@@ -24,6 +24,8 @@ def import_csv(csv_path):
     if not csv_path.exists():
         raise FileNotFoundError(f"CSV file not found: {csv_path}")
 
+    db = SessionLocal()
+
     with csv_path.open(newline="", encoding="utf-8") as handle:
         rows = list(csv.reader(handle))
 
@@ -119,7 +121,8 @@ def import_all_csvs():
     try:
         for csv_path in csv_files:
             accountId = import_csv(csv_path)
-            print(f"Imported CSV at {csv_path} as account {accountId}")
+            filename = Path(csv_path).name
+            print(f"Imported {filename} as account {accountId}")
             num_imported += 1
     finally:
         db.close()
@@ -128,9 +131,5 @@ def import_all_csvs():
 
 
 if __name__ == "__main__":
-    if len(sys.argv) != 2:
-        print("Usage: python -m backend/importer/import_accounts <path-to-csv>")
-        sys.exit(1)
-
     count = import_all_csvs()
     print(f"Imported {count} account(s)")
