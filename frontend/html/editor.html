@@ -15,6 +15,10 @@
     <select id="account-selector">
         <option value="">Select an account</option>
     </select>
+    <div class="form-actions">
+        <button type="submit">Save Info</button>
+        <button type="button" id="reset-account-details">Reset</button>
+    </div>
 </div>
 
 <!-- Main Section: Three-Card Dashboard -->
@@ -37,11 +41,6 @@
         <label class="checkbox-row">
             <input id="account-shared" name="shared" type="checkbox"> Shared account
         </label>
-        
-        <div class="form-actions">
-            <button type="submit">Save Info</button>
-            <button type="button" id="reset-account-details">Reset</button>
-        </div>
         <p id="account-form-status" class="form-status"></p>
     </form>
 
