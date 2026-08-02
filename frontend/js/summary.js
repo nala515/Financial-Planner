@@ -62,7 +62,7 @@ async function loadSummary() {
             // grab category
             const selectedOption = selector.options[selector.selectedIndex];
             const category = selectedOption?.dataset.category;
-            
+
             await loadSummaryForAccount(accountId, category);
         }
     } catch (error) {

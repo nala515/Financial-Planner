@@ -9,21 +9,6 @@ from .account_categories import get_category_attributes
 ## Utilities
 ##-----------------------------------------------------
 
-def calculate_total_contributions(
-    db: Session,
-    account_id: int,
-    start: date,
-    end: date,
-):
-    contributions = contributions_repository.db_get_account_contributions(
-        db,
-        account_id,
-        start,
-        end,
-    )
-
-    return sum(c.amount_cents for c in contributions)
-
 def calculate_growth(
     db: Session,
     account_id: int,
@@ -50,15 +35,28 @@ def calculate_growth(
         prev_balance = balances[i - 1]
         curr_balance = balances[i]
 
-        contributions = calculate_total_contributions(
+        prev_contributions = contributions_repository.db_get_account_contributions(
             db,
             account_id,
             prev_balance.date,
+            prev_balance.date,
+        )
+        curr_contributions = contributions_repository.db_get_account_contributions(
+            db,
+            account_id,
+            curr_balance.date,
             curr_balance.date,
         )
+        contributions = 0
+        if len(curr_contributions) > 0:
+            contributions = curr_contributions[0].amount_cents
 
+        # calculate growth and returns
         growth = curr_balance.balance_cents - prev_balance.balance_cents
-        investment_return = growth - contributions
+        if len(prev_contributions) > 0:
+            investment_return = growth - prev_contributions[0].amount_cents
+        else:
+            investment_return = growth
 
         results.append({
             "month": curr_balance.date,
