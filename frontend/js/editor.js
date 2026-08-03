@@ -58,6 +58,34 @@ async function loadContributionsEditor(accountId) {
     `).join('');
 }
 
+async function loadSettingsEditor() {
+    const container = document.getElementById("settings-list-container");
+    if (!container) return;
+
+    if (!settings || Object.keys(settings).length === 0) {
+        await loadSettings();
+    }
+
+    container.innerHTML = `
+        <div class="editor-row">
+            <span>Group Cash Accounts</span>
+            <input type="checkbox" id="setting-group-cash" ${settings.group_cash_accounts ? 'checked' : ''}>
+        </div>
+        <div class="editor-row">
+            <span>Hide Disabled Accounts</span>
+            <input type="checkbox" id="setting-hide-disabled" ${settings.hide_disabled_accounts ? 'checked' : ''}>
+        </div>
+        <div class="editor-row">
+            <span>Show Retirement Accounts</span>
+            <input type="checkbox" id="setting-show-retirement" ${settings.show_retirement_accounts ? 'checked' : ''}>
+        </div>
+        <div class="form-actions">
+            <button type="submit" class="primary-button">Save Settings</button>
+            <p id="settings-form-status" class="form-status"></p>
+        </div>
+    `;
+}
+
 //-----------------------------------------------------
 // Handling updates
 //-----------------------------------------------------
@@ -106,6 +134,40 @@ async function handleAccountUpdate(event) {
     }
 }
 
+async function handleSettingsUpdate(event) {
+    event.preventDefault();
+    const status = document.getElementById("settings-form-status");
+
+    // 1. Collect the data from the checkboxes
+    const updatedSettings = {
+        group_cash_accounts: document.getElementById("setting-group-cash").checked,
+        hide_disabled_accounts: document.getElementById("setting-hide-disabled").checked,
+        show_retirement_accounts: document.getElementById("setting-show-retirement").checked
+    };
+
+    try {
+        // 2. Send to the FastAPI backend
+        const response = await fetch("/api/settings", {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(updatedSettings)
+        });
+
+        if (response.ok) {
+            // 3. Update the global variable in app.js so other pages/functions stay in sync
+            settings = await response.json();
+            
+            status.textContent = "Settings saved successfully!";
+            status.className = "form-status success";
+            setTimeout(() => status.textContent = "", 3000);
+        } else {
+            throw new Error("Failed to save settings.");
+        }
+    } catch (error) {
+        status.textContent = "Error: " + error.message;
+        status.className = "form-status error";
+    }
+}
 
 //-----------------------------------------------------
 // Page setup
@@ -150,7 +212,7 @@ async function initializeEditor() {
 document.addEventListener("DOMContentLoaded", async () => {
     await loadNav();
     await initializeEditor(); // Fetches accounts and populates selector
-
+    await loadSettingsEditor();
     const selector = document.getElementById("account-selector");
     const accountForm = document.getElementById("account-form");
     const resetButton = document.getElementById("reset-account-details");
@@ -171,7 +233,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             }
         });
     }
-    // Reset Button Logic
+    // Reset button
     if (resetButton) {
         resetButton.addEventListener("click", async () => {
             const accountId = Number(selector.value);
@@ -183,7 +245,12 @@ document.addEventListener("DOMContentLoaded", async () => {
             }
         });
     }
-    // Update account logic
+    // Update settings
+    const settingsForm = document.getElementById("settings-update-form");
+    if (settingsForm) {
+        settingsForm.addEventListener("submit", handleSettingsUpdate);
+    }
+    // Update account
     if (accountForm) {
         accountForm.addEventListener("submit", handleAccountUpdate);
     }

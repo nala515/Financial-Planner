@@ -153,6 +153,8 @@ button {
     align-items: flex-start;   /* Keeps cards aligned at the top */
     padding: 1rem;
     overflow-x: auto;          /* Allows scrolling if the screen is too narrow */
+    width: 75%;                /* Spans 75% of the parent container */
+    max-width: 100%;           /* Prevents breaking on small screens */
 }
 
 /* Individual card styling */
