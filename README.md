@@ -70,3 +70,13 @@ Some planned enhancements include:
 * Google account authentication
 * Automatic investment account synchronization
 * Additional financial reports and analytics
+
+## Repository setup
+
+```bash
+git clone git@github.com:nala515/Financial-Planner.git
+cd Financial-Planner
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+```
