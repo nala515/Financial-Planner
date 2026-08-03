@@ -114,18 +114,10 @@ async function loadBalances() {
     // group the raw balance data by date for the matrix view: rowsByDate[date][account_id]
     const rowsByDate = {};
     balances.forEach(b => {
-        if (!rowsByDate[b.date]) rowsByDate[b.date] = {};
-        rowsByDate[b.date][b.account_id] = b.balance_cents;
-    });
-        
-    // map balances by date: { "YYYY-MM": { account_id: balance_cents } }
-    const rowsByDate = {};
-    balances.forEach(b => {
-        const dateKey = b.date;
-        if (!rowsByDate[dateKey]) {
-            rowsByDate[dateKey] = {};
+        if (!rowsByDate[b.date]) {
+            rowsByDate[b.date] = {};
         }
-        rowsByDate[dateKey][b.account_id] = b.balance_cents;
+        rowsByDate[b.date][b.account_id] = b.balance_cents;
     });
 
     // group dates by Year for section headers
