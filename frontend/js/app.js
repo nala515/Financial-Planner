@@ -2,6 +2,13 @@
 // Utilities
 //-----------------------------------------------------
 
+let settings = {};
+
+async function loadSettings() {
+    settings = await fetch("/api/settings")
+        .then(r => r.json());
+}
+
 function getSelectedAccountId() {
     return localStorage.getItem("selectedAccount");
 }

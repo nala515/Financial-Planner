@@ -1,5 +1,5 @@
-from ..models import Account, Balance, Contribution
-from ..schemas import AccountCreate, AccountUpdate
+from ..models import Account, Balance, Contribution, Settings
+from ..schemas import AccountCreate, AccountUpdate, SettingsCreate, SettingsUpdate
 from ..account_categories import normalize_category
 
 from datetime import date
@@ -21,6 +21,25 @@ def db_create_account(db: Session, account_data: AccountCreate):
 
     return account
 
+def db_create_settings(db: Session, settings_data: SettingsCreate):
+    settings = db.query(Settings).first()
+    if settings is not None:
+        print("Settings object already exists. Not creating a new one.")
+        return settings
+
+    settings = Settings(
+        group_cash_accounts=settings_data.group_cash_accounts,
+        hide_disabled_accounts=settings_data.hide_disabled_accounts,
+        show_retirement_accounts=settings_data.show_retirement_accounts,
+    )
+
+    db.add(settings)
+    db.commit()
+    db.refresh(settings)
+
+    return settings
+
+
 def db_get_account(db: Session, account_id: int):
     return (
         db.query(Account)
@@ -31,6 +50,10 @@ def db_get_account(db: Session, account_id: int):
 
 def db_get_accounts(db: Session):
     return db.query(Account).all()
+
+
+def db_get_settings(db: Session):
+    return db.query(Settings).all()
 
 
 def db_update_account(db: Session, account_id: int, account_data: AccountUpdate):
@@ -52,6 +75,27 @@ def db_update_account(db: Session, account_id: int, account_data: AccountUpdate)
     db.refresh(account)
 
     return account
+
+
+def db_update_settings(db: Session, settings_data: SettingsUpdate):
+    settings = db.query(Settings).first()
+
+    if settings is None:
+        return None
+
+    if settings_data.group_cash_accounts is not None:
+        settings.group_cash_accounts = settings_data.group_cash_accounts
+
+    if settings_data.hide_disabled_accounts is not None:
+        settings.hide_disabled_accounts = settings_data.hide_disabled_accounts
+
+    if settings_data.show_retirement_accounts is not None:
+        settings.show_retirement_accounts = settings_data.show_retirement_accounts
+
+    db.commit()
+    db.refresh(settings)
+
+    return settings
 
 
 def db_delete_account(db: Session, account_id: int):

@@ -102,7 +102,9 @@ def import_csv(csv_path):
                 db.add(contribution)
 
     db.commit()
-    return account.id
+    filename = Path(csv_path).name
+    print(f"Imported {filename} as account {name}, id {account.id}")
+    return
 
 def import_all_csvs():
     initialize_database()
@@ -120,9 +122,7 @@ def import_all_csvs():
     db = SessionLocal()
     try:
         for csv_path in csv_files:
-            accountId = import_csv(csv_path)
-            filename = Path(csv_path).name
-            print(f"Imported {filename} as account {accountId}")
+            import_csv(csv_path)
             num_imported += 1
     finally:
         db.close()

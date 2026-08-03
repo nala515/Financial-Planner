@@ -49,3 +49,11 @@ class IncomeSource(Base):
 
     id = Column(Integer, primary_key=True)
     name = Column(String, nullable=False)
+
+class Settings(Base):
+    __tablename__ = "settings"
+
+    id = Column(Integer, primary_key=True)
+    group_cash_accounts = Column(Boolean, default=False)
+    hide_disabled_accounts = Column(Boolean, default=False)
+    show_retirement_accounts = Column(Boolean, default=True)
