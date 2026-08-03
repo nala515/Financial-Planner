@@ -213,7 +213,7 @@ async function initializeEditor() {
 document.addEventListener("DOMContentLoaded", async () => {
     await loadNav();
     await initializeEditor(); // Fetches accounts and populates selector
-
+    await loadSettingsEditor();
     const selector = document.getElementById("account-selector");
     const accountForm = document.getElementById("account-form");
     const resetButton = document.getElementById("reset-account-details");
