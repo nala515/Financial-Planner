@@ -80,10 +80,6 @@ async function loadSettingsEditor() {
             <span>Show Retirement Accounts</span>
             <input type="checkbox" name="setting-show-retirement" ${settings.show_retirement_accounts ? 'checked' : ''}>
         </div>
-        <div class="form-actions">
-            <button type="submit" class="primary-button">Save Settings</button>
-            <p id="settings-form-status" class="form-status"></p>
-        </div>
     `;
 }
 
