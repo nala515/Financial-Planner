@@ -1,15 +1,19 @@
 from pydantic import BaseModel
 from datetime import date
 
+##-----------------------------------------------------
+## Creates
+##-----------------------------------------------------
+
 class AccountCreate(BaseModel):
     name: str
     shared: bool
-    category: str | None = None
+    category: str
 
-class AccountUpdate(BaseModel):
-    name: str | None = None
-    shared: bool | None = None
-    category: str | None = None
+class SettingsCreate(BaseModel):
+    group_cash_accounts: bool
+    hide_disabled_accounts: bool
+    show_retirement_accounts: bool
 
 class BalanceCreate(BaseModel):
     account_id: int
@@ -29,6 +33,19 @@ class IncomeEventCreate(BaseModel):
 class IncomeSourceCreate(BaseModel):
     name: str
 
+##-----------------------------------------------------
+## Updates
+##-----------------------------------------------------
+
+class AccountUpdate(BaseModel):
+    name: str | None = None
+    shared: bool | None = None
+    category: str | None = None
+
+class SettingsUpdate(BaseModel):
+    group_cash_accounts: bool | None = None
+    hide_disabled_accounts: bool | None = None
+    show_retirement_accounts: bool | None = None
+    
 class IncomeSourceUpdate(BaseModel):
     name: str | None = None
-    

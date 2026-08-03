@@ -50,6 +50,10 @@ def get_contributions():
 def get_summary():
     return FileResponse("frontend/html/summary.html")
 
+@app.get("/editor")
+def get_editor():
+    return FileResponse("frontend/html/editor.html")
+
 ##-----------------------------------------------------
 ## API Gets
 ##-----------------------------------------------------
@@ -60,6 +64,15 @@ def api_get_accounts():
 
     try:
         return services.get_accounts(db)
+    finally:
+        db.close()
+
+@app.get("/api/settings")
+def get_settings():
+    db = SessionLocal()
+
+    try:
+        return services.get_settings(db)
     finally:
         db.close()
 
@@ -108,6 +121,10 @@ def api_get_all_contributions(
 def api_get_account_categories():
     return ACCOUNT_CATEGORIES
 
+##-----------------------------------------------------
+## Account-specific Gets
+##-----------------------------------------------------
+
 @app.get("/api/accounts/{account_id}")
 def api_get_account(account_id: int):
     db = SessionLocal()
@@ -116,14 +133,6 @@ def api_get_account(account_id: int):
         return services.get_account(db, account_id)
     finally:
         db.close()
-
-@app.get("/editor")
-def get_editor():
-    return FileResponse("frontend/html/editor.html")
-
-##-----------------------------------------------------
-## Account-specific Gets
-##-----------------------------------------------------
 
 @app.get("/api/accounts/{account_id}/balances")
 def api_get_account_balances(
@@ -214,6 +223,15 @@ def create_account(account_data: schemas.AccountCreate):
     finally:
         db.close()
 
+@app.post("/api/settings")
+def create_settings(settings_data: schemas.SettingsCreate):
+    db = SessionLocal()
+
+    try:
+        return services.create_settings(db, settings_data)
+    finally:
+        db.close()
+
 @app.post("/api/balance")
 def create_balance(balance_data: schemas.BalanceCreate):
     db = SessionLocal()
@@ -260,6 +278,15 @@ def update_account(account_id: int, account_data: schemas.AccountUpdate):
 
     try:
         return services.update_account(db, account_id, account_data)
+    finally:
+        db.close()
+
+@app.patch("/api/settings")
+def update_settings(settings_data: schemas.SettingsUpdate):
+    db = SessionLocal()
+
+    try:
+        return services.update_settings(db, settings_data)
     finally:
         db.close()
 

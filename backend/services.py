@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 from datetime import date
 
-from .schemas import AccountCreate, BalanceCreate, ContributionCreate, IncomeEventCreate, IncomeSourceCreate
+from .schemas import AccountCreate, SettingsCreate, BalanceCreate, ContributionCreate, IncomeEventCreate, IncomeSourceCreate
 from .repositories import accounts_repository, balances_repository, contributions_repository, income_repository
 from .account_categories import get_category_attributes
 
@@ -185,6 +185,9 @@ def get_income_sources(db: Session):
         for source in sources
     ]
 
+def get_settings(db: Session):
+    return accounts_repository.db_get_settings(db)
+
 ##-----------------------------------------------------
 ## Creates
 ##-----------------------------------------------------
@@ -195,6 +198,15 @@ def create_account(db: Session, account_data: AccountCreate):
     return {
         "id": account.id,
         "status": "created"
+    }
+
+def create_settings(db: Session, settings_data: SettingsCreate):
+    settings = accounts_repository.db_create_settings(db, settings_data)
+
+    return {
+        "group_cash_accounts": settings.group_cash_accounts,
+        "hide_disabled_accounts": settings.hide_disabled_accounts,
+        "show_retirement_accounts": settings.show_retirement_accounts
     }
 
 def create_balance(db: Session, balance_data: BalanceCreate):
@@ -310,6 +322,16 @@ def update_account(db: Session, account_id: int, account_data):
         "name": account.name,
         "shared": account.shared,
         "category": account.category,
+        "status": "updated",
+    }
+
+def update_settings(db: Session, settings_data):
+    settings = accounts_repository.db_update_settings(db, settings_data)
+
+    if settings is None:
+        return {"status": "not_found"}
+
+    return {
         "status": "updated",
     }
 
