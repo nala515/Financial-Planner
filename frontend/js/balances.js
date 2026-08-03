@@ -40,7 +40,7 @@ function buildDisplayColumns(accounts, settings) {
             let displayName = acc.name;
             // add the [-] toggle to the last cash accounts
             if (index === lastMyCashIndex) {
-                displayName += '<span class="expand-toggle" style="cursor:pointer; color: #ef4444;">[-]</span>';
+                displayName += '<span class="expand-toggle" data-category="MyCash" style="cursor:pointer; color: #ef4444;">[-]</span>';
             }
             columns.push({ id: acc.id, name: displayName, isGroup: false });
         });
@@ -62,16 +62,15 @@ function buildDisplayColumns(accounts, settings) {
             let displayName = acc.name;
             // add the [-] toggle to the last cash accounts
             if (index === lastJointCashIndex) {
-                displayName += '<span class="expand-toggle" style="cursor:pointer; color: #ef4444;">[-]</span>';
+                displayName += '<span class="expand-toggle" data-category="JointCash" style="cursor:pointer; color: #ef4444;">[-]</span>';
             }
             columns.push({ id: acc.id, name: displayName, isGroup: false });
         });
-
-        // Add all other categories to the list (Investment, Retirement, etc.) individually
-        otherAccounts.forEach(acc => {
-            columns.push({ id: acc.id, name: acc.name, isGroup: false });
-        });
     }
+    // Add all other categories to the list (Investment, Retirement, etc.) individually
+    otherAccounts.forEach(acc => {
+        columns.push({ id: acc.id, name: acc.name, isGroup: false });
+    });
 
     return columns;
 }
