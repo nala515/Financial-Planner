@@ -165,7 +165,8 @@ async function loadBalances() {
             displayColumns.forEach(col => {
                 let balanceCents = rowsByDate[dateStr][col.id] || 0;
                 if (col.isGroup) {
-                    col.memberAccountIds.forEach(id => balanceCents += (rowsByDate[dateStr][col.id] || 0));
+                    col.memberAccountIds.forEach(accountId => {
+                        balanceCents += (rowsByDate[dateStr][accountId] || 0);
                 } else {
                     balanceCents = rowsByDate[dateStr][col.id] || 0;
                 }
