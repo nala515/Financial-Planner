@@ -18,15 +18,23 @@ function buildDisplayColumns(accounts, settings) {
 
     if (settings.group_cash_accounts) {
         // 1. Find all accounts belonging to the "Cash" category
-        const cashAccounts = accounts.filter(acc => acc.category === "Cash");
+        const myCashAccounts = accounts.filter(acc => acc.category === "Cash" && acc.shared == false);
+        const jointCashAccounts = accounts.filter(acc => acc.category === "Cash" && acc.shared == true);
         const otherAccounts = accounts.filter(acc => acc.category !== "Cash");
 
-        // 2. Add a single virtual "Cash" column that tracks all cash account IDs
+        // 2. Add virtual "Cash" columns that track cash account IDs
         columns.push({
-            id: "cash_group",
-            name: "Cash",
+            id: "my_cash_group",
+            name: "My Cash",
             isGroup: true,
-            memberAccountIds: cashAccounts.map(acc => acc.id)
+            memberAccountIds: myCashAccounts.map(acc => acc.id)
+        });
+
+        columns.push({
+            id: "joint_cash_group",
+            name: "Joint Cash",
+            isGroup: true,
+            memberAccountIds: jointCashAccounts.map(acc => acc.id)
         });
 
         // 3. Add all other categories (Investment, Retirement, etc.) individually
