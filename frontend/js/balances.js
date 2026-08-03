@@ -24,7 +24,10 @@ function buildDisplayColumns(accounts, settings) {
     const otherAccounts = accounts.filter(acc => acc.category !== "Cash");
 
     // My cash accounts
-    if (!isMyCashExpanded) {
+    if(myCashAccounts.length === 0) {
+        continue;
+    }
+    else if (myCashAccounts.length > 0 && !isMyCashExpanded) {
         // add a single "My Cash" column that tracks all "my cash" account IDs
         columns.push({
             id: "my_cash_group",
@@ -46,7 +49,10 @@ function buildDisplayColumns(accounts, settings) {
         });
     }
     // Joint cash accounts
-    if (!isJointCashExpanded) {
+    if(jointCashAccounts.length === 0) {
+        continue;
+    }
+    else if (!isJointCashExpanded) {
         // add a single "Joint Cash" column that tracks all "joint cash" account IDs
         columns.push({
             id: "joint_cash_group",
