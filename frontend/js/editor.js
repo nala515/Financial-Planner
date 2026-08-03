@@ -59,7 +59,7 @@ async function loadContributionsEditor(accountId) {
 }
 
 async function loadSettingsEditor() {
-    const container = document.getElementById("settings-container");
+    const container = document.getElementById("settings-list-container");
     if (!container) return;
 
     if (!settings || Object.keys(settings).length === 0) {
