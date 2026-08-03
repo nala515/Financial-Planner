@@ -167,7 +167,7 @@ async function loadBalances() {
                 if (col.isGroup) {
                     col.memberAccountIds.forEach(accountId => {
                         balanceCents += (rowsByDate[dateStr][accountId] || 0);
-                    }
+                    });
                 } else {
                     balanceCents = rowsByDate[dateStr][col.id] || 0;
                 }
