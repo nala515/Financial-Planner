@@ -3,6 +3,7 @@
 //-----------------------------------------------------
 
 let accountCategories = null; // cache so we don't refetch on every dropdown change
+let isCashExpanded = false;
 
 async function getAccountCategories() {
     if (accountCategories) {
@@ -16,7 +17,7 @@ async function getAccountCategories() {
 function buildDisplayColumns(accounts, settings) {
     const columns = [];
 
-    if (settings.group_cash_accounts) {
+    if (settings.group_cash_accounts && !isCashExpanded) {
         // 1. Find all accounts belonging to the "Cash" category
         const myCashAccounts = accounts.filter(acc => acc.category === "Cash" && acc.shared == false);
         const jointCashAccounts = accounts.filter(acc => acc.category === "Cash" && acc.shared == true);
@@ -203,6 +204,15 @@ document.addEventListener("DOMContentLoaded", async () => {
     typeSelector.addEventListener("change", () => {
         loadBalances();    
     });
+    const container = document.getElementById("balances");
+    if (container) {
+        container.addEventListener("click", (e) => {
+            if (e.target.classList.contains("expand-toggle")) {
+                isCashExpanded = !isCashExpanded; // Flip the state
+                loadBalances(); // Re-render the table with the new column set
+            }
+        });
+    }
 
     await loadBalances();
 });
