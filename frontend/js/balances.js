@@ -26,14 +26,14 @@ function buildDisplayColumns(accounts, settings) {
         // 2. Add virtual "Cash" columns that track cash account IDs
         columns.push({
             id: "my_cash_group",
-            name: "My Cash",
+            name: 'My Cash <span class="expand-toggle">[+]</span>',
             isGroup: true,
             memberAccountIds: myCashAccounts.map(acc => acc.id)
         });
 
         columns.push({
             id: "joint_cash_group",
-            name: "Joint Cash",
+            name: 'Joint Cash <span class="expand-toggle">[+]</span>',
             isGroup: true,
             memberAccountIds: jointCashAccounts.map(acc => acc.id)
         });
@@ -108,7 +108,7 @@ async function loadBalances() {
         fetch('/api/balances').then(r => r.json()),
         getAccountCategories()
     ]);
-    
+
     // get current type selection from dropdown
     const typeSelector = document.getElementById("type-selector");
     const selectedType = typeSelector ? typeSelector.value : "net_worth";
@@ -145,7 +145,7 @@ async function loadBalances() {
     // build Header
     let thHtml = `<thead><tr><th>Month</th>`;
     displayColumns.forEach(col => {
-            thHtml += `<th>${col.name}</th>`;
+        thHtml += `<th>${col.name}</th>`;
     });
     thHtml += `<th>Total</th></tr></thead>`;
     table.innerHTML = thHtml;
