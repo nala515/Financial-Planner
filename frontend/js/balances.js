@@ -3,7 +3,8 @@
 //-----------------------------------------------------
 
 let accountCategories = null; // cache so we don't refetch on every dropdown change
-let isCashExpanded = false;
+let isMyCashExpanded = false;
+let isJointCashExpanded = false;
 
 async function getAccountCategories() {
     if (accountCategories) {
@@ -17,34 +18,57 @@ async function getAccountCategories() {
 function buildDisplayColumns(accounts, settings) {
     const columns = [];
 
-    if (settings.group_cash_accounts && !isCashExpanded) {
-        // 1. Find all accounts belonging to the "Cash" category
-        const myCashAccounts = accounts.filter(acc => acc.category === "Cash" && acc.shared == false);
-        const jointCashAccounts = accounts.filter(acc => acc.category === "Cash" && acc.shared == true);
-        const otherAccounts = accounts.filter(acc => acc.category !== "Cash");
+    // Find categorized accounts (my cash, joint cash, others)
+    const myCashAccounts = accounts.filter(acc => acc.category === "Cash" && acc.shared == false);
+    const jointCashAccounts = accounts.filter(acc => acc.category === "Cash" && acc.shared == true);
+    const otherAccounts = accounts.filter(acc => acc.category !== "Cash");
 
-        // 2. Add virtual "Cash" columns that track cash account IDs
+    // My cash accounts
+    if (!isMyCashExpanded) {
+        // add a single "My Cash" column that tracks all "my cash" account IDs
         columns.push({
             id: "my_cash_group",
-            name: 'My Cash <span class="expand-toggle">[+]</span>',
+            name: 'My Cash <span class="expand-toggle" data-category="MyCash" style="cursor:pointer; color: #3b82f6;">[+]</span>',
             isGroup: true,
             memberAccountIds: myCashAccounts.map(acc => acc.id)
         });
+    } else { // show all cash accounts separately
+        // identify the last Cash account for the minus toggle
+        const lastMyCashIndex = myCashAccounts.length - 1;
 
+        myCashAccounts.forEach((acc, index) => {
+            let displayName = acc.name;
+            // add the [-] toggle to the last cash accounts
+            if (index === lastMyCashIndex) {
+                displayName += '<span class="expand-toggle" style="cursor:pointer; color: #ef4444;">[-]</span>';
+            }
+            columns.push({ id: acc.id, name: displayName, isGroup: false });
+        }
+    }
+    // Joint cash accounts
+    if (!isJointCashExpanded) {
+        // add a single "Joint Cash" column that tracks all "joint cash" account IDs
         columns.push({
             id: "joint_cash_group",
-            name: 'Joint Cash <span class="expand-toggle">[+]</span>',
+            name: 'Joint Cash <span class="expand-toggle" data-category="JointCash" style="cursor:pointer; color: #3b82f6;">[+]</span>',
             isGroup: true,
             memberAccountIds: jointCashAccounts.map(acc => acc.id)
         });
-
-        // 3. Add all other categories (Investment, Retirement, etc.) individually
-        otherAccounts.forEach(acc => {
-            columns.push({ id: acc.id, name: acc.name, isGroup: false });
-        });
     } else {
-        // If false, simply map every account to its own individual column
-        accounts.forEach(acc => {
+        // Identify the last joint Cash account for the minus toggles
+        const lastJointCashIndex = jointCashAccounts.length - 1;
+
+        jointCashAccounts.forEach((acc, index) => {
+            let displayName = acc.name;
+            // add the [-] toggle to the last cash accounts
+            if (index === lastJointCashIndex) {
+                displayName += '<span class="expand-toggle" style="cursor:pointer; color: #ef4444;">[-]</span>';
+            }
+            columns.push({ id: acc.id, name: displayName, isGroup: false });
+        }
+
+        // Add all other categories to the list (Investment, Retirement, etc.) individually
+        otherAccounts.forEach(acc => {
             columns.push({ id: acc.id, name: acc.name, isGroup: false });
         });
     }
@@ -208,7 +232,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (container) {
         container.addEventListener("click", (e) => {
             if (e.target.classList.contains("expand-toggle")) {
-                isCashExpanded = !isCashExpanded; // Flip the state
+                const category = event.target.dataset.category;
+                if (category === "MyCash") {
+                    isMyCashExpanded = !isMyCashExpanded; // Flip the state
+                }
+                else if (category === "JointCash") {
+                    isJointCashExpanded = !isJointCashExpanded;
+                }
                 loadBalances(); // Re-render the table with the new column set
             }
         });
