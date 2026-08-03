@@ -25,9 +25,8 @@ function buildDisplayColumns(accounts, settings) {
 
     // My cash accounts
     if(myCashAccounts.length === 0) {
-        break;
-    }
-    else if (myCashAccounts.length > 0 && !isMyCashExpanded) {
+        // do nothing
+    } else if (myCashAccounts.length > 0 && !isMyCashExpanded) {
         // add a single "My Cash" column that tracks all "my cash" account IDs
         columns.push({
             id: "my_cash_group",
@@ -50,9 +49,8 @@ function buildDisplayColumns(accounts, settings) {
     }
     // Joint cash accounts
     if(jointCashAccounts.length === 0) {
-        break;
-    }
-    else if (!isJointCashExpanded) {
+        // do nothing
+    } else if (!isJointCashExpanded) {
         // add a single "Joint Cash" column that tracks all "joint cash" account IDs
         columns.push({
             id: "joint_cash_group",
