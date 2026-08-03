@@ -69,16 +69,15 @@ async function loadSettingsEditor() {
     container.innerHTML = `
         <div class="editor-row">
             <span>Group Cash Accounts</span>
-            <input type="checkbox" name="setting-group-cash" ${settings.group_cash_accounts ? 'checked' : ''}>
-            <input type="hidden" name="id" value="${settings.id}">
+            <input type="checkbox" id="setting-group-cash" ${settings.group_cash_accounts ? 'checked' : ''}>
         </div>
         <div class="editor-row">
             <span>Hide Disabled Accounts</span>
-            <input type="checkbox" name="setting-hide-disabled" ${settings.hide_disabled_accounts ? 'checked' : ''}>
+            <input type="checkbox" id="setting-hide-disabled" ${settings.hide_disabled_accounts ? 'checked' : ''}>
         </div>
         <div class="editor-row">
             <span>Show Retirement Accounts</span>
-            <input type="checkbox" name="setting-show-retirement" ${settings.show_retirement_accounts ? 'checked' : ''}>
+            <input type="checkbox" id="setting-show-retirement" ${settings.show_retirement_accounts ? 'checked' : ''}>
         </div>
     `;
 }
