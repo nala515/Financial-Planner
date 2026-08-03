@@ -53,7 +53,7 @@ def db_get_accounts(db: Session):
 
 
 def db_get_settings(db: Session):
-    return db.query(Settings).all()
+    return db.query(Settings).first()
 
 
 def db_update_account(db: Session, account_id: int, account_data: AccountUpdate):
