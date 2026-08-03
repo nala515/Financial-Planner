@@ -103,7 +103,7 @@ async function loadBalances() {
     // get current type selection from dropdown
     const typeSelector = document.getElementById("type-selector");
     const selectedType = typeSelector ? typeSelector.value : "net_worth";
-    const typeFilteredAccounts = filterAccountsByType(allAccounts, categories, selectedType);
+    const typeFilteredAccounts = filterAccountsByType(accounts, categories, selectedType);
     if (!Array.isArray(typeFilteredAccounts) || typeFilteredAccounts.length === 0) {
         container.innerHTML = "<p>No accounts matching this filter.</p>";
         return;
