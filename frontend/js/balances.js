@@ -43,7 +43,7 @@ function buildDisplayColumns(accounts, settings) {
                 displayName += '<span class="expand-toggle" style="cursor:pointer; color: #ef4444;">[-]</span>';
             }
             columns.push({ id: acc.id, name: displayName, isGroup: false });
-        }
+        });
     }
     // Joint cash accounts
     if (!isJointCashExpanded) {
@@ -65,7 +65,7 @@ function buildDisplayColumns(accounts, settings) {
                 displayName += '<span class="expand-toggle" style="cursor:pointer; color: #ef4444;">[-]</span>';
             }
             columns.push({ id: acc.id, name: displayName, isGroup: false });
-        }
+        });
 
         // Add all other categories to the list (Investment, Retirement, etc.) individually
         otherAccounts.forEach(acc => {
