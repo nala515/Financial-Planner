@@ -78,7 +78,22 @@ button {
     list-style: none;
     padding: 0;
     display: grid;
+    grid-template-columns: minmax(0, 500px);  /* the track itself is capped at 500px */
+    justify-content: start;                    /* keeps the track left-aligned, not centered */
     gap: 1rem;
+}
+
+.account-section-header {
+    margin: 1.5rem 0 0.5rem;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-muted, #999);
+    border-bottom: 1px solid var(--border-color, #333);
+    padding-bottom: 0.25rem;
+}
+.account-section-header:first-of-type {
+    margin-top: 0;
 }
 
 .account-card {
@@ -196,13 +211,15 @@ button {
 // Tables
 //---------------------------------------------------*/
 
-.table-wrapper {
+.table-wrapper {        /* the cute little box around the table */
     max-height: 80vh;
     overflow-y: auto;
+    overflow-x: auto;
     position: relative;
     border: 1px solid #374151;
     border-radius: 8px;
-    width: 75%;
+    width: fit-content;
+    max-width: 100%;      /* safety net: prevents overflow past the page on small screens */
     margin-left: 0;
     margin-right: auto;
 }
@@ -212,19 +229,30 @@ button {
 }
 
 .data-table {
-    width: 100%;
+    width: auto;              /* or use a percentage like 75% — but this lets the table size to its columns, not the container */
     border-collapse: collapse;
     table-layout: fixed;
 }
 
+.data-table th,
+.data-table td {
+    width: 15ch;               /* ~20 characters wide, per column */
+    border: 1px solid #374151;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;       /* prevents wrapping from fighting the fixed width */
+    padding: 6px 12px;
+    color: #d1d5db;
+}
+
 .data-table.wide {
-    width: auto; /* this overrides the width from the section above, if wide is defined */
+    width: 100%;                /* wide tables fill the container fully */
     min-width: 100%;
 }
 
-.data-table th,
-.data-table td {
-    border: 1px solid #374151;
+.data-table.wide th,
+.data-table.wide td {
+    width: auto;                 /* let wide tables distribute space normally across columns */
 }
 
 .data-table thead th {
@@ -235,11 +263,6 @@ button {
     z-index: 2;
     text-align: left;
     padding: 8px 12px;
-}
-
-.data-table td {
-    padding: 6px 12px;
-    color: #d1d5db;
 }
 
 .table-year-row td {

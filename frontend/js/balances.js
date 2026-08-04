@@ -174,7 +174,7 @@ async function loadBalances() {
 
     // build table DOM
     const table = document.createElement("table");
-    table.className = "data-table wide";
+    table.className = "data-table";
 
     // build Header
     let thHtml = `<thead><tr><th>Month</th>`;

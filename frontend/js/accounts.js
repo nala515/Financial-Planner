@@ -46,28 +46,57 @@ async function loadAccounts() {
         const list = document.createElement("ul");
         list.className = "account-list";
 
+        const categoryOrder = [
+            { key: "Cash", label: "Cash" },
+            { key: "Investment", label: "Investments" },
+            { key: "Retirement", label: "Retirement" },
+            { key: "HSA", label: "HSA" },
+            { key: "529", label: "Education" },
+        ];
+         // Group accounts by category
+        const accountsByCategory = new Map();
         accounts.forEach(account => {
-            const latest = latestBalanceByAccount[account.id];
-            const balanceDisplay = latest
-                ? formatCurrency(latest.balance_cents)
-                : "No balance yet";
-
-            const item = document.createElement("li");
-            item.className = "account-card account-card-row";
-            item.innerHTML = `
-                <div class="account-card-info">
-                    <strong>${account.name}</strong>
-                    <small>${account.category || "Cash"}</small>
-                    <small>${account.shared ? "Shared" : "Personal"}</small>
-                    <small>${account.category_attributes?.retirement ? "Retirement" : "Non-retirement"}</small>
-                    <a href="/balances">View balances</a>
-                </div>
-                <div class="account-card-balance">${balanceDisplay}</div>
-            `;
-            list.appendChild(item);
+            const category = account.category || "Cash";
+            if (!accountsByCategory.has(category)) {
+                accountsByCategory.set(category, []);
+            }
+            accountsByCategory.get(category).push(account);
         });
 
-        div.appendChild(list);
+        // Render each section in order, skipping empty ones
+        categoryOrder.forEach(({ key, label }) => {
+            const categoryAccounts = accountsByCategory.get(key);
+            if (!categoryAccounts || categoryAccounts.length === 0) return;
+
+            const heading = document.createElement("h3");
+            heading.className = "account-section-header";
+            heading.textContent = label;
+            div.appendChild(heading);
+
+            const list = document.createElement("ul");
+            list.className = "account-list";
+
+            categoryAccounts.forEach(account => {
+                const latest = latestBalanceByAccount[account.id];
+                const balanceDisplay = latest
+                    ? formatCurrency(latest.balance_cents)
+                    : "No balance yet";
+
+                const item = document.createElement("li");
+                item.className = "account-card account-card-row";
+                item.innerHTML = `
+                    <div class="account-card-info">
+                        <strong>${account.name}</strong>
+                        <small>${account.shared ? "Shared" : "Personal"}</small>
+                        <small><a href="/summary" onclick="setSelectedAccountId(${account.id})">Summary</a></small>
+                    </div>
+                    <div class="account-card-balance">${balanceDisplay}</div>
+                `;
+                list.appendChild(item);
+            });
+
+            div.appendChild(list);
+        });
     } catch (error) {
         div.innerHTML = `<p>${error.message}</p>`;
     }
