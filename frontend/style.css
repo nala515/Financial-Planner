@@ -214,6 +214,7 @@ button {
 .table-wrapper {
     max-height: 80vh;
     overflow-y: auto;
+    overflow-x: auto;
     position: relative;
     border: 1px solid #374151;
     border-radius: 8px;
@@ -239,6 +240,8 @@ button {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;       /* prevents wrapping from fighting the fixed width */
+    padding: 6px 12px;
+    color: #d1d5db;
 }
 
 .data-table.wide {
@@ -259,11 +262,6 @@ button {
     z-index: 2;
     text-align: left;
     padding: 8px 12px;
-}
-
-.data-table td {
-    padding: 6px 12px;
-    color: #d1d5db;
 }
 
 .table-year-row td {
