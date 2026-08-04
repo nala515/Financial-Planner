@@ -88,7 +88,7 @@ async function loadAccounts() {
                     <div class="account-card-info">
                         <strong>${account.name}</strong>
                         <small>${account.shared ? "Shared" : "Personal"}</small>
-                        <small><a href="/balances" onclick="setSelectedAccountId(${account.id})">Summary</a></small>
+                        <small><a href="/summary" onclick="setSelectedAccountId(${account.id})">Summary</a></small>
                     </div>
                     <div class="account-card-balance">${balanceDisplay}</div>
                 `;
