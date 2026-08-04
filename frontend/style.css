@@ -78,6 +78,8 @@ button {
     list-style: none;
     padding: 0;
     display: grid;
+    grid-template-columns: minmax(0, 500px);  /* the track itself is capped at 500px */
+    justify-content: start;                    /* keeps the track left-aligned, not centered */
     gap: 1rem;
 }
 
@@ -121,9 +123,9 @@ button {
 }
 
 .account-card-row {
-    max-width: 1500px;   /* tweak until it feels right for your content */
-    margin-left: 0;
-    margin-right: auto; /* left-aligned */
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .account-card-info {
