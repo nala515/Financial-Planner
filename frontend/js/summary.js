@@ -3,14 +3,14 @@
 // Summary (Balance + Contributions + Growth)
 //-----------------------------------------------------
 
-function renderSummaryHeader(showInvestmentReturn) {
+function renderSummaryHeader(isGrowthType) {
     const thead = document.getElementById("summary-thead");
 
-    let headerHtml = `<tr><th>Month</th><th>Balance</th><th>Contributions</th><th>Growth</th>`;
-    if (showInvestmentReturn) {
-        headerHtml += `<th>Investment Return</th>`;
+    let headerHtml = `<tr><th>Month</th><th>Balance</th>`;
+    if(isGrowthType) {
+        headerHtml += `<th>Contributions</th><th>Investment Return</th>`;
     }
-    headerHtml += `</tr>`;
+    headerHtml += `<th>Growth</th></tr>`;
 
     thead.innerHTML = headerHtml;
 }
@@ -84,9 +84,9 @@ async function loadSummaryForAccount(accountId, category) {
 
     try {
         // determine which header to use and render it
-        const showInvestmentReturn = category === "Investment" || category === "Retirement";
-        const colCount = showInvestmentReturn ? 5 : 4;
-        renderSummaryHeader(showInvestmentReturn);
+        const isGrowthType = category === "Investment" || category === "Retirement";
+        const colCount = isGrowthType ? 5 : 3;
+        renderSummaryHeader(isGrowthType);
 
         // Pull full history for the account
         // Adjust the start date if you'd rather default to something
@@ -137,7 +137,7 @@ async function loadSummaryForAccount(accountId, category) {
 
                 // set up investment return column, if applicable
                 let investmentReturnCell = ""
-                if (showInvestmentReturn) {
+                if (isGrowthType) {
                     const returnColorClass =
                         row.investment_return > 0 ? "growth-positive" :
                         row.investment_return < 0 ? "growth-negative" :
