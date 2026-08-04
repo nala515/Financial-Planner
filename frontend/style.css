@@ -121,7 +121,7 @@ button {
 }
 
 .account-card-row {
-    max-width: 500px;   /* tweak until it feels right for your content */
+    max-width: 1500px;   /* tweak until it feels right for your content */
     margin-left: 0;
     margin-right: auto; /* left-aligned */
 }
