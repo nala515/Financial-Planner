@@ -236,7 +236,7 @@ button {
 
 .data-table th,
 .data-table td {
-    width: 20ch;               /* ~20 characters wide, per column */
+    width: 15ch;               /* ~20 characters wide, per column */
     border: 1px solid #374151;
     overflow: hidden;
     text-overflow: ellipsis;
