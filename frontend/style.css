@@ -211,14 +211,15 @@ button {
 // Tables
 //---------------------------------------------------*/
 
-.table-wrapper {
+.table-wrapper {        /* the cute little box around the table */
     max-height: 80vh;
     overflow-y: auto;
     overflow-x: auto;
     position: relative;
     border: 1px solid #374151;
     border-radius: 8px;
-    width: 75%;
+    width: fit-content;
+    max-width: 100%;      /* safety net: prevents overflow past the page on small screens */
     margin-left: 0;
     margin-right: auto;
 }
