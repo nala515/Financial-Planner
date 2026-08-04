@@ -5,6 +5,12 @@ ACCOUNT_CATEGORIES = {
         "invested": False,
         "net_worth": True,
     },
+    "Credit": {
+        "retirement": False,
+        "spendable": False,
+        "invested": False,
+        "net_worth": True,
+    },
     "Investment": {
         "retirement": False,
         "spendable": True,
