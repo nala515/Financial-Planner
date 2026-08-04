@@ -227,19 +227,28 @@ button {
 }
 
 .data-table {
-    width: 100%;
+    width: auto;              /* or use a percentage like 75% — but this lets the table size to its columns, not the container */
     border-collapse: collapse;
     table-layout: fixed;
 }
 
+.data-table th,
+.data-table td {
+    width: 20ch;               /* ~20 characters wide, per column */
+    border: 1px solid #374151;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;       /* prevents wrapping from fighting the fixed width */
+}
+
 .data-table.wide {
-    width: auto; /* this overrides the width from the section above, if wide is defined */
+    width: 100%;                /* wide tables fill the container fully */
     min-width: 100%;
 }
 
-.data-table th,
-.data-table td {
-    border: 1px solid #374151;
+.data-table.wide th,
+.data-table.wide td {
+    width: auto;                 /* let wide tables distribute space normally across columns */
 }
 
 .data-table thead th {
