@@ -55,7 +55,7 @@ async function loadContributions() {
 
         // 4. Build Table DOM
         const table = document.createElement("table");
-        table.className = "data-table wide";
+        table.className = "data-table";
 
         // Build Header
         let thHtml = `<thead><tr><th>Month</th>`;
