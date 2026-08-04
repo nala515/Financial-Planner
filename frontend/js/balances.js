@@ -3,9 +3,18 @@
 //-----------------------------------------------------
 
 let accountCategories = null; // cache so we don't refetch on every dropdown change
-let isMyCashExpanded = false;
-let isJointCashExpanded = false;
 
+// Track multiple toggle states in one object
+let expandedStates = {
+    MyCash: false,
+    JointCash: false,
+    HSA: false,
+    529: false,
+    Investment: false,
+    Retirement: false
+};
+
+// get account categories
 async function getAccountCategories() {
     if (accountCategories) {
         return accountCategories;
@@ -15,70 +24,68 @@ async function getAccountCategories() {
     return accountCategories;
 }
 
+// build account columns with groupings as desired
 function buildDisplayColumns(accounts, settings) {
     const columns = [];
+    // categories for grouping
+    const groups = ["MyCash", "JointCash", "HSA", "529", "Investment", "Retirement"];
 
-    // Find categorized accounts (my cash, joint cash, others)
-    const myCashAccounts = accounts.filter(acc => acc.category === "Cash" && acc.shared == false);
-    const jointCashAccounts = accounts.filter(acc => acc.category === "Cash" && acc.shared == true);
-    const otherAccounts = accounts.filter(acc => acc.category !== "Cash");
+    const groupedAccounts = accounts.reduce((map, acc) => {
+        let groupKey;
+    
+        // Logic to determine which bucket the account belongs to
+        if (acc.category === "Cash") {
+            groupKey = acc.shared ? "JointCash" : "MyCash";
+        } else {
+            groupKey = acc.category; // HSA, Investment, Retirement
+        }
+        // Initialize the array if it doesn't exist yet
+        if (!map[groupKey]) map[groupKey] = [];
+        map[groupKey].push(acc);
+        return map;
+    }, {});
 
-    // My cash accounts
-    if(myCashAccounts.length === 0) {
-        // do nothing
-    } else if (myCashAccounts.length > 0 && !isMyCashExpanded) {
-        // add a single "My Cash" column that tracks all "my cash" account IDs
-        columns.push({
-            id: "my_cash_group",
-            name: 'My Cash <span class="expand-toggle" data-category="MyCash" style="cursor:pointer; color: #3b82f6;">[+]</span>',
-            isGroup: true,
-            memberAccountIds: myCashAccounts.map(acc => acc.id)
-        });
-    } else { // show all cash accounts separately
-        // identify the last Cash account for the minus toggle
-        const lastMyCashIndex = myCashAccounts.length - 1;
+    groups.forEach(groupName => {
+        const groupMembers = groupedAccounts[groupName] || [];
+        const isExpanded = expandedStates[groupName];
 
-        myCashAccounts.forEach((acc, index) => {
-            let displayName = acc.name;
-            // add the [-] toggle to the last cash accounts
-            if (index === lastMyCashIndex) {
-                displayName += '<span class="expand-toggle" data-category="MyCash" style="cursor:pointer; color: #ef4444;">[-]</span>';
-            }
-            columns.push({ id: acc.id, name: displayName, isGroup: false });
-        });
-    }
-    // Joint cash accounts
-    if(jointCashAccounts.length === 0) {
-        // do nothing
-    } else if (!isJointCashExpanded) {
-        // add a single "Joint Cash" column that tracks all "joint cash" account IDs
-        columns.push({
-            id: "joint_cash_group",
-            name: 'Joint Cash <span class="expand-toggle" data-category="JointCash" style="cursor:pointer; color: #3b82f6;">[+]</span>',
-            isGroup: true,
-            memberAccountIds: jointCashAccounts.map(acc => acc.id)
-        });
-    } else {
-        // Identify the last joint Cash account for the minus toggles
-        const lastJointCashIndex = jointCashAccounts.length - 1;
-
-        jointCashAccounts.forEach((acc, index) => {
-            let displayName = acc.name;
-            // add the [-] toggle to the last cash accounts
-            if (index === lastJointCashIndex) {
-                displayName += '<span class="expand-toggle" data-category="JointCash" style="cursor:pointer; color: #ef4444;">[-]</span>';
-            }
-            columns.push({ id: acc.id, name: displayName, isGroup: false });
-        });
-    }
-    // Add all other categories to the list (Investment, Retirement, etc.) individually
-    otherAccounts.forEach(acc => {
-        columns.push({ id: acc.id, name: acc.name, isGroup: false });
+        // if no accounts match, do nothing
+        if(groupMembers.length === 0) {
+            //
+        }
+        // if one account, add the individual account
+        else if (groupMembers.length === 1) {
+            groupMembers.forEach(acc => {
+                columns.push({ id: acc.id, name: acc.name, isGroup: false });
+            });
+        }
+        // if multiple accounts and they're expanded, show all with a minus toggle
+        else if (isExpanded) {
+            const lastIndex = groupMembers.length - 1;
+            groupMembers.forEach((acc, index) => {
+                let displayName = acc.name;
+                // add the [-] toggle to the last account
+                if (index === lastIndex) {
+                    displayName += `<span class="expand-toggle" data-category="${groupName}" style="cursor:pointer; color: #ef4444;">[-]</span>`;
+                }
+                columns.push({ id: acc.id, name: displayName, isGroup: false });
+            });
+        }
+        // if multiple accounts and they're collapsed, show all with a plus toggle
+        else {
+            columns.push({
+                id: `${groupName}_group`,
+                name: `${groupName} <span class="expand-toggle" data-category="${groupName}" style="cursor:pointer; color: #3b82f6;">[+]</span>`,
+                isGroup: true,
+                memberAccountIds: groupMembers.map(m => m.id)
+            });
+        }
     });
 
     return columns;
 }
 
+// filter accounts by type to only show the ones requested
 function filterAccountsByType(accounts, categories, type) {
     return accounts.filter(acc => {
         const categoryInfo = categories[acc.category];
@@ -222,26 +229,24 @@ async function loadBalances() {
     container.appendChild(table);
 }
 
+// event listeners
 document.addEventListener("DOMContentLoaded", async () => {
     await loadNav();
     await loadSettings();
     await populateTypeSelector();
 
+    // type filtering
     const typeSelector = document.getElementById("type-selector");
     typeSelector.addEventListener("change", () => {
         loadBalances();    
     });
+    // [+] or [-] toggles
     const container = document.getElementById("balances");
     if (container) {
         container.addEventListener("click", (e) => {
             if (e.target.classList.contains("expand-toggle")) {
                 const category = event.target.dataset.category;
-                if (category === "MyCash") {
-                    isMyCashExpanded = !isMyCashExpanded; // Flip the state
-                }
-                else if (category === "JointCash") {
-                    isJointCashExpanded = !isJointCashExpanded;
-                }
+                expandedStates[category] = !expandedStates[category];
                 loadBalances(); // Re-render the table with the new column set
             }
         });
