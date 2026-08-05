@@ -2,12 +2,6 @@
 // Dashboard
 //-----------------------------------------------------
 
-// Assuming dates are in YYYY-MM-DD format
-const sortedDates = Object.keys(rowsByDate).sort().reverse();
-const currentMonth = sortedDates;
-const lastMonth = sortedDates[2]; // One month ago
-const lastYear = sortedDates[3]; // Twelve months ago
-
 function generateCategoryCard(categoryName, accountsInCategory) {
     let currentTotal = 0;
     let monthAgoTotal = 0;
