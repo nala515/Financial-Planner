@@ -62,7 +62,7 @@ async function loadDashboard() {
         netWorth.className = "dashboard-card";
         netWorth.innerHTML = `
             <h2>Net Worth</h2>
-            <p>${formatCurrency(dashboard.nw.current)}</p>
+            <p>${formatCurrency(nw.current)}</p>
             <div class="growth-stats">
                 <span>1M: ${renderGrowth(nw.current, nw['1m'])}</span>
                 <span>1Y: ${renderGrowth(nw.current, nw['1y'])}</span>
