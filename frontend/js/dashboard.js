@@ -75,8 +75,8 @@ async function loadDashboard() {
             <h2>Net Worth</h2>
             <p>${formatCurrency(nw.current)}</p>
             <div class="growth-stats">
-                <span>1M: ${renderGrowth(nw.current, nw['1m'])}</span>
-                <span>1Y: ${renderGrowth(nw.current, nw['1y'])}</span>
+                <small><span>1M: ${renderGrowth(nw.current, nw['1m'])}</span></small>
+                <small><span>1Y: ${renderGrowth(nw.current, nw['1y'])}</span></small>
             </div>
         `;
         container.appendChild(netWorth);
@@ -92,8 +92,8 @@ async function loadDashboard() {
                     <h3>${formatTypeLabel(key)}</h3>
                     <p class="main-balance">${formatCurrency(data.current)}</p>
                     <div class="growth-stats">
-                        <span>1M: ${renderGrowth(data.current, data['1m'])}</span>
-                        <span>1Y: ${renderGrowth(data.current, data['1y'])}</span>
+                        <small><span>1M: ${renderGrowth(data.current, data['1m'])}</span></small>
+                        <small><span>1Y: ${renderGrowth(data.current, data['1y'])}</span></small>
                     </div>
                 </div>
             `;
