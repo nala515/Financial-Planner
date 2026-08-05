@@ -1,5 +1,5 @@
 //-----------------------------------------------------
-// Dashboard
+// Utilities
 //-----------------------------------------------------
 
 function generateCategoryCard(categoryName, accountsInCategory) {
@@ -40,6 +40,17 @@ function renderGrowth(currentCents, pastCents) {
     `;
 }
 
+function formatTypeLabel(key) { 
+    // Example: "net_worth" -> "Net Worth", "spendable" -> "Spendable"
+    return key
+        .split("_")
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(" ");
+}
+
+//-----------------------------------------------------
+// Dashboard
+//-----------------------------------------------------
 
 async function loadDashboard() {
     const container = document.getElementById("dashboard");
