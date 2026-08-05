@@ -9,6 +9,13 @@ body {
     background: #111827;
 }
 
+/* Applies only on phone-width screens */
+@media (max-width: 600px) {
+  body {
+    font-size: 19px;
+  }
+}
+
 nav {
     display: flex;
     gap: 1rem;
