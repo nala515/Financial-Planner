@@ -74,44 +74,20 @@ async function loadDashboard() {
         const categories = document.createElement("div");
         categories.className = "dashboard-grid";
 
-        const ret = dashboard.categories?.retirement || { current: 0, "1m": 0, "1y": 0 };
-        const nonRet = dashboard.categories?.non_retirement || { current: 0, "1m": 0, "1y": 0 };
-        const cash = dashboard.categories?.cash || { current: 0, "1m": 0, "1y": 0 };
-        const spend = dashboard.categories?.spendable || { current: 0, "1m": 0, "1y": 0 };
-        categories.innerHTML = `
-            <div class="dashboard-card">
-                <h3>Retirement</h3>
-                <p class="main-balance">${formatCurrency(ret.current)}</p>
-                <div class="growth-stats">
-                    <span>1M: ${renderGrowth(ret.current, ret['1m'])}</span>
-                    <span>1Y: ${renderGrowth(ret.current, ret['1y'])}</span>
+        const keys = ["retirement", "non_retirement", "cash", "spendable"];
+        categories.innerHTML = keys.map(key => {
+            const data = dashboard.categories[key] || { current: 0, "1m": 0, "1y": 0 };
+            return `
+                <div class="dashboard-card">
+                    <h3>${formatTypeLabel(key)}</h3>
+                    <p class="main-balance">${formatCurrency(data.current)}</p>
+                    <div class="growth-stats">
+                        <span>1M: ${renderGrowth(data.current, data['1m'])}</span>
+                        <span>1Y: ${renderGrowth(data.current, data['1y'])}</span>
+                    </div>
                 </div>
-            </div>
-            <div class="dashboard-card">
-                <h3>Non-retirement</h3>
-                <p class="main-balance">${formatCurrency(nonRet.current)}</p>
-                <div class="growth-stats">
-                    <span>1M: ${renderGrowth(nonRet.current, nonRet['1m'])}</span>
-                    <span>1Y: ${renderGrowth(nonRet.current, nonRet['1y'])}</span>
-                </div>
-            </div>
-            <div class="dashboard-card">
-                <h3>Cash</h3>
-                <p class="main-balance">${formatCurrency(cash.current)}</p>
-                <div class="growth-stats">
-                    <span>1M: ${renderGrowth(cash.current, cash['1m'])}</span>
-                    <span>1Y: ${renderGrowth(cash.current, cash['1y'])}</span>
-                </div>
-            </div>
-            <div class="dashboard-card">
-                <h3>Spendable</h3>
-                <p class="main-balance">${formatCurrency(spend.current)}</p>
-                <div class="growth-stats">
-                    <span>1M: ${renderGrowth(spend.current, spend['1m'])}</span>
-                    <span>1Y: ${renderGrowth(spend.current, spend['1y'])}</span>
-                </div>
-            </div>
-        `;
+            `;
+        }).join('');
         container.appendChild(categories);
     } catch (error) {
         container.innerHTML = `<p>${error.message}</p>`;
