@@ -1,7 +1,7 @@
 
 async function loadNav() {
   const container = document.getElementById("nav-container");
-  const html = await fetch("/static/nav.html").then(r => r.text());
+  const html = await fetch("/static/html/nav.html").then(r => r.text());
   container.innerHTML = html;
   initNav();
 }
