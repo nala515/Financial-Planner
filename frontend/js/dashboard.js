@@ -64,10 +64,15 @@ async function loadDashboard() {
         container.innerHTML = "";
 
         const netWorth = document.createElement("div");
+        const nw = dashboard.net_worth || { current: 0, "1m": 0, "1y": 0 };
         netWorth.className = "dashboard-card";
         netWorth.innerHTML = `
             <h2>Net Worth</h2>
-            <p>${formatCurrency(dashboard.net_worth || 0)}</p>
+            <p>${formatCurrency(dashboard.nw.current)}</p>
+            <div class="growth-stats">
+                <span>1M: ${renderGrowth(nw.current, nw['1m'])}</span>
+                <span>1Y: ${renderGrowth(nw.current, nw['1y'])}</span>
+            </div>
         `;
         container.appendChild(netWorth);
 
