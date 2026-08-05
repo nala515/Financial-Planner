@@ -37,7 +37,7 @@ function renderGrowth(currentCents, pastCents) {
     const diff = currentCents - pastCents;
     const isPositive = diff >= 0;
     const arrow = isPositive ? '▲' : '▼';
-    const colorClass = isPositive ? 'growth-up' : 'growth-down';
+    const colorClass = isPositive ? 'growth-positive' : 'growth-negative';
 
     return `
         <span class="${colorClass}">
