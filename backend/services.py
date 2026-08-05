@@ -1,5 +1,6 @@
 from sqlalchemy.orm import Session
 from datetime import date
+from dateutil.relativedelta import relativedelta
 
 from .schemas import AccountCreate, SettingsCreate, BalanceCreate, ContributionCreate, IncomeEventCreate, IncomeSourceCreate
 from .repositories import accounts_repository, balances_repository, contributions_repository, income_repository
@@ -75,36 +76,62 @@ def calculate_growth(
 
 def get_dashboard_summary(db: Session):
     accounts = accounts_repository.db_get_accounts(db)
-    latest_balances = []
 
-    for account in accounts:
-        balances = balances_repository.db_get_account_balances(db, account.id)
-        latest_balance = balances[-1].balance_cents if balances else 0
-        latest_balances.append((account, latest_balance))
-
-    net_worth = sum(balance for _, balance in latest_balances)
-
+    # initialize data
+    def empty_stats():
+        return {"current": 0, "1m": 0, "1y": 0}
     categories = {
-        "retirement": 0,
-        "non_retirement": 0,
-        "cash": 0,
-        "spendable": 0,
+        "retirement": empty_stats(),
+        "non_retirement": empty_stats(),
+        "cash": empty_stats(),
+        "spendable": empty_stats(),
     }
 
-    for account, balance in latest_balances:
+    # aggregate the data
+    for account in accounts:
+        balances = balances_repository.db_get_account_balances(db, account.id)
+        if not balances:
+            continue
+
+        latest_balance_record = balances[-1]
+        current_cents = latest_balance_record.balance_cents
+        
+        # use this account's latest date as the "Anchor" date for comparisons
+        anchor_date = latest_balance_record.date
+        one_month_ago = anchor_date - relativedelta(months=1)
+        one_year_ago = anchor_date - relativedelta(years=1)
+
+        # map balances by date for easy historical lookup
+        balance_map = {b.date: b.balance_cents for b in balances}
+        m_ago_cents = balance_map.get(one_month_ago, 0)
+        y_ago_cents = balance_map.get(one_year_ago, 0)
+
+        # apply category aggregation
         category_name = account.category or "Cash"
-        category_attributes = get_category_attributes(category_name)
+        attrs = get_category_attributes(category_name)
 
-        if category_attributes.get("retirement"):
-            categories["retirement"] += balance
+        # helper to add balances to a given category bucket
+        def add_to_category(key):
+            categories[key]["current"] += current_cents
+            categories[key]["1m"] += m_ago_cents
+            categories[key]["1y"] += y_ago_cents
+
+        # Master Buckets: Retirement vs Non-Retirement
+        if attrs.get("retirement"):
+            add_to_category("retirement")
         else:
-            categories["non_retirement"] += balance
+            add_to_category("non_retirement")
 
+        # Overlapping Buckets: Cash vs Spendable
         if category_name == "Cash":
-            categories["cash"] += balance
+            add_to_category("cash")
+        if attrs.get("spendable"):
+            add_to_category("spendable")
 
-        if category_attributes.get("spendable"):
-            categories["spendable"] += balance
+    net_worth = empty_stats()
+    net_worth["current"] = categories["retirement"]["current"] + categories["non_retirement"]["current"]
+    net_worth["1m"] = categories["retirement"]["1m"] + categories["non_retirement"]["1m"]
+    net_worth["1y"] = categories["retirement"]["1y"] + categories["non_retirement"]["1y"]
 
     return {
         "net_worth": net_worth,
