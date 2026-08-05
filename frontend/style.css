@@ -286,6 +286,15 @@ button {
 // Growth styles
 //---------------------------------------------------*/
 
+.growth-stats {
+    font-size: 0.85rem;
+    margin-top: 10px;
+    display: flex;
+    flex-direction: column; 
+    gap: 4px;               
+    color: #9ca3af;
+}
+
 .growth-positive {
     color: #4ade80;
     font-weight: 600;
