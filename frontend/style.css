@@ -282,16 +282,20 @@ button {
     background: #1f2937;
 }
 
-.data-table td.growth-positive {
+/*-----------------------------------------------------
+// Growth styles
+//---------------------------------------------------*/
+
+.growth-positive {
     color: #4ade80;
     font-weight: 600;
 }
 
-.data-table td.growth-negative {
+.growth-negative {
     color: #f87171;
     font-weight: 600;
 }
 
-.data-table td.growth-neutral {
+.growth-neutral {
     color: #d1d5db;
 }
