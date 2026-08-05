@@ -77,7 +77,7 @@ def calculate_growth(
 def get_dashboard_summary(db: Session):
     accounts = accounts_repository.db_get_accounts(db)
 
-    # initialize category data
+    # initialize data
     def empty_stats():
         return {"current": 0, "1m": 0, "1y": 0}
     categories = {
@@ -128,7 +128,10 @@ def get_dashboard_summary(db: Session):
         if attrs.get("spendable"):
             add_to_category("spendable")
 
-    net_worth = categories["retirement"]["current"] + categories["non_retirement"]["current"]
+    net_worth = empty_stats()
+    net_worth["current"] = categories["retirement"]["current"] + categories["non_retirement"]["current"]
+    net_worth["1m"] = categories["retirement"]["1m"] + categories["non_retirement"]["1m"]
+    net_worth["1y"] = categories["retirement"]["1y"] + categories["non_retirement"]["1y"]
 
     return {
         "net_worth": net_worth,
