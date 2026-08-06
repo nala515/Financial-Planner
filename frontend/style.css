@@ -9,19 +9,6 @@ body {
     background: #111827;
 }
 
-/* Applies only on phone-width screens */
-@media (max-width: 600px) {
-  body {
-    font-size: 19px;
-  }
-  .nav-dropdown {
-    margin-left: 1.25rem;
-  }
-  .nav-dropdown .nav-link {
-    padding-left: 0.75rem;
-  }
-}
-
 .checkbox-row {
     display: flex;
     align-items: center;
@@ -159,6 +146,10 @@ button {
 
 /* --- Mobile layout --- */
 @media (max-width: 768px) {
+  body {
+    font-size: 19px;
+  }
+
   .nav-toggle {
     display: block;
   }
@@ -184,7 +175,11 @@ button {
     position: static;
     box-shadow: none;
     border: none;
-    margin-left: 1rem;
+    margin-left: 3rem;
+  }
+
+  .nav-dropdown .nav-link {
+    padding-left: 0.75rem;
   }
 }
 
