@@ -34,19 +34,6 @@ function formatYearLabel(snapshotDate) {
     return date.getFullYear().toString();
 }
 
-async function loadNav() {
-    const placeholder = document.getElementById("nav-placeholder");
-    if (!placeholder) {
-        return;
-    }
-    const response = await fetch("/static/html/nav.html");
-    if (!response.ok) {
-        placeholder.innerHTML = `<p style="color:red">Nav failed to load: ${response.status}</p>`;
-        return;
-    }
-    placeholder.innerHTML = await response.text();
-}
-
 async function sendDebugMsg(msg) {
     try {
         await fetch("/api/debug", {
