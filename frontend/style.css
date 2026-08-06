@@ -77,8 +77,12 @@ button {
 
 .nav-link,
 .nav-group-toggle {
+  appearance: none;
+  -webkit-appearance: none;
+  text-align: left;
+  width: 100%;
   display: block;
-  padding: 0.5rem 0.9rem;
+  padding: 0.5rem 0.6rem;
   color: var(--text-secondary, #ccc);
   text-decoration: none;
   background: none;
