@@ -32,7 +32,7 @@ function buildDisplayColumns(accounts, settings) {
 
     const groupedAccounts = accounts.reduce((map, acc) => {
         let groupKey;
-    
+
         // Logic to determine which bucket the account belongs to
         if (acc.category === "Cash") {
             groupKey = acc.shared ? "JointCash" : "MyCash";
@@ -238,7 +238,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     // type filtering
     const typeSelector = document.getElementById("type-selector");
     typeSelector.addEventListener("change", () => {
-        loadBalances();    
+        loadBalances();
     });
     // [+] or [-] toggles
     const container = document.getElementById("balances");

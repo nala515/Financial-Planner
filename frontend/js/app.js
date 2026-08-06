@@ -46,3 +46,17 @@ async function loadNav() {
     }
     placeholder.innerHTML = await response.text();
 }
+
+async function sendDebugMsg(msg) {
+    try {
+        await fetch("/api/debug", {
+            method: "POST",
+            headers: {
+               "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ msg: msg })
+        });
+    } catch (error) {
+        console.error("Failed to send debug log to Uvicorn:", error);
+    }
+}

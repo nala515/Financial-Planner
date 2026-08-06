@@ -2,7 +2,7 @@ from sqlalchemy.orm import Session
 from datetime import date
 from dateutil.relativedelta import relativedelta
 
-from .schemas import AccountCreate, SettingsCreate, BalanceCreate, ContributionCreate, IncomeEventCreate, IncomeSourceCreate
+from .schemas import AccountCreate, SettingsCreate, BalanceCreate, ContributionCreate, IncomeEventCreate, IncomeSourceCreate, DebugRequest
 from .repositories import accounts_repository, balances_repository, contributions_repository, income_repository
 from .account_categories import get_category_attributes
 
@@ -95,7 +95,7 @@ def get_dashboard_summary(db: Session):
 
         latest_balance_record = balances[-1]
         current_cents = latest_balance_record.balance_cents
-        
+
         # use this account's latest date as the "Anchor" date for comparisons
         anchor_date = latest_balance_record.date
         one_month_ago = anchor_date - relativedelta(months=1)
