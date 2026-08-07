@@ -126,6 +126,7 @@ async function populateAccountSelector(select, accounts) {
             const option = document.createElement("option");
             option.value = account.id;
             option.textContent = account.name;
+            option.dataset.category = account.category;
 
             optgroup.appendChild(option);
         });
