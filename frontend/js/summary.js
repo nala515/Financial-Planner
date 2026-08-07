@@ -25,18 +25,10 @@ async function loadSummary() {
 
     try {
         const accounts = await loadAccounts();
-        let accountId = await populateAccountDropdown(selector, accounts);
-
-        if (!accountId) {
-            accountId = getSelectedAccountId();
-            if (accountId && selector.querySelector(`option[value="${accountId}"]`)) {
-                selector.value = accountId;
-            }
-        }
-
+        const accountId = await populateAccountDropdown(selector, accounts);
         // call function to load account summary
         if (accountId) {
-            setSelectedAccountId(accountId);
+            // grab category
             const selectedOption = selector.options[selector.selectedIndex];
             const category = selectedOption?.dataset.category;
             await loadSummaryForAccount(accountId, category);
