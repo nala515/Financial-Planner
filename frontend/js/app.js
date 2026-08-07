@@ -3,7 +3,6 @@
 //-----------------------------------------------------
 
 let settings = {};
-let accountCategories = null;
 
 async function loadSettings() {
     settings = await fetch("/api/settings")
@@ -19,9 +18,6 @@ function setSelectedAccountId(accountId) {
 }
 
 async function getAccountCategories() {
-    if (accountCategories) {
-        return accountCategories;
-    }
     const response = await fetch(`/api/account-categories`);
     accountCategories = await response.json();
     return accountCategories;
