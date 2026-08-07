@@ -47,3 +47,26 @@ async function sendDebugMsg(msg) {
         console.error("Failed to send debug log to Uvicorn:", error);
     }
 }
+
+function getDropdownGroup(categoryName, categories) {
+    const info = categories[categoryName];
+
+    if (!info) {
+        return "Other";
+    }
+
+    if (info.retirement) {
+        return "Retirement";
+    }
+
+    if (info.invested) {
+        return "Investment";
+    }
+
+    if (info.spendable) {
+        return "Cash";
+    }
+
+    // HSA, 529, or anything else
+    return "Other";
+}
