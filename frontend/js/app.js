@@ -3,6 +3,7 @@
 //-----------------------------------------------------
 
 let settings = {};
+let accountCategories = null;
 
 async function loadSettings() {
     settings = await fetch("/api/settings")
