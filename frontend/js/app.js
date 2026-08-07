@@ -18,11 +18,12 @@ async function loadAccounts() {
 }
 
 function getSelectedAccountId() {
-    return localStorage.getItem("selectedAccount");
+    const accountId = localStorage.getItem("selectedAccount");
+    return accountId ? Number(accountId) : null;
 }
 
 function setSelectedAccountId(accountId) {
-    localStorage.setItem("selectedAccount", accountId);
+    localStorage.setItem("selectedAccount", Number(accountId));
 }
 
 async function getAccountCategories() {
@@ -145,10 +146,14 @@ async function populateAccountDropdown(select, accounts) {
 
         select.appendChild(optgroup);
     });
-    // by default, maintain the account selection from previous
-    const accountId = getSelectedAccountId();
-    if (accountId) {
-            selector.value = accountId;
+
+    let accountId = getSelectedAccountId();
+    if (accountId && select.querySelector(`option[value="${accountId}"]`)) {
+        select.value = String(accountId);
+    } else if (select.options.length > 0) {
+        accountId = Number(select.options[0].value);
+        select.value = String(accountId);
+        setSelectedAccountId(accountId);
     }
     return accountId;
 }

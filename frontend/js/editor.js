@@ -34,8 +34,16 @@ async function populateAccountCategoryOptions(select) {
         });
 }
 
+async function populateAll(accountId) {
+    const selectedAccount = accountCache.find(a => a.id === accountId);
+    if (selectedAccount) {
+        populateAccountForm(selectedAccount);
+        await populateBalances(accountId);
+        await populateContributions(accountId);
+    }
+}
 
-async function loadBalancesEditor(accountId) {
+async function populateBalances(accountId) {
     const container = document.getElementById("balances-list-container");
     const response = await fetch(`/api/accounts/${accountId}/balances`);
     const balances = await response.json();
@@ -49,7 +57,7 @@ async function loadBalancesEditor(accountId) {
     `).join('');
 }
 
-async function loadContributionsEditor(accountId) {
+async function populateContributions(accountId) {
     const container = document.getElementById("contributions-list-container");
     const response = await fetch(`/api/accounts/${accountId}/contributions`);
     const contributions = await response.json();
@@ -63,7 +71,7 @@ async function loadContributionsEditor(accountId) {
     `).join('');
 }
 
-async function loadSettingsEditor() {
+async function populateSettings() {
     const container = document.getElementById("settings-list-container");
     if (!container) return;
 
@@ -183,8 +191,8 @@ async function initializeEditor() {
 
     try {
         const accounts = await loadAccounts();
-        await populateAccountDropdown(selector, accounts);
         accountCache = Array.isArray(accounts) ? accounts : [];
+        return await populateAccountDropdown(selector, accounts); // returns accountId
     } catch (error) {
         console.error(error);
     }
@@ -192,8 +200,12 @@ async function initializeEditor() {
 
 document.addEventListener("DOMContentLoaded", async () => {
     await loadNav();
-    await initializeEditor(); // Fetches accounts and populates selector
-    await loadSettingsEditor();
+    await populateSettings();
+
+    // populate account dropdown and form
+    let accountId = await initializeEditor(); // Fetches accounts and populates selector
+    await populateAll(accountId);
+
     const selector = document.getElementById("account-selector");
     const accountForm = document.getElementById("account-form");
     const resetButton = document.getElementById("reset-account-details");
@@ -201,28 +213,17 @@ document.addEventListener("DOMContentLoaded", async () => {
     // Account selector logic
     if (selector) {
         selector.addEventListener("change", async (event) => {
-            const accountId = Number(event.target.value);
+            accountId = Number(event.target.value);
             if (!accountId) return;
-            
-            const selectedAccount = accountCache.find(a => a.id === accountId);
-            if (selectedAccount) {
-                populateAccountForm(selectedAccount);
-                await loadBalancesEditor(accountId);
-                await loadContributionsEditor(accountId);
-            } else {
-                form.reset(); // Clear if "Select an account" is chosen
-            }
+            await populateAll(accountId);
         });
     }
     // Reset button
     if (resetButton) {
         resetButton.addEventListener("click", async () => {
-            const accountId = Number(selector.value);
-            const original = accountCache.find(a => a.id === accountId);
-            if (original) {
-                populateAccountForm(original);
-                await loadBalancesEditor(accountId);
-                await loadContributionsEditor(accountId);
+            accountId = Number(selector.value);
+            if (accountId) {
+                await populateAll(accountId);
             }
         });
     }
