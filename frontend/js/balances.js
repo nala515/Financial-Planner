@@ -2,8 +2,6 @@
 // Utility functions
 //-----------------------------------------------------
 
-let accountCategories = null; // cache so we don't refetch on every dropdown change
-
 // Track multiple toggle states in one object
 let expandedStates = {
     MyCash: false,
