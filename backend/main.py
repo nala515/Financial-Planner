@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
@@ -6,6 +6,7 @@ from datetime import date
 from .database import engine, SessionLocal
 from .models import Base
 from . import services, schemas
+from .schemas import DebugRequest
 from .account_categories import ACCOUNT_CATEGORIES
 
 app = FastAPI()
@@ -20,9 +21,15 @@ app.add_middleware(
 
 Base.metadata.create_all(bind=engine)
 
+class NoCacheStaticFiles(StaticFiles):
+    def file_response(self, *args, **kwargs):
+        response = super().file_response(*args, **kwargs)
+        response.headers["Cache-Control"] = "no-cache"
+        return response
+
 app.mount(
     "/static",
-    StaticFiles(directory="frontend"),
+    NoCacheStaticFiles(directory="frontend"),
     name="static"
 )
 
@@ -267,6 +274,11 @@ def create_income_source(source_data: schemas.IncomeSourceCreate):
         return services.create_income_source(db, source_data)
     finally:
         db.close()
+
+@app.post("/api/debug")
+def print_debug(request: DebugRequest):
+    print(request.msg)
+    return {"status": "ok"}
 
 ##-----------------------------------------------------
 ## Patches

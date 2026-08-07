@@ -34,15 +34,16 @@ function formatYearLabel(snapshotDate) {
     return date.getFullYear().toString();
 }
 
-async function loadNav() {
-    const placeholder = document.getElementById("nav-placeholder");
-    if (!placeholder) {
-        return;
+async function sendDebugMsg(msg) {
+    try {
+        await fetch("/api/debug", {
+            method: "POST",
+            headers: {
+               "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ msg: msg })
+        });
+    } catch (error) {
+        console.error("Failed to send debug log to Uvicorn:", error);
     }
-    const response = await fetch("/static/html/nav.html");
-    if (!response.ok) {
-        placeholder.innerHTML = `<p style="color:red">Nav failed to load: ${response.status}</p>`;
-        return;
-    }
-    placeholder.innerHTML = await response.text();
 }

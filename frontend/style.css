@@ -9,25 +9,6 @@ body {
     background: #111827;
 }
 
-/* Applies only on phone-width screens */
-@media (max-width: 600px) {
-  body {
-    font-size: 19px;
-  }
-}
-
-nav {
-    display: flex;
-    gap: 1rem;
-    margin-bottom: 1.5rem;
-}
-
-nav a {
-    color: #60a5fa;
-    text-decoration: none;
-    font-weight: 600;
-}
-
 .checkbox-row {
     display: flex;
     align-items: center;
@@ -56,6 +37,158 @@ button {
     color: #f9fafb;
     border: 1px solid #4b5563;
     border-radius: 6px;
+}
+
+/*-----------------------------------------------------
+// Navigation
+//---------------------------------------------------*/
+
+.site-nav {
+  background: var(--bg-secondary, #1a1a1a);
+  border-bottom: 1px solid var(--border-color, #333);
+  position: relative;
+  z-index: 100;
+}
+
+.nav-inner {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 2rem;            /* controls spacing between brand icon and menu */
+  padding: 0.5rem 1.5rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.nav-brand {
+  color: var(--text-primary, #fff);
+  font-weight: 600;
+  text-decoration: none;
+  font-size: 1.1rem;
+  line-height: 1.2; /* should be same as nav-link, nav-group-toggle height */
+}
+
+.nav-menu {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.nav-link,
+.nav-group-toggle {
+  appearance: none;
+  -webkit-appearance: none;
+  text-align: left;
+  width: 100%;
+  display: block;
+  padding: 0.35rem 0.6rem;
+  color: var(--text-secondary, #ccc);
+  text-decoration: none;
+  background: none;
+  border: none;
+  font: inherit;
+  cursor: pointer;
+  border-radius: 6px;
+  white-space: nowrap;
+  min-width: 0;
+  line-height: 1.2;
+}
+
+.nav-link:hover,
+.nav-group-toggle:hover {
+  background: var(--bg-hover, #2a2a2a);
+  color: var(--text-primary, #fff);
+}
+
+.nav-link--active,
+.nav-group-toggle--active {
+  color: var(--accent-color, #4da3ff);
+  font-weight: 600;
+}
+
+.nav-caret {
+  font-size: 0.7em;
+  margin-left: 0.25rem;
+}
+
+/* --- Dropdowns --- */
+.nav-group {
+  position: relative;
+}
+
+.nav-dropdown {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  min-width: 180px;
+  background: var(--bg-secondary, #1a1a1a);
+  border: 1px solid var(--border-color, #333);
+  border-radius: 8px;
+  padding: 0.4rem;
+  margin: 0.25rem 0 0;
+  list-style: none;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+.nav-group--open .nav-dropdown {
+  display: block;
+}
+
+.nav-dropdown .nav-link {
+  padding: 0.5rem 0.75rem;
+}
+
+/* --- Mobile hamburger (hidden on desktop) --- */
+.nav-toggle {
+  display: none;
+  background: none;
+  border: none;
+  color: var(--text-primary, #fff);
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+
+/* --- Mobile layout --- */
+@media (max-width: 768px) {
+  body {
+    font-size: 19px;
+  }
+
+  .nav-toggle {
+    display: block;
+  }
+
+  .nav-menu {
+    display: none;
+    flex-direction: column;
+    align-items: stretch;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: var(--bg-secondary, #1a1a1a);
+    border-bottom: 1px solid var(--border-color, #333);
+    padding: 0.5rem;
+  }
+
+  .nav-menu--open {
+    display: flex;
+  }
+
+  .nav-dropdown {
+    position: static;
+    box-shadow: none;
+    border: none;
+    margin-left: 3rem;
+  }
+
+  .nav-dropdown .nav-link {
+    padding-left: 0.75rem;
+  }
 }
 
 /*-----------------------------------------------------

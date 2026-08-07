@@ -46,6 +46,13 @@ class SettingsUpdate(BaseModel):
     group_cash_accounts: bool | None = None
     hide_disabled_accounts: bool | None = None
     show_retirement_accounts: bool | None = None
-    
+
 class IncomeSourceUpdate(BaseModel):
     name: str | None = None
+
+##-----------------------------------------------------
+## Other
+##-----------------------------------------------------
+
+class DebugRequest(BaseModel):
+    msg: str
