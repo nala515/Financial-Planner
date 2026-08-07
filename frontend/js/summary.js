@@ -24,24 +24,10 @@ async function loadSummary() {
     }
 
     try {
-        const response = await fetch(`/api/accounts`);
-
-        if (!response.ok) {
-            throw new Error("Unable to load accounts");
-        }
-
-        const accounts = await response.json();
-        await populateAccountSelector(
-            selector,
-            accounts
-        );
-
-        const accountId = getSelectedAccountId();
-
+        const accounts = await loadAccounts();
+        const accountId = await populateAccountDropdown(selector, accounts);
         // call function to load account summary
         if (accountId) {
-            selector.value = accountId;
-
             // grab category
             const selectedOption = selector.options[selector.selectedIndex];
             const category = selectedOption?.dataset.category;
@@ -92,9 +78,7 @@ async function loadSummaryForAccount(accountId, category) {
             return;
         }
 
-        const sortedRows = [...rows].sort(
-            (a, b) => new Date(b.month) - new Date(a.month)
-        );
+        const sortedRows = [...rows].sort((a, b) => b.month.localeCompare(a.month));
 
         const groupedRows = sortedRows.reduce((groups, row) => {
             const year = formatYearLabel(row.month);

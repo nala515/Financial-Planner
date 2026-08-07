@@ -38,7 +38,7 @@ async function loadAccounts() {
         const latestBalanceByAccount = {};
         balances.forEach(b => {
             const existing = latestBalanceByAccount[b.account_id];
-            if (!existing || new Date(b.date) > new Date(existing.date)) {
+            if (!existing || b.date > existing.date) {
                 latestBalanceByAccount[b.account_id] = b;
             }
         });

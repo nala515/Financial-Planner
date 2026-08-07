@@ -61,6 +61,38 @@ def get_summary():
 def get_editor():
     return FileResponse("frontend/html/editor.html")
 
+@app.get("/income")
+def get_income():
+    return FileResponse("frontend/html/income.html")
+
+@app.get("/expenses")
+def get_expenses():
+    return FileResponse("frontend/html/expenses.html")
+
+@app.get("/money-movement")
+def get_money_movement():
+    return FileResponse("frontend/html/money-movement.html")
+
+@app.get("/savings")
+def get_savings():
+    return FileResponse("frontend/html/savings.html")
+
+@app.get("/growth-investment")
+def get_growth_investment():
+    return FileResponse("frontend/html/growth-investment.html")
+
+@app.get("/growth-retirement")
+def get_growth_retirement():
+    return FileResponse("frontend/html/growth-retirement.html")
+
+@app.get("/add-entry")
+def get_add_entry():
+    return FileResponse("frontend/html/add-entry.html")
+
+@app.get("/settings")
+def get_settings():
+    return FileResponse("frontend/html/settings.html")
+
 ##-----------------------------------------------------
 ## API Gets
 ##-----------------------------------------------------
@@ -84,11 +116,11 @@ def get_settings():
         db.close()
 
 @app.get("/api/dashboard")
-def api_get_dashboard_summary():
+def api_get_dashboard_data():
     db = SessionLocal()
 
     try:
-        return services.get_dashboard_summary(db)
+        return services.get_dashboard_data(db)
     finally:
         db.close()
 

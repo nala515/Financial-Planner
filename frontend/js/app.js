@@ -9,12 +9,21 @@ async function loadSettings() {
         .then(r => r.json());
 }
 
+async function loadAccounts() {
+        const response = await fetch(`/api/accounts`);
+        if (!response.ok) {
+            throw new Error("Unable to load accounts");
+        }
+        return await response.json();
+}
+
 function getSelectedAccountId() {
-    return localStorage.getItem("selectedAccount");
+    const accountId = localStorage.getItem("selectedAccount");
+    return accountId ? Number(accountId) : null;
 }
 
 function setSelectedAccountId(accountId) {
-    localStorage.setItem("selectedAccount", accountId);
+    localStorage.setItem("selectedAccount", Number(accountId));
 }
 
 async function getAccountCategories() {
@@ -34,14 +43,19 @@ function formatCurrency(cents) {
     });
 }
 
-function formatMonthLabel(snapshotDate) {
-    const date = new Date(snapshotDate);
-    return date.toLocaleDateString("en-US", { month: "long" });
+const MONTH_NAMES = [
+    "January", "February", "March", "April",
+    "May", "June", "July", "August",
+    "September", "October", "November", "December"
+];
+
+function formatMonthLabel(dateString) {
+    const month = Number(dateString.slice(5, 7));
+    return MONTH_NAMES[month - 1];
 }
 
-function formatYearLabel(snapshotDate) {
-    const date = new Date(snapshotDate);
-    return date.getFullYear().toString();
+function formatYearLabel(dateString) {
+    return dateString.slice(0, 4);
 }
 
 //-----------------------------------------------------
@@ -95,7 +109,7 @@ function sortAccountsForDropdown(accounts) {
     });
 }
 
-async function populateAccountSelector(select, accounts) {
+async function populateAccountDropdown(select, accounts) {
     select.innerHTML = "";
 
     const sortedAccounts = sortAccountsForDropdown(accounts);
@@ -132,4 +146,14 @@ async function populateAccountSelector(select, accounts) {
 
         select.appendChild(optgroup);
     });
+
+    let accountId = getSelectedAccountId();
+    if (accountId && select.querySelector(`option[value="${accountId}"]`)) {
+        select.value = String(accountId);
+    } else if (select.options.length > 0) {
+        accountId = Number(select.options[0].value);
+        select.value = String(accountId);
+        setSelectedAccountId(accountId);
+    }
+    return accountId;
 }

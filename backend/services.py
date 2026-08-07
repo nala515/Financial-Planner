@@ -74,7 +74,7 @@ def calculate_growth(
 ## Dashboard
 ##-----------------------------------------------------
 
-def get_dashboard_summary(db: Session):
+def get_dashboard_data(db: Session):
     accounts = accounts_repository.db_get_accounts(db)
 
     # initialize data

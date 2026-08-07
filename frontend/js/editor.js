@@ -19,9 +19,7 @@ async function populateAccountCategoryOptions(select) {
     if (!select) {
         return;
     }
-
     const categories = await getAccountCategories();
-
     select.innerHTML = "";
 
     Object.keys(categories)
@@ -34,11 +32,26 @@ async function populateAccountCategoryOptions(select) {
         });
 }
 
+// uses selected account's info to populate the fields
+async function populateFormsWithAccountData(accountId) {
+    await populateAccountCategoryOptions(document.getElementById("account-category"));
+    const selectedAccount = accountCache.find(a => a.id === accountId);
+    if (selectedAccount) {
+        populateAccountForm(selectedAccount);
+        await populateBalances(accountId);
+        await populateContributions(accountId);
+    }
+}
 
-async function loadBalancesEditor(accountId) {
+async function populateBalances(accountId) {
     const container = document.getElementById("balances-list-container");
     const response = await fetch(`/api/accounts/${accountId}/balances`);
     const balances = await response.json();
+
+    if (!Array.isArray(balances) || balances.length === 0) {
+        container.innerHTML = '<div class="editor-row">No balances found.</div>';
+        return;
+    }
 
     container.innerHTML = balances.map(b => `
         <div class="editor-row">
@@ -49,10 +62,15 @@ async function loadBalancesEditor(accountId) {
     `).join('');
 }
 
-async function loadContributionsEditor(accountId) {
+async function populateContributions(accountId) {
     const container = document.getElementById("contributions-list-container");
     const response = await fetch(`/api/accounts/${accountId}/contributions`);
     const contributions = await response.json();
+
+    if (!Array.isArray(contributions) || contributions.length === 0) {
+        container.innerHTML = '<div class="editor-row">No contributions found.</div>';
+        return;
+    }
 
     container.innerHTML = contributions.map(c => `
         <div class="editor-row">
@@ -61,34 +79,6 @@ async function loadContributionsEditor(accountId) {
             <input type="hidden" name="date" value="${formatMonthLabel(c.date)} ${formatYearLabel(c.date)}">
         </div>
     `).join('');
-}
-
-async function loadSettingsEditor() {
-    const container = document.getElementById("settings-list-container");
-    if (!container) return;
-
-    if (!settings || Object.keys(settings).length === 0) {
-        await loadSettings();
-    }
-
-    container.innerHTML = `
-        <div class="editor-row">
-            <span>Group Cash Accounts</span>
-            <input type="checkbox" id="setting-group-cash" ${settings.group_cash_accounts ? 'checked' : ''}>
-        </div>
-        <div class="editor-row">
-            <span>Hide Disabled Accounts</span>
-            <input type="checkbox" id="setting-hide-disabled" ${settings.hide_disabled_accounts ? 'checked' : ''}>
-        </div>
-        <div class="editor-row">
-            <span>Show Retirement Accounts</span>
-            <input type="checkbox" id="setting-show-retirement" ${settings.show_retirement_accounts ? 'checked' : ''}>
-        </div>
-        <div class="form-actions">
-            <button type="submit" class="primary-button">Save Settings</button>
-            <p id="settings-form-status" class="form-status"></p>
-        </div>
-    `;
 }
 
 //-----------------------------------------------------
@@ -108,7 +98,7 @@ async function handleAccountUpdate(event) {
         return;
     }
 
-    const accountId = selector.value;
+    const accountId = Number(selector.value);
     if (!accountId) {
         status.textContent = "Please select an account first.";
         return;
@@ -139,75 +129,19 @@ async function handleAccountUpdate(event) {
     }
 }
 
-async function handleSettingsUpdate(event) {
-    event.preventDefault();
-    const status = document.getElementById("settings-form-status");
-
-    // 1. Collect the data from the checkboxes
-    const updatedSettings = {
-        group_cash_accounts: document.getElementById("setting-group-cash").checked,
-        hide_disabled_accounts: document.getElementById("setting-hide-disabled").checked,
-        show_retirement_accounts: document.getElementById("setting-show-retirement").checked
-    };
-
-    try {
-        // 2. Send to the FastAPI backend
-        const response = await fetch("/api/settings", {
-            method: "PATCH",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(updatedSettings)
-        });
-
-        if (response.ok) {
-            // 3. Update the global variable in app.js so other pages/functions stay in sync
-            settings = await response.json();
-            
-            status.textContent = "Settings saved successfully!";
-            status.className = "form-status success";
-            setTimeout(() => status.textContent = "", 3000);
-        } else {
-            throw new Error("Failed to save settings.");
-        }
-    } catch (error) {
-        status.textContent = "Error: " + error.message;
-        status.className = "form-status error";
-    }
-}
-
 //-----------------------------------------------------
 // Page setup
 //-----------------------------------------------------
 
 async function initializeEditor() {
     const selector = document.getElementById("account-selector");
-
     try {
-        const response = await fetch(`/api/accounts`);
-
-        if (!response.ok) {
-            throw new Error("Unable to load accounts");
-        }
-
-        const accounts = await response.json();
+        const accounts = await loadAccounts();
         accountCache = Array.isArray(accounts) ? accounts : [];
+        const accountId = await populateAccountDropdown(selector, accounts); // returns accountId
 
-        if (!Array.isArray(accounts) || accounts.length === 0) {
-            if (selector) {
-                selector.innerHTML = '<option value="">No accounts</option>';
-            }
-            return;
-        }
-
-        if (selector) {
-            selector.innerHTML = '<option value="">Select an account</option>';
-            populateAccountCategoryOptions(document.getElementById("account-category"));
-
-            accounts.forEach(account => {
-                const option = document.createElement("option");
-                option.value = account.id;
-                option.textContent = account.name;
-                selector.appendChild(option);
-            });
+        if (accountId) {
+            populateFormsWithAccountData(accountId);
         }
     } catch (error) {
         console.error(error);
@@ -216,8 +150,10 @@ async function initializeEditor() {
 
 document.addEventListener("DOMContentLoaded", async () => {
     await loadNav();
+
+    // populate account dropdown and form
     await initializeEditor(); // Fetches accounts and populates selector
-    await loadSettingsEditor();
+
     const selector = document.getElementById("account-selector");
     const accountForm = document.getElementById("account-form");
     const resetButton = document.getElementById("reset-account-details");
@@ -225,35 +161,20 @@ document.addEventListener("DOMContentLoaded", async () => {
     // Account selector logic
     if (selector) {
         selector.addEventListener("change", async (event) => {
-            const accountId = Number(event.target.value);
+            accountId = Number(event.target.value);
             if (!accountId) return;
-            
-            const selectedAccount = accountCache.find(a => a.id === accountId);
-            if (selectedAccount) {
-                populateAccountForm(selectedAccount);
-                await loadBalancesEditor(accountId);
-                await loadContributionsEditor(accountId);
-            } else {
-                form.reset(); // Clear if "Select an account" is chosen
-            }
+            setSelectedAccountId(accountId);
+            await populateFormsWithAccountData(accountId);
         });
     }
     // Reset button
     if (resetButton) {
         resetButton.addEventListener("click", async () => {
-            const accountId = Number(selector.value);
-            const original = accountCache.find(a => a.id === accountId);
-            if (original) {
-                populateAccountForm(original);
-                await loadBalancesEditor(accountId);
-                await loadContributionsEditor(accountId);
+            accountId = Number(selector.value);
+            if (accountId) {
+                await populateFormsWithAccountData(accountId);
             }
         });
-    }
-    // Update settings
-    const settingsForm = document.getElementById("settings-update-form");
-    if (settingsForm) {
-        settingsForm.addEventListener("submit", handleSettingsUpdate);
     }
     // Update account
     if (accountForm) {
