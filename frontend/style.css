@@ -39,6 +39,14 @@ button {
     border-radius: 6px;
 }
 
+select optgroup {
+    font-weight: 600;
+}
+
+select option {
+    font-weight: normal;
+}
+
 /*-----------------------------------------------------
 // Navigation
 //---------------------------------------------------*/
