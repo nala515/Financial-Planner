@@ -19,7 +19,7 @@ function populateAccountCategoryOptions(select) {
         return;
     }
 
-    const categories = ["Cash", "Investment", "Retirement", "HSA", "529"];
+    const categories = getAccountCategories();
     select.innerHTML = "";
 
     categories.forEach(category => {
