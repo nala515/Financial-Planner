@@ -114,7 +114,7 @@ async function populateAccountSelector(select, accounts) {
     groupNames.forEach(groupName => {
 
         const groupAccounts = sortedAccounts.filter(account =>
-            getDropdownGroup(account.category, categories) === groupName
+            getDropdownGroup(account.category) === groupName
         );
 
         if (groupAccounts.length === 0) {
