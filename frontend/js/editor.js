@@ -19,9 +19,7 @@ async function populateAccountCategoryOptions(select) {
     if (!select) {
         return;
     }
-
     const categories = await getAccountCategories();
-
     select.innerHTML = "";
 
     Object.keys(categories)
@@ -34,7 +32,9 @@ async function populateAccountCategoryOptions(select) {
         });
 }
 
-async function populateAll(accountId) {
+// uses selected account's info to populate the fields
+async function populateFormsWithAccountData(accountId) {
+    await populateAccountCategoryOptions(document.getElementById("account-category"));
     const selectedAccount = accountCache.find(a => a.id === accountId);
     if (selectedAccount) {
         populateAccountForm(selectedAccount);
@@ -47,6 +47,11 @@ async function populateBalances(accountId) {
     const container = document.getElementById("balances-list-container");
     const response = await fetch(`/api/accounts/${accountId}/balances`);
     const balances = await response.json();
+
+    if (!Array.isArray(balances) || balances.length === 0) {
+        container.innerHTML = '<div class="editor-row">No balances found.</div>';
+        return;
+    }
 
     container.innerHTML = balances.map(b => `
         <div class="editor-row">
@@ -61,6 +66,11 @@ async function populateContributions(accountId) {
     const container = document.getElementById("contributions-list-container");
     const response = await fetch(`/api/accounts/${accountId}/contributions`);
     const contributions = await response.json();
+
+    if (!Array.isArray(contributions) || contributions.length === 0) {
+        container.innerHTML = '<div class="editor-row">No contributions found.</div>';
+        return;
+    }
 
     container.innerHTML = contributions.map(c => `
         <div class="editor-row">
@@ -88,7 +98,7 @@ async function handleAccountUpdate(event) {
         return;
     }
 
-    const accountId = selector.value;
+    const accountId = Number(selector.value);
     if (!accountId) {
         status.textContent = "Please select an account first.";
         return;
@@ -125,11 +135,14 @@ async function handleAccountUpdate(event) {
 
 async function initializeEditor() {
     const selector = document.getElementById("account-selector");
-
     try {
         const accounts = await loadAccounts();
         accountCache = Array.isArray(accounts) ? accounts : [];
-        return await populateAccountDropdown(selector, accounts); // returns accountId
+        const accountId = await populateAccountDropdown(selector, accounts); // returns accountId
+
+        if (accountId) {
+            populateFormsWithAccountData(accountId);
+        }
     } catch (error) {
         console.error(error);
     }
@@ -139,8 +152,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     await loadNav();
 
     // populate account dropdown and form
-    let accountId = await initializeEditor(); // Fetches accounts and populates selector
-    await populateAll(accountId);
+    await initializeEditor(); // Fetches accounts and populates selector
 
     const selector = document.getElementById("account-selector");
     const accountForm = document.getElementById("account-form");
@@ -151,7 +163,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         selector.addEventListener("change", async (event) => {
             accountId = Number(event.target.value);
             if (!accountId) return;
-            await populateAll(accountId);
+            setSelectedAccountId(accountId);
+            await populateFormsWithAccountData(accountId);
         });
     }
     // Reset button
@@ -159,7 +172,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         resetButton.addEventListener("click", async () => {
             accountId = Number(selector.value);
             if (accountId) {
-                await populateAll(accountId);
+                await populateFormsWithAccountData(accountId);
             }
         });
     }

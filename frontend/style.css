@@ -14,6 +14,11 @@ body {
     align-items: center;
     gap: 0.5rem;
     font-weight: 500;
+    margin-bottom: 0.1rem;
+}
+
+.checkbox-row input {
+    margin: 0;
 }
 
 .checkbox-row input {
@@ -304,6 +309,7 @@ select option {
 
 .form-status {
     min-height: 1.25rem;
+    margin: 0;
     color: #93c5fd;
     font-weight: 600;
 }
@@ -322,8 +328,8 @@ select option {
 
 /* Individual card styling */
 .editor-card {
-    flex: 1;                   /* Makes all cards take up equal width */
-    min-width: 320px;          /* Prevents them from getting too squished */
+    flex: 1 1 0;
+    min-width: 0;
     background: #1f2937;       /* Dark background */
     border: 1px solid #374151; /* Border color */
     border-radius: 8px;
