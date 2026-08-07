@@ -1,5 +1,5 @@
 //-----------------------------------------------------
-// Utilities
+// Getters and Setters 
 //-----------------------------------------------------
 
 let settings = {};
@@ -17,6 +17,19 @@ function setSelectedAccountId(accountId) {
     localStorage.setItem("selectedAccount", accountId);
 }
 
+async function getAccountCategories() {
+    if (accountCategories) {
+        return accountCategories;
+    }
+    const response = await fetch(`/api/account-categories`);
+    accountCategories = await response.json();
+    return accountCategories;
+}
+
+//-----------------------------------------------------
+// Formatting
+//-----------------------------------------------------
+
 function formatCurrency(cents) {
     return (cents / 100).toLocaleString("en-US", {
         style: "currency",
@@ -33,6 +46,10 @@ function formatYearLabel(snapshotDate) {
     const date = new Date(snapshotDate);
     return date.getFullYear().toString();
 }
+
+//-----------------------------------------------------
+// Utilities
+//-----------------------------------------------------
 
 async function sendDebugMsg(msg) {
     try {
