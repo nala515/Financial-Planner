@@ -31,9 +31,9 @@ async function loadSummary() {
         }
 
         const accounts = await response.json();
-        populateAccountSelector(
-            document.getElementById("account-selector"),
-    accounts
+        await populateAccountSelector(
+            selector,
+            accounts
         );
 
         const accountId = getSelectedAccountId();
