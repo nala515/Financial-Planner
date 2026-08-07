@@ -14,21 +14,26 @@ function populateAccountForm(account) {
     document.getElementById("account-shared").checked = Boolean(account.shared);
 }
 
-function populateAccountCategoryOptions(select) {
+
+async function populateAccountCategoryOptions(select) {
     if (!select) {
         return;
     }
 
     const categories = await getAccountCategories();
+
     select.innerHTML = "";
 
-    categories.forEach(category => {
-        const option = document.createElement("option");
-        option.value = category;
-        option.textContent = category;
-        select.appendChild(option);
-    });
+    Object.keys(categories)
+        .sort()
+        .forEach(categoryName => {
+            const option = document.createElement("option");
+            option.value = categoryName;
+            option.textContent = categoryName;
+            select.appendChild(option);
+        });
 }
+
 
 async function loadBalancesEditor(accountId) {
     const container = document.getElementById("balances-list-container");
