@@ -31,28 +31,11 @@ async function loadSummary() {
         }
 
         const accounts = await response.json();
-        selector.innerHTML = "";
+        populateAccountSelector(
+            document.getElementById("account-selector"),
+    accounts
+        );
 
-        if (!Array.isArray(accounts) || accounts.length === 0) {
-            selector.innerHTML = '<option value="">No accounts available</option>';
-            tbody.innerHTML = '<tr><td colspan="4">No accounts found yet.</td></tr>';
-            return;
-        }
-
-        const defaultOption = document.createElement("option");
-        defaultOption.value = "";
-        defaultOption.textContent = "Select an account";
-        selector.appendChild(defaultOption);
-
-        accounts.forEach(account => {
-            const option = document.createElement("option");
-            option.value = account.id;
-            option.textContent = account.name;
-            option.dataset.category = account.category
-            selector.appendChild(option);
-        });
-
-        const params = new URLSearchParams(window.location.search);
         const accountId = getSelectedAccountId();
 
         // call function to load account summary
@@ -62,7 +45,6 @@ async function loadSummary() {
             // grab category
             const selectedOption = selector.options[selector.selectedIndex];
             const category = selectedOption?.dataset.category;
-
             await loadSummaryForAccount(accountId, category);
         }
     } catch (error) {
