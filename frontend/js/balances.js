@@ -14,15 +14,6 @@ let expandedStates = {
     Retirement: false
 };
 
-// get account categories
-async function getAccountCategories() {
-    if (accountCategories) {
-        return accountCategories;
-    }
-    const response = await fetch(`/api/account-categories`);
-    accountCategories = await response.json();
-    return accountCategories;
-}
 
 // build account columns with groupings as desired
 function buildDisplayColumns(accounts, settings) {
