@@ -9,6 +9,14 @@ async function loadSettings() {
         .then(r => r.json());
 }
 
+async function loadAccounts() {
+        const response = await fetch(`/api/accounts`);
+        if (!response.ok) {
+            throw new Error("Unable to load accounts");
+        }
+        return await response.json();
+}
+
 function getSelectedAccountId() {
     return localStorage.getItem("selectedAccount");
 }
@@ -34,14 +42,19 @@ function formatCurrency(cents) {
     });
 }
 
-function formatMonthLabel(snapshotDate) {
-    const date = new Date(snapshotDate);
-    return date.toLocaleDateString("en-US", { month: "long" });
+const MONTH_NAMES = [
+    "January", "February", "March", "April",
+    "May", "June", "July", "August",
+    "September", "October", "November", "December"
+];
+
+function formatMonthLabel(dateString) {
+    const month = Number(dateString.slice(5, 7));
+    return MONTH_NAMES[month - 1];
 }
 
-function formatYearLabel(snapshotDate) {
-    const date = new Date(snapshotDate);
-    return date.getFullYear().toString();
+function formatYearLabel(dateString) {
+    return dateString.slice(0, 4);
 }
 
 //-----------------------------------------------------
@@ -95,7 +108,7 @@ function sortAccountsForDropdown(accounts) {
     });
 }
 
-async function populateAccountSelector(select, accounts) {
+async function populateAccountDropdown(select, accounts) {
     select.innerHTML = "";
 
     const sortedAccounts = sortAccountsForDropdown(accounts);
@@ -132,4 +145,10 @@ async function populateAccountSelector(select, accounts) {
 
         select.appendChild(optgroup);
     });
+    // by default, maintain the account selection from previous
+    const accountId = getSelectedAccountId();
+    if (accountId) {
+            selector.value = accountId;
+    }
+    return accountId;
 }

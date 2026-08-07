@@ -182,33 +182,9 @@ async function initializeEditor() {
     const selector = document.getElementById("account-selector");
 
     try {
-        const response = await fetch(`/api/accounts`);
-
-        if (!response.ok) {
-            throw new Error("Unable to load accounts");
-        }
-
-        const accounts = await response.json();
+        const accounts = await loadAccounts();
+        await populateAccountDropdown(selector, accounts);
         accountCache = Array.isArray(accounts) ? accounts : [];
-
-        if (!Array.isArray(accounts) || accounts.length === 0) {
-            if (selector) {
-                selector.innerHTML = '<option value="">No accounts</option>';
-            }
-            return;
-        }
-
-        if (selector) {
-            selector.innerHTML = '<option value="">Select an account</option>';
-            populateAccountCategoryOptions(document.getElementById("account-category"));
-
-            accounts.forEach(account => {
-                const option = document.createElement("option");
-                option.value = account.id;
-                option.textContent = account.name;
-                selector.appendChild(option);
-            });
-        }
     } catch (error) {
         console.error(error);
     }

@@ -84,11 +84,11 @@ def get_settings():
         db.close()
 
 @app.get("/api/dashboard")
-def api_get_dashboard_summary():
+def api_get_dashboard_data():
     db = SessionLocal()
 
     try:
-        return services.get_dashboard_summary(db)
+        return services.get_dashboard_data(db)
     finally:
         db.close()
 

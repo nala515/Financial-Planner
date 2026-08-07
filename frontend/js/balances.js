@@ -153,7 +153,7 @@ async function loadBalances() {
     });
 
     // group dates by Year for section headers
-    const sortedDates = Object.keys(rowsByDate).sort((a, b) => new Date(b) - new Date(a));
+    const sortedDates = Object.keys(rowsByDate).sort().reverse();
     const groupedByYear = sortedDates.reduce((groups, dateStr) => {
         const year = formatYearLabel(dateStr);
         if (!groups[year]) groups[year] = [];
