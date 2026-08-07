@@ -19,7 +19,7 @@ function populateAccountCategoryOptions(select) {
         return;
     }
 
-    const categories = getAccountCategories();
+    const categories = await getAccountCategories();
     select.innerHTML = "";
 
     categories.forEach(category => {
