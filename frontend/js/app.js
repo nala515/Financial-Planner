@@ -66,30 +66,18 @@ async function sendDebugMsg(msg) {
     }
 }
 
-function getDropdownGroup(categoryName, categories) {
-    const info = categories[categoryName];
-
-    if (!info) {
-        return "Other";
-    }
-
-    if (info.retirement) {
-        return "Retirement";
-    }
-
-    if (info.invested) {
-        return "Investment";
-    }
-
-    if (info.spendable) {
-        return "Cash";
+function getDropdownGroup(categoryName) {
+    if (categoryName === "Retirement" ||
+        categoryName === "Investment" ||
+        categoryName === "Cash") {
+        return categoryName;
     }
 
     // HSA, 529, or anything else
     return "Other";
 }
 
-function sortAccountsForDropdown(accounts, categories) {
+function sortAccountsForDropdown(accounts) {
 
     const groupOrder = {
         "Retirement": 0,
@@ -100,8 +88,8 @@ function sortAccountsForDropdown(accounts, categories) {
 
     return [...accounts].sort((a, b) => {
 
-        const groupA = getDropdownGroup(a.category, categories);
-        const groupB = getDropdownGroup(b.category, categories);
+        const groupA = getDropdownGroup(a.category);
+        const groupB = getDropdownGroup(b.category);
 
         if (groupA !== groupB) {
             return groupOrder[groupA] - groupOrder[groupB];
@@ -112,12 +100,9 @@ function sortAccountsForDropdown(accounts, categories) {
 }
 
 async function populateAccountSelector(select, accounts) {
-
-    const categories = await getAccountCategories();
-
     select.innerHTML = "";
 
-    const sortedAccounts = sortAccountsForDropdown(accounts, categories);
+    const sortedAccounts = sortAccountsForDropdown(accounts);
 
     const groupNames = [
         "Retirement",
