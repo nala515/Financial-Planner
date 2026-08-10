@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, Query
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
@@ -237,6 +237,15 @@ def api_get_income_events():
 
     try:
         return services.get_income_events(db)
+    finally:
+        db.close()
+
+@app.get("/api/analytics/savings-summary")
+def api_get_savings_summary(granularity: str = Query("month", regex="^(month|year)$")):
+    db = SessionLocal()
+
+    try:
+        return services.get_savings_summary(db, granularity)
     finally:
         db.close()
 

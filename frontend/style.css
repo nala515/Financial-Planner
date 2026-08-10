@@ -429,6 +429,15 @@ select option {
     background: #1f2937;
 }
 
+.savings-summary-table th:nth-child(1),
+.savings-summary-table td:nth-child(1),
+.savings-summary-table th:nth-child(3),
+.savings-summary-table td:nth-child(3),
+.savings-summary-table th:nth-child(4),
+.savings-summary-table td:nth-child(4){
+    border-right: 2px solid #6b7280;
+}
+
 /*-----------------------------------------------------
 // Growth styles
 //---------------------------------------------------*/
@@ -456,3 +465,41 @@ select option {
     color: #d1d5db !important;
 }
 
+/*-----------------------------------------------------
+// Savings page
+//---------------------------------------------------*/
+
+.savings-summary-wrapper {
+    width: fit-content;
+    max-width: 100%;
+}
+
+.savings-summary-wrapper .data-table {
+    width: auto;
+}
+
+.savings-toggle-group {
+    display: inline-flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.savings-toggle-button {
+    min-width: auto;
+    padding: 0.5rem 0.9rem;
+    background: #1f2937;
+    color: #d1d5db;
+    border: 1px solid #374151;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.savings-toggle-button:hover {
+    background: #374151;
+}
+
+.savings-toggle-button.active {
+    background: #4da3ff;
+    color: #111827;
+    border-color: #4da3ff;
+}

@@ -43,15 +43,18 @@ function formatCurrency(cents) {
     });
 }
 
-const MONTH_NAMES = [
-    "January", "February", "March", "April",
-    "May", "June", "July", "August",
-    "September", "October", "November", "December"
-];
-
 function formatMonthLabel(dateString) {
     const month = Number(dateString.slice(5, 7));
     return MONTH_NAMES[month - 1];
+}
+
+const MONTH_NAMES = [
+    "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+];
+
+function formatMonthYear(year, month) {
+    return `${MONTH_NAMES[month - 1]} ${year}`;
 }
 
 function formatYearLabel(dateString) {
