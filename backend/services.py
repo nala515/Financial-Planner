@@ -233,13 +233,16 @@ def calculate_monthly_savings_metrics(db: Session):
 
     for balance in balances:
         attrs = account_attrs.get(balance.account_id, get_category_attributes(None))
-        prev_date = balance.date - relativedelta(months=1)
-        prev_key = (balance.account_id, prev_date.year, prev_date.month)
-        prev_balance = balance_map.get(prev_key)
-        if prev_balance is None:
+
+        # Growth "during" this balance's month = next month's balance - this month's balance,
+        # since a snapshot represents the balance as of the start of its month.
+        next_date = balance.date + relativedelta(months=1)
+        next_key = (balance.account_id, next_date.year, next_date.month)
+        next_balance = balance_map.get(next_key)
+        if next_balance is None:
             continue
 
-        growth = balance.balance_cents - prev_balance
+        growth = next_balance - balance.balance_cents
         month_key = (balance.date.year, balance.date.month)
         if month_key not in monthly_metrics:
             continue
