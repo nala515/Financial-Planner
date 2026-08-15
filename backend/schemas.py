@@ -33,6 +33,15 @@ class IncomeEventCreate(BaseModel):
 class IncomeSourceCreate(BaseModel):
     name: str
 
+class MonthlyEntryCreate(BaseModel):
+    account_id: int
+    balance_cents: int
+    contribution_cents: int = 0
+
+class MonthlyEntryBatchCreate(BaseModel):
+    snapshot_date: date
+    entries: list[MonthlyEntryCreate]
+
 ##-----------------------------------------------------
 ## Updates
 ##-----------------------------------------------------
