@@ -203,11 +203,8 @@ def get_income_events(db: Session, start: date | None = None, end: date | None =
     return income_repository.db_get_income_events(db, start, end)
 
 
-def calculate_monthly_savings_metrics(db: Session):
+def calculate_monthly_savings_metrics(db: Session, income_sources: list):
     income_events = income_repository.db_get_income_events(db)
-    if not income_events:
-        return []
-
     accounts = accounts_repository.db_get_accounts(db)
     balances = balances_repository.db_get_all_balances(db)
 
@@ -216,20 +213,27 @@ def calculate_monthly_savings_metrics(db: Session):
         for account in accounts
     }
 
+    source_ids = [source.id for source in income_sources]
+    source_ids_set = set(source_ids)
+
     balance_map: dict[tuple[int, int, int], int] = {}
     for balance in balances:
         balance_map[(balance.account_id, balance.date.year, balance.date.month)] = balance.balance_cents
 
-    monthly_metrics: dict[tuple[int, int], dict[str, int]] = {}
+    monthly_metrics: dict[tuple[int, int], dict] = {}
     for event in income_events:
         key = (event.date.year, event.date.month)
         if key not in monthly_metrics:
             monthly_metrics[key] = {
                 "cash_income": 0,
-                "investment_growth": 0,
+                "investment_income": 0,
                 "non_retirement_spendable_growth": 0,
+                "income_by_source": {source_id: 0 for source_id in source_ids},
             }
+
         monthly_metrics[key]["cash_income"] += event.amount_cents
+        if event.source_id in source_ids_set:
+            monthly_metrics[key]["income_by_source"][event.source_id] += event.amount_cents
 
     for balance in balances:
         attrs = account_attrs.get(balance.account_id, get_category_attributes(None))
@@ -245,7 +249,7 @@ def calculate_monthly_savings_metrics(db: Session):
             continue
 
         if attrs.get("invested") and attrs.get("spendable"):
-            monthly_metrics[month_key]["investment_growth"] += growth
+            monthly_metrics[month_key]["investment_income"] += growth
 
         if not attrs.get("retirement") and attrs.get("spendable"):
             monthly_metrics[month_key]["non_retirement_spendable_growth"] += growth
@@ -253,17 +257,23 @@ def calculate_monthly_savings_metrics(db: Session):
     monthly_rows = []
     for (year, month), metrics in sorted(monthly_metrics.items(), reverse=True):
         cash_income = metrics["cash_income"]
-        investment_growth = metrics["investment_growth"]
-        non_retirement_spendable_growth = metrics["non_retirement_spendable_growth"]
-        total_income = cash_income + investment_growth
-        expenses = total_income - non_retirement_spendable_growth
+        investment_income = metrics["investment_income"]
+        total_income = cash_income + investment_income
+        expenses = total_income - metrics["non_retirement_spendable_growth"]
         cash_savings = cash_income - expenses
         total_savings = total_income - expenses
+
+        income_by_source = {
+            str(source_id): metrics["income_by_source"].get(source_id, 0)
+            for source_id in source_ids
+        }
 
         monthly_rows.append({
             "year": year,
             "month": month,
+            "income_by_source": income_by_source,
             "cash_income": cash_income,
+            "investment_income": investment_income,
             "total_income": total_income,
             "expenses": expenses,
             "cash_savings": cash_savings,
@@ -274,44 +284,70 @@ def calculate_monthly_savings_metrics(db: Session):
 
 
 def get_savings_summary(db: Session, granularity: str = "month"):
-    monthly_rows = calculate_monthly_savings_metrics(db)
+    income_sources = income_repository.db_get_income_sources(db)
+    monthly_rows = calculate_monthly_savings_metrics(db, income_sources)
+
     if granularity == "month":
-        return monthly_rows
+        return {
+            "income_sources": [
+                {"id": source.id, "name": source.name}
+                for source in income_sources
+            ],
+            "rows": monthly_rows,
+        }
 
     if granularity != "year":
         raise ValueError("granularity must be 'month' or 'year'")
 
-    yearly_totals: dict[int, dict[str, int]] = {}
+    yearly_totals: dict[int, dict] = {}
     for row in monthly_rows:
         year = row["year"]
         if year not in yearly_totals:
             yearly_totals[year] = {
                 "month_count": 0,
                 "cash_income": 0,
-                "total_income": 0,
+                "investment_income": 0,
                 "expenses": 0,
                 "cash_savings": 0,
                 "total_savings": 0,
+                "income_by_source": {source_id: 0 for source_id in source_ids},
             }
 
         yearly_totals[year]["month_count"] += 1
         yearly_totals[year]["cash_income"] += row["cash_income"]
-        yearly_totals[year]["total_income"] += row["total_income"]
+        yearly_totals[year]["investment_income"] += row["investment_income"]
         yearly_totals[year]["expenses"] += row["expenses"]
         yearly_totals[year]["cash_savings"] += row["cash_savings"]
         yearly_totals[year]["total_savings"] += row["total_savings"]
 
-    return [
-        {
+        for source_id, amount in row["income_by_source"].items():
+            yearly_totals[year]["income_by_source"][int(source_id)] += amount
+
+    yearly_rows = []
+    for year, data in sorted(yearly_totals.items(), reverse=True):
+        income_by_source = {
+            str(source_id): round(data["income_by_source"][source_id] / data["month_count"])
+            for source_id in source_ids
+        }
+
+        yearly_rows.append({
             "year": year,
+            "income_by_source": income_by_source,
             "avg_monthly_cash_income": round(data["cash_income"] / data["month_count"]),
-            "avg_monthly_total_income": round(data["total_income"] / data["month_count"]),
+            "avg_monthly_investment_income": round(data["investment_income"] / data["month_count"]),
+            "avg_monthly_total_income": round((data["cash_income"] + data["investment_income"]) / data["month_count"]),
             "avg_monthly_expenses": round(data["expenses"] / data["month_count"]),
             "avg_monthly_cash_savings": round(data["cash_savings"] / data["month_count"]),
             "avg_monthly_total_savings": round(data["total_savings"] / data["month_count"]),
-        }
-        for year, data in sorted(yearly_totals.items(), reverse=True)
-    ]
+        })
+
+    return {
+        "income_sources": [
+            {"id": source.id, "name": source.name}
+            for source in income_sources
+        ],
+        "rows": yearly_rows,
+    }
 
 
 def get_income_sources(db: Session):
