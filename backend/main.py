@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Request, Query
+from fastapi import FastAPI, Request, Query, HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
@@ -313,6 +313,17 @@ def create_income_source(source_data: schemas.IncomeSourceCreate):
 
     try:
         return services.create_income_source(db, source_data)
+    finally:
+        db.close()
+
+@app.post("/api/monthly-entry-batch")
+def create_monthly_entry_batch(batch_data: schemas.MonthlyEntryBatchCreate):
+    db = SessionLocal()
+
+    try:
+        return services.create_monthly_entry_batch(db, batch_data)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
     finally:
         db.close()
 
