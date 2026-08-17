@@ -30,31 +30,26 @@ def calculate_growth(
         prev_balance = balances[i - 1]
         curr_balance = balances[i]
 
+        # The pair (prev -> curr) measures what happened DURING the month
+        # that starts at prev_balance.date. Growth/contributions/returns
+        # for this row all belong to that month, not curr_balance.date.
         prev_contributions = contributions_repository.db_get_account_contributions(
             db,
             account_id,
             prev_balance.date,
             prev_balance.date,
         )
-        curr_contributions = contributions_repository.db_get_account_contributions(
-            db,
-            account_id,
-            curr_balance.date,
-            curr_balance.date,
-        )
+
         contributions = 0
-        if len(curr_contributions) > 0:
-            contributions = curr_contributions[0].amount_cents
+        if len(prev_contributions) > 0:
+            contributions = prev_contributions[0].amount_cents
 
         # calculate growth and returns
         growth = curr_balance.balance_cents - prev_balance.balance_cents
-        if len(prev_contributions) > 0:
-            investment_return = growth - prev_contributions[0].amount_cents
-        else:
-            investment_return = growth
+        investment_return = growth - contributions
 
         results.append({
-            "month": curr_balance.date,
+            "month": prev_balance.date,
             "starting_balance": prev_balance.balance_cents,
             "ending_balance": curr_balance.balance_cents,
             "growth": growth,
