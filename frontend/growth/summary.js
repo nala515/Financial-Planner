@@ -123,7 +123,7 @@ async function loadSummaryForAccount(accountId, category) {
                 // put it all together
                 tr.innerHTML = `
                     <td>${formatMonthLabel(row.month)}</td>
-                    <td>${formatCurrency(row.ending_balance)}</td>
+                    <td>${formatCurrency(row.starting_balance)}</td>
                     ${growthTypeCells}
                     <td class="${growthColorClass}">${formatCurrency(row.growth)}</td>
                 `;
