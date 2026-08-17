@@ -21,7 +21,7 @@ def calculate_growth(
     # regardless of what order the repository returns them in.
     balances = sorted(balances, key=lambda b: b.date)
 
-    if len(balances) < 2:
+    if len(balances) == 0:
         return []
 
     results = []
@@ -56,6 +56,31 @@ def calculate_growth(
             "contributions": contributions,
             "investment_return": investment_return,
         })
+
+    # The most recent balance has no "next" snapshot to measure growth into
+    # yet, but we still want to surface it — with whatever contribution has
+    # already been logged for that month — rather than hiding the month
+    # entirely until next month's snapshot arrives.
+    last_balance = balances[-1]
+    last_contributions = contributions_repository.db_get_account_contributions(
+        db,
+        account_id,
+        last_balance.date,
+        last_balance.date,
+    )
+
+    contributions = 0
+    if len(last_contributions) > 0:
+        contributions = last_contributions[0].amount_cents
+
+    results.append({
+        "month": last_balance.date,
+        "starting_balance": last_balance.balance_cents,
+        "ending_balance": "TBD",
+        "growth": "TBD",
+        "contributions": contributions,
+        "investment_return": "TBD",
+    })
 
     return results
 
