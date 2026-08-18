@@ -180,7 +180,7 @@ def get_invested_spendable_growth(balances: list,
         if prev_balance is None:
             continue
 
-        month_key = (balance.date.year, balance.date.month)
+        month_key = (prev_date.year, prev_date.month)
         if month_key not in growth:
             continue
 
@@ -209,7 +209,7 @@ def get_spendable_growth(balances: list,
         if prev_balance is None:
             continue
 
-        month_key = (balance.date.year, balance.date.month)
+        month_key = (prev_date.year, prev_date.month)
         if month_key not in growth:
             continue
 
