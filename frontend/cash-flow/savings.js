@@ -79,7 +79,7 @@ function buildColumnDescriptors(incomeSources, expanded) {
     }
 
     columns.push({
-        label: "Investment Income",
+        label: "Investment Gains",
         isCurrency: true,
         getValue: row => row.investmentIncome,
     });
