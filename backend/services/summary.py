@@ -258,7 +258,7 @@ def calculate_monthly_savings_metrics(db: Session, income_sources: list):
     income_events = income_repository.db_get_income_events(db)
     balances = balances_repository.db_get_all_balances(db)
     balance_map = build_balance_map(balances)
-    contributions = contributions_repository.db_get_all_balances(db)
+    contributions = contributions_repository.db_get_all_contributions(db)
     contrib_map = build_contributions_map(contributions)
     account_attrs = get_account_attrs(db)
 
