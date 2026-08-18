@@ -176,11 +176,16 @@ def get_cash_income(income_events: list) -> dict[tuple[int, int], int]:
         cash_income[key] = cash_income.get(key, 0) + event.amount_cents
     return cash_income
 
-# returns total balance growth for each month for accounts that are invested + spendable
+# returns total gains for each month for accounts that are invested + spendable
 def get_invested_spendable_growth(balances: list,
                                   account_attrs: dict,
                                   balance_map: dict,
                                   months: set) -> dict[tuple[int, int], int]:
+    contributions = contributions_repository.db_get_all_contributions()
+    contrib_map = {
+        (c.account_id, c.date.year, c.date.month): c.amount_cents 
+        for c in contributions
+    }
     growth = {key: 0 for key in months}
 
     for balance in balances:
@@ -196,7 +201,10 @@ def get_invested_spendable_growth(balances: list,
             continue
 
         if attrs.get("invested") and attrs.get("spendable"):
-            growth[month_key] += balance.balance_cents - prev_balance
+            contribution_key = (balance.account_id, balance.date.year, balance.date.month)
+            monthly_contrib = contrib_map.get(contribution_key, 0)
+            net_gain = (balance.balance_cents - prev_balance) - monthly_contrib
+            growth[month_key] += net_gain
     return growth
 
 # returns total balance growth for each month for accounts that are spendable
@@ -271,7 +279,7 @@ def calculate_monthly_savings_metrics(db: Session, income_sources: list):
                 for source_id in source_ids
             },
             "cash_income": cash,
-            "investment_growth": investment,
+            "investment_gains": investment,
             "total_income": total_income,
             "expenses": expenses,
             "cash_savings": cash_savings,
@@ -305,7 +313,7 @@ def get_savings_summary(db: Session, granularity: str = "month"):
             yearly_totals[year] = {
                 "month_count": 0,
                 "cash_income": 0,
-                "investment_growth": 0,
+                "investment_gains": 0,
                 "expenses": 0,
                 "cash_savings": 0,
                 "total_savings": 0,
@@ -314,7 +322,7 @@ def get_savings_summary(db: Session, granularity: str = "month"):
 
         yearly_totals[year]["month_count"] += 1
         yearly_totals[year]["cash_income"] += row["cash_income"]
-        yearly_totals[year]["investment_growth"] += row["investment_growth"]
+        yearly_totals[year]["investment_gains"] += row["investment_gains"]
         yearly_totals[year]["expenses"] += row["expenses"]
         yearly_totals[year]["cash_savings"] += row["cash_savings"]
         yearly_totals[year]["total_savings"] += row["total_savings"]
@@ -333,8 +341,8 @@ def get_savings_summary(db: Session, granularity: str = "month"):
             "year": year,
             "income_by_source": income_by_source,
             "avg_monthly_cash_income": round(data["cash_income"] / data["month_count"]),
-            "avg_monthly_investment_growth": round(data["investment_growth"] / data["month_count"]),
-            "avg_monthly_total_income": round((data["cash_income"] + data["investment_growth"]) / data["month_count"]),
+            "avg_monthly_investment_gains": round(data["investment_gains"] / data["month_count"]),
+            "avg_monthly_total_income": round((data["cash_income"] + data["investment_gains"]) / data["month_count"]),
             "avg_monthly_expenses": round(data["expenses"] / data["month_count"]),
             "avg_monthly_cash_savings": round(data["cash_savings"] / data["month_count"]),
             "avg_monthly_total_savings": round(data["total_savings"] / data["month_count"]),
