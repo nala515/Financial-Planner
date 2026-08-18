@@ -181,15 +181,18 @@ def get_invested_spendable_growth(balances: list,
                                   account_attrs: dict,
                                   balance_map: dict,
                                   months: set) -> dict[tuple[int, int], int]:
-    contributions = contributions_repository.db_get_all_contributions()
-    contrib_map = {
-        (c.account_id, c.date.year, c.date.month): c.amount_cents 
-        for c in contributions
-    }
+    # create a contribution map
+    contributions = contributions_repository.db_get_all_contributions(db)
+    contrib_map: dict[tuple[int, int, int], int] = {}
+    for c in contributions:
+        contrib_map[(c.account_id, c.date.year, c.date.month)] = c.amount_cents
+
     growth = {key: 0 for key in months}
 
     for balance in balances:
         attrs = account_attrs.get(balance.account_id, get_category_attributes(None))
+
+        # Determine the previous month for the balance delta
         prev_date = balance.date - relativedelta(months=1)
         prev_key = (balance.account_id, prev_date.year, prev_date.month)
         prev_balance = balance_map.get(prev_key)
@@ -200,9 +203,13 @@ def get_invested_spendable_growth(balances: list,
         if month_key not in growth:
             continue
 
+        # Filter by "invested spendable" criteria
         if attrs.get("invested") and attrs.get("spendable"):
+            # Grab the contribution for this account + month to subtract it out
             contribution_key = (balance.account_id, balance.date.year, balance.date.month)
             monthly_contrib = contrib_map.get(contribution_key, 0)
+
+            # Calculate gain: balance change - contribution
             net_gain = (balance.balance_cents - prev_balance) - monthly_contrib
             growth[month_key] += net_gain
     return growth
