@@ -4,47 +4,37 @@ from dateutil.relativedelta import relativedelta
 from backend.repositories import balances_repository, contributions_repository, accounts_repository, income_repository
 from backend.account_categories import get_category_attributes
 
+
 def calculate_growth(
     db: Session,
     account_id: int,
     start: date,
     end: date,
 ):
-    balances = balances_repository.db_get_account_balances(
-        db,
-        account_id,
-        start,
-        end,
-    )
+    # Fetch balances and contributions and create maps
+    raw_balances = balances_repository.db_get_account_balances(db, account_id, start, end)
+    raw_contributions = contributions_repository.db_get_account_contributions(db, account_id, start, end)
+    balance_map = build_balance_map(balances)
+    contrib_map = build_contributions_map(raw_contributions)
 
-    # Ensure ascending order by date so month-over-month pairs are correct,
-    # regardless of what order the repository returns them in.
-    balances = sorted(balances, key=lambda b: b.date)
-
-    if len(balances) == 0:
+    # Sort balances to ensure correct month-over-month pairing
+    balances = sorted(raw_balances, key=lambda b: b.date)
+    if not balances:
         return []
 
     results = []
 
+    # Iterate through pairs to calculate growth metrics
     for i in range(1, len(balances)):
         prev_balance = balances[i - 1]
         curr_balance = balances[i]
 
-        # The pair (prev -> curr) measures what happened DURING the month
-        # that starts at prev_balance.date. Growth/contributions/returns
-        # for this row all belong to that month, not curr_balance.date.
-        prev_contributions = contributions_repository.db_get_account_contributions(
-            db,
-            account_id,
-            prev_balance.date,
-            prev_balance.date,
-        )
+        # Use the contribution map for the month being measured
+        # We look up the contribution that occurred during the "prev" month
+        key = (account_id, prev_balance.date.year, prev_balance.date.month)
+        contributions = contrib_map.get(key, 0)
 
-        contributions = 0
-        if len(prev_contributions) > 0:
-            contributions = prev_contributions[0].amount_cents
-
-        # calculate growth and returns
+        # Calculate gains by doing (balance change - contributions)
         growth = curr_balance.balance_cents - prev_balance.balance_cents
         investment_return = growth - contributions
 
@@ -57,28 +47,17 @@ def calculate_growth(
             "investment_return": investment_return,
         })
 
-    # The most recent balance has no "next" snapshot to measure growth into
-    # yet, but we still want to surface it — with whatever contribution has
-    # already been logged for that month — rather than hiding the month
-    # entirely until next month's snapshot arrives.
+    # Handle the most recent month, which won't have gains yet, just balance/contributions
     last_balance = balances[-1]
-    last_contributions = contributions_repository.db_get_account_contributions(
-        db,
-        account_id,
-        last_balance.date,
-        last_balance.date,
-    )
-
-    contributions = 0
-    if len(last_contributions) > 0:
-        contributions = last_contributions[0].amount_cents
+    last_key = (account_id, last_balance.date.year, last_balance.date.month)
+    last_contributions = contrib_map.get(last_key, 0)
 
     results.append({
         "month": last_balance.date,
         "starting_balance": last_balance.balance_cents,
         "ending_balance": "TBD",
         "growth": "TBD",
-        "contributions": contributions,
+        "contributions": last_contributions,
         "investment_return": "TBD",
     })
 
