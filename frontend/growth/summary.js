@@ -6,7 +6,7 @@
 function renderSummaryHeader(isGrowthType) {
     const thead = document.getElementById("summary-thead");
 
-    let headerHtml = `<tr><th>Month</th><th>Balance</th>`;
+    let headerHtml = `<tr><th>Month</th><th>Starting Balance</th>`;
     if(isGrowthType) {
         headerHtml += `<th>Contributions</th><th>Investment Return</th>`;
     }
@@ -123,7 +123,7 @@ async function loadSummaryForAccount(accountId, category) {
                 // put it all together
                 tr.innerHTML = `
                     <td>${formatMonthLabel(row.month)}</td>
-                    <td>${formatCurrency(row.ending_balance)}</td>
+                    <td>${formatCurrency(row.starting_balance)}</td>
                     ${growthTypeCells}
                     <td class="${growthColorClass}">${formatCurrency(row.growth)}</td>
                 `;

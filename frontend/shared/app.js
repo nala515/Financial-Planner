@@ -37,6 +37,10 @@ async function getAccountCategories() {
 //-----------------------------------------------------
 
 function formatCurrency(cents) {
+    // check for a string before doing numerical logic
+    if (cents === "TBD") {
+        return "TBD";
+    }
     return (cents / 100).toLocaleString("en-US", {
         style: "currency",
         currency: "USD"
