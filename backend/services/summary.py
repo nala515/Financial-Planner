@@ -283,6 +283,7 @@ def calculate_monthly_savings_metrics(db: Session, income_sources: list):
 
 def get_savings_summary(db: Session, granularity: str = "month"):
     income_sources = income_repository.db_get_income_sources(db)
+    source_ids = [source.id for source in income_sources]
     monthly_rows = calculate_monthly_savings_metrics(db, income_sources)
 
     if granularity == "month":
