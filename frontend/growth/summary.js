@@ -6,7 +6,7 @@
 function renderSummaryHeader(isGrowthType) {
     const thead = document.getElementById("summary-thead");
 
-    let headerHtml = `<tr><th>Month</th><th>Balance</th>`;
+    let headerHtml = `<tr><th>Month</th><th>Starting Balance</th>`;
     if(isGrowthType) {
         headerHtml += `<th>Contributions</th><th>Investment Return</th>`;
     }
