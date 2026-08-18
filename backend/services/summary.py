@@ -168,6 +168,13 @@ def build_balance_map(balances: list):
         balance_map[(balance.account_id, balance.date.year, balance.date.month)] = balance.balance_cents
     return balance_map
 
+# returns a map of contributions for easy access by date
+def build_contributions_map(contributions: list):
+    contrib_map: dict[tuple[int, int, int], int] = {}
+    for c in contributions:
+        contrib_map[(c.account_id, c.date.year, c.date.month)] = c.amount_cents
+    return contrib_map
+
 # returns total cash income for each month in a list
 def get_cash_income(income_events: list) -> dict[tuple[int, int], int]:
     cash_income = {}
@@ -180,13 +187,8 @@ def get_cash_income(income_events: list) -> dict[tuple[int, int], int]:
 def get_invested_spendable_growth(balances: list,
                                   account_attrs: dict,
                                   balance_map: dict,
+                                  contrib_map: dict,
                                   months: set) -> dict[tuple[int, int], int]:
-    # create a contribution map
-    contributions = contributions_repository.db_get_all_contributions(db)
-    contrib_map: dict[tuple[int, int, int], int] = {}
-    for c in contributions:
-        contrib_map[(c.account_id, c.date.year, c.date.month)] = c.amount_cents
-
     growth = {key: 0 for key in months}
 
     for balance in balances:
@@ -256,13 +258,14 @@ def calculate_monthly_savings_metrics(db: Session, income_sources: list):
     income_events = income_repository.db_get_income_events(db)
     balances = balances_repository.db_get_all_balances(db)
     balance_map = build_balance_map(balances)
+    contributions = contributions_repository.db_get_all_balances(db)
+    contrib_map = build_contributions_map(contributions)
     account_attrs = get_account_attrs(db)
 
     # parse the data with these function calls
     cash_income = get_cash_income(income_events)
     months = set(cash_income.keys())
-
-    invested_spendable_growth = get_invested_spendable_growth(balances, account_attrs, balance_map, months)
+    invested_spendable_growth = get_invested_spendable_growth(balances, account_attrs, balance_map, contrib_map, months)
     spendable_growth = get_spendable_growth(balances, account_attrs, balance_map, months)
     income_by_source = get_income_by_source(income_sources, income_events, months)
     source_ids = [source.id for source in income_sources]
