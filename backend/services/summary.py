@@ -14,7 +14,7 @@ def calculate_growth(
     # Fetch balances and contributions and create maps
     raw_balances = balances_repository.db_get_account_balances(db, account_id, start, end)
     raw_contributions = contributions_repository.db_get_account_contributions(db, account_id, start, end)
-    balance_map = build_balance_map(balances)
+    balance_map = build_balance_map(raw_balances)
     contrib_map = build_contributions_map(raw_contributions)
 
     # Sort balances to ensure correct month-over-month pairing
