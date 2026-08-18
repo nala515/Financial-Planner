@@ -207,8 +207,8 @@ def get_invested_spendable_growth(balances: list,
 
         # Filter by "invested spendable" criteria
         if attrs.get("invested") and attrs.get("spendable"):
-            # Grab the contribution for this account + month to subtract it out
-            contribution_key = (balance.account_id, balance.date.year, balance.date.month)
+            # Grab the contributions made in the previous month to subtract it out from overall growth
+            contribution_key = (prev_balance.account_id, prev_balance.date.year, prev_balance.date.month)
             monthly_contrib = contrib_map.get(contribution_key, 0)
 
             # Calculate gain: balance change - contribution
