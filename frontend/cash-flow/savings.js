@@ -31,7 +31,7 @@ function normalizeSavingsRow(row, granularity, sourceIds) {
         sortKey: granularity === "month" ? row.year * 12 + row.month : row.year,
         incomeBySource: row.income_by_source || {},
         cashIncome: granularity === "month" ? row.cash_income : row.avg_monthly_cash_income,
-        investmentIncome: granularity === "month" ? row.investment_income : row.avg_monthly_investment_income,
+        investmentIncome: granularity === "month" ? row.investment_gains : row.avg_monthly_investment_gains,
         totalIncome: granularity === "month" ? row.total_income : row.avg_monthly_total_income,
         expenses: granularity === "month" ? row.expenses : row.avg_monthly_expenses,
         cashSavings: granularity === "month" ? row.cash_savings : row.avg_monthly_cash_savings,
@@ -79,7 +79,7 @@ function buildColumnDescriptors(incomeSources, expanded) {
     }
 
     columns.push({
-        label: "Investment Income",
+        label: "Investment Gains",
         isCurrency: true,
         getValue: row => row.investmentIncome,
     });

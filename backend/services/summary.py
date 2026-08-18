@@ -4,47 +4,37 @@ from dateutil.relativedelta import relativedelta
 from backend.repositories import balances_repository, contributions_repository, accounts_repository, income_repository
 from backend.account_categories import get_category_attributes
 
+
 def calculate_growth(
     db: Session,
     account_id: int,
     start: date,
     end: date,
 ):
-    balances = balances_repository.db_get_account_balances(
-        db,
-        account_id,
-        start,
-        end,
-    )
+    # Fetch balances and contributions and create maps
+    raw_balances = balances_repository.db_get_account_balances(db, account_id, start, end)
+    raw_contributions = contributions_repository.db_get_account_contributions(db, account_id, start, end)
+    balance_map = build_balance_map(raw_balances)
+    contrib_map = build_contributions_map(raw_contributions)
 
-    # Ensure ascending order by date so month-over-month pairs are correct,
-    # regardless of what order the repository returns them in.
-    balances = sorted(balances, key=lambda b: b.date)
-
-    if len(balances) == 0:
+    # Sort balances to ensure correct month-over-month pairing
+    balances = sorted(raw_balances, key=lambda b: b.date)
+    if not balances:
         return []
 
     results = []
 
+    # Iterate through pairs to calculate growth metrics
     for i in range(1, len(balances)):
         prev_balance = balances[i - 1]
         curr_balance = balances[i]
 
-        # The pair (prev -> curr) measures what happened DURING the month
-        # that starts at prev_balance.date. Growth/contributions/returns
-        # for this row all belong to that month, not curr_balance.date.
-        prev_contributions = contributions_repository.db_get_account_contributions(
-            db,
-            account_id,
-            prev_balance.date,
-            prev_balance.date,
-        )
+        # Use the contribution map for the month being measured
+        # We look up the contribution that occurred during the "prev" month
+        key = (account_id, prev_balance.date.year, prev_balance.date.month)
+        contributions = contrib_map.get(key, 0)
 
-        contributions = 0
-        if len(prev_contributions) > 0:
-            contributions = prev_contributions[0].amount_cents
-
-        # calculate growth and returns
+        # Calculate gains by doing (balance change - contributions)
         growth = curr_balance.balance_cents - prev_balance.balance_cents
         investment_return = growth - contributions
 
@@ -57,28 +47,17 @@ def calculate_growth(
             "investment_return": investment_return,
         })
 
-    # The most recent balance has no "next" snapshot to measure growth into
-    # yet, but we still want to surface it — with whatever contribution has
-    # already been logged for that month — rather than hiding the month
-    # entirely until next month's snapshot arrives.
+    # Handle the most recent month, which won't have gains yet, just balance/contributions
     last_balance = balances[-1]
-    last_contributions = contributions_repository.db_get_account_contributions(
-        db,
-        account_id,
-        last_balance.date,
-        last_balance.date,
-    )
-
-    contributions = 0
-    if len(last_contributions) > 0:
-        contributions = last_contributions[0].amount_cents
+    last_key = (account_id, last_balance.date.year, last_balance.date.month)
+    last_contributions = contrib_map.get(last_key, 0)
 
     results.append({
         "month": last_balance.date,
         "starting_balance": last_balance.balance_cents,
         "ending_balance": "TBD",
         "growth": "TBD",
-        "contributions": contributions,
+        "contributions": last_contributions,
         "investment_return": "TBD",
     })
 
@@ -168,6 +147,13 @@ def build_balance_map(balances: list):
         balance_map[(balance.account_id, balance.date.year, balance.date.month)] = balance.balance_cents
     return balance_map
 
+# returns a map of contributions for easy access by date
+def build_contributions_map(contributions: list):
+    contrib_map: dict[tuple[int, int, int], int] = {}
+    for c in contributions:
+        contrib_map[(c.account_id, c.date.year, c.date.month)] = c.amount_cents
+    return contrib_map
+
 # returns total cash income for each month in a list
 def get_cash_income(income_events: list) -> dict[tuple[int, int], int]:
     cash_income = {}
@@ -176,27 +162,36 @@ def get_cash_income(income_events: list) -> dict[tuple[int, int], int]:
         cash_income[key] = cash_income.get(key, 0) + event.amount_cents
     return cash_income
 
-# returns total balance growth for each month for accounts that are invested + spendable
+# returns total gains for each month for accounts that are invested + spendable
 def get_invested_spendable_growth(balances: list,
                                   account_attrs: dict,
                                   balance_map: dict,
+                                  contrib_map: dict,
                                   months: set) -> dict[tuple[int, int], int]:
     growth = {key: 0 for key in months}
 
     for balance in balances:
         attrs = account_attrs.get(balance.account_id, get_category_attributes(None))
+
+        # Determine the previous month for the balance delta
         prev_date = balance.date - relativedelta(months=1)
         prev_key = (balance.account_id, prev_date.year, prev_date.month)
         prev_balance = balance_map.get(prev_key)
         if prev_balance is None:
             continue
 
-        month_key = (balance.date.year, balance.date.month)
+        month_key = (prev_date.year, prev_date.month)
         if month_key not in growth:
             continue
 
+        # Filter by "invested spendable" criteria
         if attrs.get("invested") and attrs.get("spendable"):
-            growth[month_key] += balance.balance_cents - prev_balance
+            # Grab the contributions made in the previous month to subtract it out from overall growth
+            monthly_contrib = contrib_map.get(prev_key, 0)
+
+            # Calculate gain: balance change - contribution
+            net_gain = (balance.balance_cents - prev_balance) - monthly_contrib
+            growth[month_key] += net_gain
     return growth
 
 # returns total balance growth for each month for accounts that are spendable
@@ -214,7 +209,7 @@ def get_spendable_growth(balances: list,
         if prev_balance is None:
             continue
 
-        month_key = (balance.date.year, balance.date.month)
+        month_key = (prev_date.year, prev_date.month)
         if month_key not in growth:
             continue
 
@@ -241,13 +236,14 @@ def calculate_monthly_savings_metrics(db: Session, income_sources: list):
     income_events = income_repository.db_get_income_events(db)
     balances = balances_repository.db_get_all_balances(db)
     balance_map = build_balance_map(balances)
+    contributions = contributions_repository.db_get_all_contributions(db)
+    contrib_map = build_contributions_map(contributions)
     account_attrs = get_account_attrs(db)
 
     # parse the data with these function calls
     cash_income = get_cash_income(income_events)
     months = set(cash_income.keys())
-
-    invested_spendable_growth = get_invested_spendable_growth(balances, account_attrs, balance_map, months)
+    invested_spendable_growth = get_invested_spendable_growth(balances, account_attrs, balance_map, contrib_map, months)
     spendable_growth = get_spendable_growth(balances, account_attrs, balance_map, months)
     income_by_source = get_income_by_source(income_sources, income_events, months)
     source_ids = [source.id for source in income_sources]
@@ -271,7 +267,7 @@ def calculate_monthly_savings_metrics(db: Session, income_sources: list):
                 for source_id in source_ids
             },
             "cash_income": cash,
-            "investment_growth": investment,
+            "investment_gains": investment,
             "total_income": total_income,
             "expenses": expenses,
             "cash_savings": cash_savings,
@@ -283,6 +279,7 @@ def calculate_monthly_savings_metrics(db: Session, income_sources: list):
 
 def get_savings_summary(db: Session, granularity: str = "month"):
     income_sources = income_repository.db_get_income_sources(db)
+    source_ids = [source.id for source in income_sources]
     monthly_rows = calculate_monthly_savings_metrics(db, income_sources)
 
     if granularity == "month":
@@ -304,7 +301,7 @@ def get_savings_summary(db: Session, granularity: str = "month"):
             yearly_totals[year] = {
                 "month_count": 0,
                 "cash_income": 0,
-                "investment_growth": 0,
+                "investment_gains": 0,
                 "expenses": 0,
                 "cash_savings": 0,
                 "total_savings": 0,
@@ -313,7 +310,7 @@ def get_savings_summary(db: Session, granularity: str = "month"):
 
         yearly_totals[year]["month_count"] += 1
         yearly_totals[year]["cash_income"] += row["cash_income"]
-        yearly_totals[year]["investment_growth"] += row["investment_growth"]
+        yearly_totals[year]["investment_gains"] += row["investment_gains"]
         yearly_totals[year]["expenses"] += row["expenses"]
         yearly_totals[year]["cash_savings"] += row["cash_savings"]
         yearly_totals[year]["total_savings"] += row["total_savings"]
@@ -332,8 +329,8 @@ def get_savings_summary(db: Session, granularity: str = "month"):
             "year": year,
             "income_by_source": income_by_source,
             "avg_monthly_cash_income": round(data["cash_income"] / data["month_count"]),
-            "avg_monthly_investment_growth": round(data["investment_growth"] / data["month_count"]),
-            "avg_monthly_total_income": round((data["cash_income"] + data["investment_growth"]) / data["month_count"]),
+            "avg_monthly_investment_gains": round(data["investment_gains"] / data["month_count"]),
+            "avg_monthly_total_income": round((data["cash_income"] + data["investment_gains"]) / data["month_count"]),
             "avg_monthly_expenses": round(data["expenses"] / data["month_count"]),
             "avg_monthly_cash_savings": round(data["cash_savings"] / data["month_count"]),
             "avg_monthly_total_savings": round(data["total_savings"] / data["month_count"]),
