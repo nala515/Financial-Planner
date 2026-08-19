@@ -139,13 +139,13 @@ async function loadSavingsSummary(granularity = DEFAULT_GRANULARITY) {
             });
         });
 
-        const toggle = container.querySelector(".expand-toggle");
-        if (toggle) {
+        const toggles = container.querySelectorAll(".expand-toggle");
+        toggles.forEach(toggle => {
             toggle.addEventListener("click", () => {
                 setSavedExpandedState(!expanded);
                 loadSavingsSummary(granularity);
             });
-        }
+        });
     } catch (error) {
         container.innerHTML = `<p>${error.message}</p>`;
     }
