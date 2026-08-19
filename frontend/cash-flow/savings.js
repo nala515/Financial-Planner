@@ -108,8 +108,8 @@ function buildTable(data, granularity, expanded, useTotals = false) {
     `).join("");
     
     return `<div class="table-wrapper savings-summary-wrapper">
+                <h2>${headerName}</h2>
                 <table class="data-table savings-summary-table">
-                    <h2>${headerName}</h2>
                     <thead><tr>${headerCells}</tr></thead>
                     <tbody>${bodyRows}</tbody>
                 </table>
