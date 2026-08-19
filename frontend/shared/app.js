@@ -65,6 +65,23 @@ function formatYearLabel(dateString) {
     return dateString.slice(0, 4);
 }
 
+// adds a [+] or [-] depending on the state of expansion, also adds html attributes (pass in empty string if not needed)
+function addExpandCollapseMarker(text, attr, expanded)
+{
+    color = expanded ? "color: #3b82f6;" : "color: #ef4444;";
+    marker = expanded ? "[-]" : "[+]";
+    text += `<span class="expand-toggle" ` + color + attr + ` style="cursor:pointer;">` + marker + `</span>`;
+    return text;
+}
+
+function getGrowthFormatting(value) {
+    const colorClass =
+        value > 0 ? "growth-positive" :
+        value < 0 ? "growth-negative" :
+        "growth-neutral";
+    return `class="${colorClass}"`
+}
+
 //-----------------------------------------------------
 // Utilities
 //-----------------------------------------------------

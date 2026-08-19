@@ -25,17 +25,20 @@ function setSavedExpandedState(value) {
     localStorage.setItem(STORAGE_KEYS.expanded, value ? "true" : "false");
 }
 
-function normalizeSavingsRow(row, granularity, sourceIds) {
+// this function decides the column labels, format, values, etc. based on the table being built
+function normalizeSavingsRow(row, granularity, sourceIds, useTotals) {
+    const prefix = (granularity === "year" && !useTotals)  ? "avg_monthly_" : "";
+
     const normalized = {
         label: granularity === "month" ? formatMonthYear(row.year, row.month) : row.year,
         sortKey: granularity === "month" ? row.year * 12 + row.month : row.year,
-        incomeBySource: row.income_by_source || {},
-        cashIncome: granularity === "month" ? row.cash_income : row.avg_monthly_cash_income,
-        investmentIncome: granularity === "month" ? row.investment_gains : row.avg_monthly_investment_gains,
-        totalIncome: granularity === "month" ? row.total_income : row.avg_monthly_total_income,
-        expenses: granularity === "month" ? row.expenses : row.avg_monthly_expenses,
-        cashSavings: granularity === "month" ? row.cash_savings : row.avg_monthly_cash_savings,
-        totalSavings: granularity === "month" ? row.total_savings : row.avg_monthly_total_savings,
+        incomeBySource: row[`${prefix}income_by_source`] || {},
+        cashIncome: row[`${prefix}cash_income`],
+        investmentIncome: row[`${prefix}investment_gains`],
+        totalIncome: row[`${prefix}total_income`],
+        spending: row[`${prefix}spending`],
+        cashSavings: row[`${prefix}cash_savings`],
+        totalSavings: row[`${prefix}total_savings`],
     };
 
     normalized.incomeBySource = sourceIds.reduce((memo, sourceId) => {
@@ -48,84 +51,50 @@ function normalizeSavingsRow(row, granularity, sourceIds) {
 
 function buildColumnDescriptors(incomeSources, expanded) {
     const columns = [];
-    columns.push({
-        label: "",
-        isCurrency: false,
-        getValue: row => row.label,
-    });
+    columns.push({label: "", isCurrency: false, canBeNeg: false, getValue: row => row.label});
 
     if (expanded) {
         incomeSources.forEach(source => {
-            columns.push({
-                label: source.name,
-                isCurrency: true,
-                getValue: row => row.incomeBySource[String(source.id)] || 0,
-            });
-        });
-
-        columns.push({
-            label: "Cash Income [-]",
-            isCurrency: true,
-            isToggle: true,
-            getValue: row => row.cashIncome,
-        });
-    } else {
-        columns.push({
-            label: "Cash Income [+]",
-            isCurrency: true,
-            isToggle: true,
-            getValue: row => row.cashIncome,
+            columns.push({label: source.name, isCurrency: true, canBeNeg: false, getValue: row => row.incomeBySource[String(source.id)] || 0});
         });
     }
+    columns.push({label: "Cash Income", isCurrency: true, canBeNeg: false, isToggle: true, getValue: row => row.cashIncome});
 
-    columns.push({
-        label: "Investment Gains",
-        isCurrency: true,
-        getValue: row => row.investmentIncome,
-    });
-    columns.push({
-        label: "Total Income",
-        isCurrency: true,
-        getValue: row => row.totalIncome,
-    });
-    columns.push({
-        label: "Expenses",
-        isCurrency: true,
-        getValue: row => row.expenses,
-    });
-    columns.push({
-        label: "Cash Savings",
-        isCurrency: true,
-        getValue: row => row.cashSavings,
-    });
-    columns.push({
-        label: "Total Savings",
-        isCurrency: true,
-        getValue: row => row.totalSavings,
-    });
-
+    columns.push({label: "Investment Gains", isCurrency: true, canBeNeg: true, getValue: row => row.investmentIncome});
+    columns.push({label: "Total Income", isCurrency: true, canBeNeg: false, getValue: row => row.totalIncome});
+    columns.push({label: "Spending", isCurrency: true, canBeNeg: false, getValue: row => row.spending});
+    columns.push({label: "Cash Savings", isCurrency: true, canBeNeg: true, getValue: row => row.cashSavings});
+    columns.push({label: "Total Increase", isCurrency: true, canBeNeg: true, getValue: row => row.totalSavings});
     return columns;
 }
 
-function buildSavingsTable(data, granularity, expanded) {
+// Builds tables for the page
+function buildTables(data, granularity, expanded) {
     if (!data || !Array.isArray(data.rows) || data.rows.length === 0) {
         return `<p>No savings summary data available.</p>`;
     }
+    // if granularity is set to year, build two tables, otherwise just need one
+    table1 = buildTable(data, granularity, expanded);
+    table2 = granularity === "year" ? buildTable(data, granularity, expanded, true) : ``;
+    return `${table1} ${table2}`;
+}
 
+// Generic function to build a table, can build any of the 3 established versions (monthly, averages, or totals)
+function buildTable(data, granularity, expanded, useTotals = false) {
     const incomeSources = Array.isArray(data.income_sources) ? data.income_sources : [];
     const sourceIds = incomeSources.map(source => source.id);
-
+    
     const normalizedRows = data.rows
-        .map(row => normalizeSavingsRow(row, granularity, sourceIds))
+        .map(row => normalizeSavingsRow(row, granularity, sourceIds, useTotals))
         .sort((a, b) => b.sortKey - a.sortKey);
 
     const columns = buildColumnDescriptors(incomeSources, expanded);
     columns[0].label = granularity === "month" ? "Month" : "Year";
 
+    const headerName = granularity === "month" ? "Monthly Totals" : useTotals ? "Yearly Totals" : "Monthly Averages";
+    
     const headerCells = columns.map(col => {
-        const label = col.isToggle
-            ? `<span class="income-expand-toggle" style="cursor:pointer; white-space: nowrap;">${col.label}</span>`
-            : col.label;
+        const label = col.isToggle ? addExpandCollapseMarker(col.label, "", expanded) : col.label;
         return `<th>${label}</th>`;
     }).join("");
 
@@ -133,32 +102,24 @@ function buildSavingsTable(data, granularity, expanded) {
         <tr class="table-data-row">
             ${columns.map(col => {
                 const value = col.getValue(row);
-                return `<td>${col.isCurrency ? formatCurrency(value) : value}</td>`;
+                const color = col.canBeNeg ? getGrowthFormatting(value) : "";
+                return `<td ${color}>${col.isCurrency ? formatCurrency(value) : value}</td>`;
             }).join("")}
         </tr>
     `).join("");
-
-    return `
-        <div class="table-wrapper savings-summary-wrapper">
-            <table class="data-table savings-summary-table">
-                <thead>
-                    <tr>
-                        ${headerCells}
-                    </tr>
-                </thead>
-                <tbody>
-                    ${bodyRows}
-                </tbody>
-            </table>
-        </div>
-    `;
+    
+    return `<div class="table-wrapper savings-summary-wrapper">
+                <h2>${headerName}</h2>
+                <table class="data-table savings-summary-table">
+                    <thead><tr>${headerCells}</tr></thead>
+                    <tbody>${bodyRows}</tbody>
+                </table>
+            </div>`;
 }
 
 async function loadSavingsSummary(granularity = DEFAULT_GRANULARITY) {
     const container = document.getElementById("savings");
-    if (!container) {
-        return;
-    }
+    if (!container) { return; }
 
     const expanded = getSavedExpandedState();
     localStorage.setItem(STORAGE_KEYS.granularity, granularity);
@@ -171,7 +132,7 @@ async function loadSavingsSummary(granularity = DEFAULT_GRANULARITY) {
         }
 
         const data = await response.json();
-        container.innerHTML = `${buildToggleButtons(granularity)}${buildSavingsTable(data, granularity, expanded)}`;
+        container.innerHTML = `${buildToggleButtons(granularity)}${buildTables(data, granularity, expanded)}`;
 
         container.querySelectorAll(".savings-toggle-button").forEach(button => {
             button.addEventListener("click", () => {
@@ -182,13 +143,13 @@ async function loadSavingsSummary(granularity = DEFAULT_GRANULARITY) {
             });
         });
 
-        const toggle = container.querySelector(".income-expand-toggle");
-        if (toggle) {
+        const toggles = container.querySelectorAll(".expand-toggle");
+        toggles.forEach(toggle => {
             toggle.addEventListener("click", () => {
                 setSavedExpandedState(!expanded);
                 loadSavingsSummary(granularity);
             });
-        }
+        });
     } catch (error) {
         container.innerHTML = `<p>${error.message}</p>`;
     }

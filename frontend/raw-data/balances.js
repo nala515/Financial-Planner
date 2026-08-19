@@ -55,16 +55,18 @@ function buildDisplayColumns(accounts, settings) {
                 let displayName = acc.name;
                 // add the [-] toggle to the last account
                 if (index === lastIndex) {
-                    displayName += `<span class="expand-toggle" data-category="${groupName}" style="cursor:pointer; color: #ef4444;">[-]</span>`;
+                    attr = ` data-category="${groupName}" `;
+                    displayName = addExpandCollapseMarker(acc.name, attr, isExpanded);
                 }
                 columns.push({ id: acc.id, name: displayName, isGroup: false });
             });
         }
         // if multiple accounts and they're collapsed, show all with a plus toggle
         else {
+            attr = ` data-category="${groupName}" `;
             columns.push({
                 id: `${groupName}_group`,
-                name: `${groupName} <span class="expand-toggle" data-category="${groupName}" style="cursor:pointer; color: #3b82f6;">[+]</span>`,
+                name: addExpandCollapseMarker(groupName, attr, isExpanded),
                 isGroup: true,
                 memberAccountIds: groupMembers.map(m => m.id)
             });
