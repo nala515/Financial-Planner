@@ -174,7 +174,7 @@ async function loadSavingsSummary(granularity = DEFAULT_GRANULARITY) {
             });
         });
 
-        const toggle = container.querySelector(".income-expand-toggle");
+        const toggle = container.querySelector(".expand-toggle");
         if (toggle) {
             toggle.addEventListener("click", () => {
                 setSavedExpandedState(!expanded);
