@@ -65,6 +65,14 @@ function formatYearLabel(dateString) {
     return dateString.slice(0, 4);
 }
 
+// adds a [+] or [-] depending on the state of expansion, also adds html attributes (pass in empty string if not needed)
+function addExpandCollapseMarker(text, attr, expanded)
+{
+    marker = expanded ? "[-]" : "[+]";
+    text += `<span class="expand-toggle" ` + attr + ` style="cursor:pointer; color: #ef4444;">` + marker + `</span>`;
+    return text;
+}
+
 //-----------------------------------------------------
 // Utilities
 //-----------------------------------------------------
