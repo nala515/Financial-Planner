@@ -68,9 +68,9 @@ function formatYearLabel(dateString) {
 // adds a [+] or [-] depending on the state of expansion, also adds html attributes (pass in empty string if not needed)
 function addExpandCollapseMarker(text, attr, expanded)
 {
-    color = expanded ? "#3b82f6" : "#ef4444";
+    color = expanded ? "color: #3b82f6;" : "color: #ef4444;";
     marker = expanded ? "[-]" : "[+]";
-    text += `<span class="expand-toggle" color: ` + color + attr + ` style="cursor:pointer;">` + marker + `</span>`;
+    text += `<span class="expand-toggle" ` + color + attr + ` style="cursor:pointer;">` + marker + `</span>`;
     return text;
 }
 
