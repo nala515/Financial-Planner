@@ -51,20 +51,20 @@ function normalizeSavingsRow(row, granularity, sourceIds, useTotals) {
 
 function buildColumnDescriptors(incomeSources, expanded) {
     const columns = [];
-    columns.push({label: "", isCurrency: false, getValue: row => row.label});
+    columns.push({label: "", isCurrency: false, canBeNeg: false, getValue: row => row.label});
 
     if (expanded) {
         incomeSources.forEach(source => {
-            columns.push({label: source.name, isCurrency: true, getValue: row => row.incomeBySource[String(source.id)] || 0});
+            columns.push({label: source.name, isCurrency: true, canBeNeg: false, getValue: row => row.incomeBySource[String(source.id)] || 0});
         });
     }
-    columns.push({label: "Cash Income", isCurrency: true, isToggle: true, getValue: row => row.cashIncome});
+    columns.push({label: "Cash Income", isCurrency: true, canBeNeg: false, isToggle: true, getValue: row => row.cashIncome});
 
-    columns.push({label: "Investment Gains", isCurrency: true, getValue: row => row.investmentIncome});
-    columns.push({label: "Total Income", isCurrency: true, getValue: row => row.totalIncome});
-    columns.push({label: "Spending", isCurrency: true, getValue: row => row.spending});
-    columns.push({label: "Cash Savings", isCurrency: true, getValue: row => row.cashSavings});
-    columns.push({label: "Total Increase", isCurrency: true, getValue: row => row.totalSavings});
+    columns.push({label: "Investment Gains", isCurrency: true, canBeNeg: true, getValue: row => row.investmentIncome});
+    columns.push({label: "Total Income", isCurrency: true, canBeNeg: false, getValue: row => row.totalIncome});
+    columns.push({label: "Spending", isCurrency: true, canBeNeg: false, getValue: row => row.spending});
+    columns.push({label: "Cash Savings", isCurrency: true, canBeNeg: true, getValue: row => row.cashSavings});
+    columns.push({label: "Total Increase", isCurrency: true, canBeNeg: true, getValue: row => row.totalSavings});
     return columns;
 }
 
@@ -102,7 +102,8 @@ function buildTable(data, granularity, expanded, useTotals = false) {
         <tr class="table-data-row">
             ${columns.map(col => {
                 const value = col.getValue(row);
-                return `<td>${col.isCurrency ? formatCurrency(value) : value}</td>`;
+                const color = canBeNeg ? getGrowthFormatting(value) : "";
+                return `<td ${color}>${col.isCurrency ? formatCurrency(value) : value}</td>`;
             }).join("")}
         </tr>
     `).join("");
