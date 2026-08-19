@@ -70,7 +70,7 @@ function addExpandCollapseMarker(text, attr, expanded)
 {
     color = expanded ? "#3b82f6" : "#ef4444";
     marker = expanded ? "[-]" : "[+]";
-    text += `<span class="expand-toggle" color: ` color + attr + ` style="cursor:pointer;">` + marker + `</span>`;
+    text += `<span class="expand-toggle" color: ` + color + attr + ` style="cursor:pointer;">` + marker + `</span>`;
     return text;
 }
 
