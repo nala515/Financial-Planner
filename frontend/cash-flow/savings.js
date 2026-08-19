@@ -117,7 +117,7 @@ function buildSavingsTable(data, granularity, expanded) {
     columns[0].label = granularity === "month" ? "Month" : "Year";
 
     const headerCells = columns.map(col => {
-        const label = col.isToggle ? addExpandCollapseMarker(col.label, expanded, "") : col.label;
+        const label = col.isToggle ? addExpandCollapseMarker(col.label, "", expanded) : col.label;
         return `<th>${label}</th>`;
     }).join("");
 
