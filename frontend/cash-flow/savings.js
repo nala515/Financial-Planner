@@ -54,6 +54,7 @@ function buildColumnDescriptors(incomeSources, expanded) {
         getValue: row => row.label,
     });
 
+    // Cash columns
     if (expanded) {
         incomeSources.forEach(source => {
             columns.push({
@@ -62,22 +63,15 @@ function buildColumnDescriptors(incomeSources, expanded) {
                 getValue: row => row.incomeBySource[String(source.id)] || 0,
             });
         });
-
-        columns.push({
-            label: "Cash Income [-]",
-            isCurrency: true,
-            isToggle: true,
-            getValue: row => row.cashIncome,
-        });
-    } else {
-        columns.push({
-            label: "Cash Income [+]",
-            isCurrency: true,
-            isToggle: true,
-            getValue: row => row.cashIncome,
-        });
     }
+    columns.push({
+        label: "Cash Income",
+        isCurrency: true,
+        isToggle: true,
+        getValue: row => row.cashIncome,
+    });
 
+    // Other columns
     columns.push({
         label: "Investment Gains",
         isCurrency: true,
@@ -123,9 +117,7 @@ function buildSavingsTable(data, granularity, expanded) {
     columns[0].label = granularity === "month" ? "Month" : "Year";
 
     const headerCells = columns.map(col => {
-        const label = col.isToggle
-            ? `<span class="income-expand-toggle" style="cursor:pointer; white-space: nowrap;">${col.label}</span>`
-            : col.label;
+        const label = col.isToggle ? addExpandCollapseMarker(col.label, expanded, "") : col.label;
         return `<th>${label}</th>`;
     }).join("");
 
