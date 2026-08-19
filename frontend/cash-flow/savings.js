@@ -74,13 +74,13 @@ function buildTables(data, granularity, expanded) {
         return `<p>No savings summary data available.</p>`;
     }
     // if granularity is set to year, build two tables, otherwise just need one
-    table1 = buildTable(data, granularity, sourceIds, expanded);
-    table2 = granularity === "year" ? buildTable(data, sourceIds, expanded, true) : ``;
+    table1 = buildTable(data, granularity, expanded);
+    table2 = granularity === "year" ? buildTable(data, expanded, true) : ``;
     return `${table1} ${table2}`;
 }
 
 // Generic function to build a table, can build any of the 3 established versions (monthly, averages, or totals)
-function buildTable(data, granularity, sourceIds, expanded, useTotals = false) {
+function buildTable(data, granularity, expanded, useTotals = false) {
     const incomeSources = Array.isArray(data.income_sources) ? data.income_sources : [];
     const sourceIds = incomeSources.map(source => source.id);
     
