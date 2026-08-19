@@ -74,6 +74,14 @@ function addExpandCollapseMarker(text, attr, expanded)
     return text;
 }
 
+function getGrowthFormatting(value) {
+    const colorClass =
+        value > 0 ? "growth-positive" :
+        value < 0 ? "growth-negative" :
+        "growth-neutral";
+    return `class="${colorClass}"`
+}
+
 //-----------------------------------------------------
 // Utilities
 //-----------------------------------------------------
