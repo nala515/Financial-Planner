@@ -102,7 +102,7 @@ function buildTable(data, granularity, expanded, useTotals = false) {
         <tr class="table-data-row">
             ${columns.map(col => {
                 const value = col.getValue(row);
-                const color = canBeNeg ? getGrowthFormatting(value) : "";
+                const color = col.canBeNeg ? getGrowthFormatting(value) : "";
                 return `<td ${color}>${col.isCurrency ? formatCurrency(value) : value}</td>`;
             }).join("")}
         </tr>
