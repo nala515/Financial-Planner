@@ -83,7 +83,7 @@ function buildColumnDescriptors(incomeSources, expanded) {
         getValue: row => row.totalIncome,
     });
     columns.push({
-        label: "spending",
+        label: "Spending",
         isCurrency: true,
         getValue: row => row.spending,
     });
@@ -93,7 +93,7 @@ function buildColumnDescriptors(incomeSources, expanded) {
         getValue: row => row.cashSavings,
     });
     columns.push({
-        label: "Total Savings",
+        label: "Total Increase",
         isCurrency: true,
         getValue: row => row.totalSavings,
     });
@@ -117,7 +117,9 @@ function buildSavingsTable(data, granularity, expanded) {
     columns[0].label = granularity === "month" ? "Month" : "Year";
 
     const headerCells = columns.map(col => {
-        const label = col.isToggle ? addExpandCollapseMarker(col.label, "", expanded) : col.label;
+        // adjust label based on granularity and collapsibility
+        let label = granularity === "year" ? `Avg. ${col.label}` : col.label;
+        label = col.isToggle ? addExpandCollapseMarker(label, "", expanded) : label;
         return `<th>${label}</th>`;
     }).join("");
 
@@ -133,14 +135,8 @@ function buildSavingsTable(data, granularity, expanded) {
     return `
         <div class="table-wrapper savings-summary-wrapper">
             <table class="data-table savings-summary-table">
-                <thead>
-                    <tr>
-                        ${headerCells}
-                    </tr>
-                </thead>
-                <tbody>
-                    ${bodyRows}
-                </tbody>
+                <thead><tr>${headerCells}</tr></thead>
+                <tbody>${bodyRows}</tbody>
             </table>
         </div>
     `;
