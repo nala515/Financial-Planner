@@ -55,7 +55,7 @@ function buildDisplayColumns(accounts, settings) {
                 let displayName = acc.name;
                 // add the [-] toggle to the last account
                 if (index === lastIndex) {
-                    attr = 'data-category="' + groupName + '"';
+                    attr = 'data-category="${groupName}"';
                     displayName = addExpandCollapseMarker(acc.name, attr, isExpanded);
                 }
                 columns.push({ id: acc.id, name: displayName, isGroup: false });
@@ -63,7 +63,7 @@ function buildDisplayColumns(accounts, settings) {
         }
         // if multiple accounts and they're collapsed, show all with a plus toggle
         else {
-            attr = 'data-category="' + groupName + '"';
+            attr = 'data-category="${groupName}"';
             columns.push({
                 id: `${groupName}_group`,
                 name: addExpandCollapseMarker(groupName, attr, isExpanded);,
