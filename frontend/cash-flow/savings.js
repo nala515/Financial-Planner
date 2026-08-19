@@ -48,60 +48,24 @@ function normalizeSavingsRow(row, granularity, sourceIds) {
 
 function buildColumnDescriptors(incomeSources, expanded) {
     const columns = [];
-    columns.push({
-        label: "",
-        isCurrency: false,
-        getValue: row => row.label,
-    });
+    columns.push({label: "", isCurrency: false, getValue: row => row.label});
 
-    // Cash columns
     if (expanded) {
         incomeSources.forEach(source => {
-            columns.push({
-                label: source.name,
-                isCurrency: true,
-                getValue: row => row.incomeBySource[String(source.id)] || 0,
-            });
+            columns.push({label: source.name, isCurrency: true, getValue: row => row.incomeBySource[String(source.id)] || 0});
         });
     }
-    columns.push({
-        label: "Cash Income",
-        isCurrency: true,
-        isToggle: true,
-        getValue: row => row.cashIncome,
-    });
+    columns.push({label: "Cash Income", isCurrency: true, isToggle: true, getValue: row => row.cashIncome});
 
-    // Other columns
-    columns.push({
-        label: "Investment Gains",
-        isCurrency: true,
-        getValue: row => row.investmentIncome,
-    });
-    columns.push({
-        label: "Total Income",
-        isCurrency: true,
-        getValue: row => row.totalIncome,
-    });
-    columns.push({
-        label: "Spending",
-        isCurrency: true,
-        getValue: row => row.spending,
-    });
-    columns.push({
-        label: "Cash Savings",
-        isCurrency: true,
-        getValue: row => row.cashSavings,
-    });
-    columns.push({
-        label: "Total Increase",
-        isCurrency: true,
-        getValue: row => row.totalSavings,
-    });
-
+    columns.push({label: "Investment Gains", isCurrency: true, getValue: row => row.investmentIncome});
+    columns.push({label: "Total Income", isCurrency: true, getValue: row => row.totalIncome});
+    columns.push({label: "Spending", isCurrency: true, getValue: row => row.spending});
+    columns.push({label: "Cash Savings", isCurrency: true, getValue: row => row.cashSavings});
+    columns.push({label: "Total Increase", isCurrency: true, getValue: row => row.totalSavings});
     return columns;
 }
 
-function buildSavingsTable(data, granularity, expanded) {
+function buildMonthlyAvgsTable(data, granularity, expanded) {
     if (!data || !Array.isArray(data.rows) || data.rows.length === 0) {
         return `<p>No savings summary data available.</p>`;
     }
@@ -142,9 +106,7 @@ function buildSavingsTable(data, granularity, expanded) {
 
 async function loadSavingsSummary(granularity = DEFAULT_GRANULARITY) {
     const container = document.getElementById("savings");
-    if (!container) {
-        return;
-    }
+    if (!container) { return; }
 
     const expanded = getSavedExpandedState();
     localStorage.setItem(STORAGE_KEYS.granularity, granularity);
@@ -157,7 +119,7 @@ async function loadSavingsSummary(granularity = DEFAULT_GRANULARITY) {
         }
 
         const data = await response.json();
-        container.innerHTML = `${buildToggleButtons(granularity)}${buildSavingsTable(data, granularity, expanded)}`;
+        container.innerHTML = `${buildToggleButtons(granularity)}${buildMonthlyAvgsTable(data, granularity, expanded)}`;
 
         container.querySelectorAll(".savings-toggle-button").forEach(button => {
             button.addEventListener("click", () => {
