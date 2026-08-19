@@ -91,6 +91,8 @@ function buildTable(data, granularity, expanded, useTotals = false) {
     const columns = buildColumnDescriptors(incomeSources, expanded);
     columns[0].label = granularity === "month" ? "Month" : "Year";
 
+    const headerName = granularity === "month" ? "Monthly Totals" : useTotals ? "Yearly Totals" : "Monthly Averages";
+    
     const headerCells = columns.map(col => {
         const label = col.isToggle ? addExpandCollapseMarker(col.label, "", expanded) : col.label;
         return `<th>${label}</th>`;
@@ -104,9 +106,10 @@ function buildTable(data, granularity, expanded, useTotals = false) {
             }).join("")}
         </tr>
     `).join("");
-
+    
     return `<div class="table-wrapper savings-summary-wrapper">
                 <table class="data-table savings-summary-table">
+                    <h2>${headerName}</h2>
                     <thead><tr>${headerCells}</tr></thead>
                     <tbody>${bodyRows}</tbody>
                 </table>
