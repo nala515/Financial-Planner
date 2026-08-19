@@ -25,17 +25,20 @@ function setSavedExpandedState(value) {
     localStorage.setItem(STORAGE_KEYS.expanded, value ? "true" : "false");
 }
 
-function normalizeSavingsRow(row, granularity, sourceIds) {
+// this function decides the column labels, format, values, etc. based on the table being built
+function normalizeSavingsRow(row, granularity, sourceIds, useTotals) {
+    const prefix = (granularity === "year" && !useTotals)  ? "avg_monthly_" : "";
+
     const normalized = {
         label: granularity === "month" ? formatMonthYear(row.year, row.month) : row.year,
         sortKey: granularity === "month" ? row.year * 12 + row.month : row.year,
-        incomeBySource: row.avg_monthly_income_by_source || {},
-        cashIncome: granularity === "month" ? row.cash_income : row.avg_monthly_cash_income,
-        investmentIncome: granularity === "month" ? row.investment_gains : row.avg_monthly_investment_gains,
-        totalIncome: granularity === "month" ? row.total_income : row.avg_monthly_total_income,
-        spending: granularity === "month" ? row.spending : row.avg_monthly_spending,
-        cashSavings: granularity === "month" ? row.cash_savings : row.avg_monthly_cash_savings,
-        totalSavings: granularity === "month" ? row.total_savings : row.avg_monthly_total_savings,
+        incomeBySource: row[`${prefix}income_by_source`] || {},
+        cashIncome: row[`${prefix}cash_income`],
+        investmentIncome: row[`${prefix}investment_gains`],
+        totalIncome: row[`${prefix}total_income`],
+        spending: row[`${prefix}spending`],
+        cashSavings: row[`${prefix}cash_savings`],
+        totalSavings: row[`${prefix}total_savings`],
     };
 
     normalized.incomeBySource = sourceIds.reduce((memo, sourceId) => {
@@ -65,16 +68,24 @@ function buildColumnDescriptors(incomeSources, expanded) {
     return columns;
 }
 
-function buildMonthlyAvgsTable(data, granularity, expanded) {
+// Builds tables for the page
+function buildTables(data, granularity, expanded) {
     if (!data || !Array.isArray(data.rows) || data.rows.length === 0) {
         return `<p>No savings summary data available.</p>`;
     }
+    // if granularity is set to year, build two tables, otherwise just need one
+    table1 = buildTable(data, granularity, sourceIds, expanded);
+    table2 = granularity === "year" ? buildTable(data, sourceIds, expanded, true) : ``;
+    return `${table1} ${table2}`;
+}
 
+// Generic function to build a table, can build any of the 3 established versions (monthly, averages, or totals)
+function buildTable(data, granularity, sourceIds, expanded, useTotals = false) {
     const incomeSources = Array.isArray(data.income_sources) ? data.income_sources : [];
     const sourceIds = incomeSources.map(source => source.id);
-
+    
     const normalizedRows = data.rows
-        .map(row => normalizeSavingsRow(row, granularity, sourceIds))
+        .map(row => normalizeSavingsRow(row, granularity, sourceIds, useTotals))
         .sort((a, b) => b.sortKey - a.sortKey);
 
     const columns = buildColumnDescriptors(incomeSources, expanded);
@@ -94,14 +105,12 @@ function buildMonthlyAvgsTable(data, granularity, expanded) {
         </tr>
     `).join("");
 
-    return `
-        <div class="table-wrapper savings-summary-wrapper">
-            <table class="data-table savings-summary-table">
-                <thead><tr>${headerCells}</tr></thead>
-                <tbody>${bodyRows}</tbody>
-            </table>
-        </div>
-    `;
+    return `<div class="table-wrapper savings-summary-wrapper">
+                <table class="data-table savings-summary-table">
+                    <thead><tr>${headerCells}</tr></thead>
+                    <tbody>${bodyRows}</tbody>
+                </table>
+            </div>`;
 }
 
 async function loadSavingsSummary(granularity = DEFAULT_GRANULARITY) {
@@ -119,7 +128,7 @@ async function loadSavingsSummary(granularity = DEFAULT_GRANULARITY) {
         }
 
         const data = await response.json();
-        container.innerHTML = `${buildToggleButtons(granularity)}${buildMonthlyAvgsTable(data, granularity, expanded)}`;
+        container.innerHTML = `${buildToggleButtons(granularity)}${buildTables(data, granularity, expanded)}`;
 
         container.querySelectorAll(".savings-toggle-button").forEach(button => {
             button.addEventListener("click", () => {
