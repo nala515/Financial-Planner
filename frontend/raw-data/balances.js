@@ -66,7 +66,7 @@ function buildDisplayColumns(accounts, settings) {
             attr = 'data-category="${groupName}"';
             columns.push({
                 id: `${groupName}_group`,
-                name: addExpandCollapseMarker(groupName, attr, isExpanded);,
+                name: addExpandCollapseMarker(groupName, attr, isExpanded),
                 isGroup: true,
                 memberAccountIds: groupMembers.map(m => m.id)
             });
