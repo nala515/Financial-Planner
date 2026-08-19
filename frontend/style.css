@@ -499,15 +499,6 @@ select option {
     background: #1f2937;
 }
 
-.savings-summary-table th:nth-child(1),
-.savings-summary-table td:nth-child(1),
-.savings-summary-table th:nth-child(3),
-.savings-summary-table td:nth-child(3),
-.savings-summary-table th:nth-child(4),
-.savings-summary-table td:nth-child(4){
-    border-right: 2px solid #6b7280;
-}
-
 /*-----------------------------------------------------
 // Growth styles
 //---------------------------------------------------*/
@@ -572,4 +563,24 @@ select option {
     background: #4da3ff;
     color: #111827;
     border-color: #4da3ff;
+}
+
+.savings-summary-table th:nth-child(1),
+.savings-summary-table td:nth-child(1),
+.savings-summary-table th:nth-child(3),
+.savings-summary-table td:nth-child(3),
+.savings-summary-table th:nth-child(4),
+.savings-summary-table td:nth-child(4){
+    border-right: 2px solid #6b7280;
+}
+
+.savings-summary-section {
+    margin-bottom: 2.5rem;
+}
+
+.savings-summary-section h2 {
+    margin: 0 0 0.75rem 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #cbd5e1; /* adjust to match your existing dark-mode heading color */
 }
