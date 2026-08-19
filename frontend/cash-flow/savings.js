@@ -75,7 +75,7 @@ function buildTables(data, granularity, expanded) {
     }
     // if granularity is set to year, build two tables, otherwise just need one
     table1 = buildTable(data, granularity, expanded);
-    table2 = granularity === "year" ? buildTable(data, expanded, true) : ``;
+    table2 = granularity === "year" ? buildTable(data, granularity, expanded, true) : ``;
     return `${table1} ${table2}`;
 }
 
