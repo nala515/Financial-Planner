@@ -320,14 +320,23 @@ def get_savings_summary(db: Session, granularity: str = "month"):
 
     yearly_rows = []
     for year, data in sorted(yearly_totals.items(), reverse=True):
-        income_by_source = {
-            str(source_id): round(data["income_by_source"][source_id] / data["month_count"])
-            for source_id in source_ids
-        }
+        income_by_source = {}
+        avg_monthly_income_by_source = {}
+        for source_id in source_ids:
+            total = data["income_by_source"][source_id]
+            income_by_source[str(source_id)] = total
+            avg_monthly_income_by_source[str(source_id)] = round(total / data["month_count"])
 
         yearly_rows.append({
             "year": year,
             "income_by_source": income_by_source,
+            "cash_income": data["cash_income"],
+            "investment_gains": data["investment_gains"],
+            "total_income": data["cash_income"] + data["investment_gains"],
+            "spending": data["spending"],
+            "cash_savings": data["cash_savings"],
+            "total_savings": data["total_savings"],
+            "avg_monthly_income_by_source": avg_monthly_income_by_source,
             "avg_monthly_cash_income": round(data["cash_income"] / data["month_count"]),
             "avg_monthly_investment_gains": round(data["investment_gains"] / data["month_count"]),
             "avg_monthly_total_income": round((data["cash_income"] + data["investment_gains"]) / data["month_count"]),
