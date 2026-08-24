@@ -3,138 +3,73 @@
 // Summary (Balance + Contributions + Growth)
 //-----------------------------------------------------
 
-function renderSummaryHeader(isGrowthType) {
-    const thead = document.getElementById("summary-thead");
+//-----------------------------------------------------
+// Row normalization + column descriptors for buildTable()
+//-----------------------------------------------------
 
-    let headerHtml = `<tr><th>Month</th><th>Starting Balance</th>`;
-    if(isGrowthType) {
-        headerHtml += `<th>Contributions</th><th>Investment Return</th>`;
-    }
-    headerHtml += `<th>Growth</th></tr>`;
-
-    thead.innerHTML = headerHtml;
+// Attaches year/month-label/sort fields to one summary row returned by the API; all other fields pass through untouched.
+function normalizeSummaryRow(row) {
+    return {...row, year: Number(row.month.slice(0, 4)), monthLabel: formatMonthYearLabel(row.month), sortKey: row.month};
 }
 
-async function loadSummary() {
-    const selector = document.getElementById("account-selector");
-    const tbody = document.getElementById("summary-body");
-
-    if (!selector || !tbody) {
-        return;
+// Builds the column set for an account's summary table; growth-type accounts get two extra columns.
+function buildSummaryColumnDescriptors(isGrowthType) {
+    const columns = [
+        { label: "Month", getValue: row => row.monthLabel },
+        { label: "Starting Balance", getValue: row => row.starting_balance, isCurrency: true }
+    ];
+    if (isGrowthType) {
+        columns.push(
+            { label: "Contributions", getValue: row => row.contributions, isCurrency: true },
+            { label: "Investment Return", getValue: row => row.investment_return, isCurrency: true, canBeNeg: true }
+        );
     }
+    columns.push({ label: "Growth", getValue: row => row.growth, isCurrency: true, canBeNeg: true });
 
-    try {
-        const accounts = await loadAccounts();
-        const accountId = await populateAccountDropdown(selector, accounts);
-        // call function to load account summary
-        if (accountId) {
-            // grab category
-            const selectedOption = selector.options[selector.selectedIndex];
-            const category = selectedOption?.dataset.category;
-            await loadSummaryForAccount(accountId, category);
-        }
-    } catch (error) {
-        tbody.innerHTML = `<tr><td colspan="4">${error.message}</td></tr>`;
-    }
+    return columns;
 }
+
+//-----------------------------------------------------
+// Main function
+//-----------------------------------------------------
 
 async function loadSummaryForAccount(accountId, category) {
-    const tbody = document.getElementById("summary-body");
-
-    if (!tbody) {
-        return;
-    }
+    const container = document.getElementById("summary");
+    if (!container) return;
 
     if (!accountId) {
-        tbody.innerHTML = '<tr><td colspan="4">No account selected.</td></tr>';
+        container.innerHTML = `<p>No account selected.</p>`;
         return;
     }
+    const isGrowthType = category === "Investment" || category === "Retirement";
 
     try {
-        // determine which header to use and render it
-        const isGrowthType = category === "Investment" || category === "Retirement";
-        const colCount = isGrowthType ? 5 : 3;
-        renderSummaryHeader(isGrowthType);
-
-        // Pull full history for the account
-        // Adjust the start date if you'd rather default to something
-        // like "this year" or the account's creation date.
         const start = "2000-01-01";
         const end = new Date().toISOString().split("T")[0];
 
-        const response = await fetch(
-            `/api/accounts/${accountId}/summary?start=${start}&end=${end}`
-        );
-
+        const response = await fetch(`/api/accounts/${accountId}/summary?start=${start}&end=${end}`);
         if (!response.ok) {
             throw new Error("Unable to load summary");
         }
 
-        const rows = await response.json();
-        tbody.innerHTML = "";
-
-        if (!Array.isArray(rows) || rows.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="${colCount}">No monthly data found.</td></tr>`;
+        const rawRows = await response.json();
+        if (!Array.isArray(rawRows) || rawRows.length === 0) {
+            container.innerHTML = `<p>No monthly data found.</p>`;
             return;
         }
 
-        const sortedRows = [...rows].sort((a, b) => b.month.localeCompare(a.month));
+        const rows = rawRows.map(normalizeSummaryRow).sort((a, b) => b.sortKey.localeCompare(a.sortKey));
+        const columns = buildSummaryColumnDescriptors(isGrowthType);
+        container.innerHTML = buildTable(rows, columns, { tableClass: "data-table" });
 
-        const groupedRows = sortedRows.reduce((groups, row) => {
-            const year = formatYearLabel(row.month);
-            if (!groups[year]) {
-                groups[year] = [];
-            }
-            groups[year].push(row);
-            return groups;
-        }, {});
-
-        const years = Object.keys(groupedRows).sort((a, b) => Number(b) - Number(a));
-
-        years.forEach(year => {
-            const yearRow = document.createElement("tr");
-            yearRow.className = "table-year-row";
-            yearRow.innerHTML = `<td colspan="${colCount}">${year}</td>`;
-            tbody.appendChild(yearRow);
-
-            groupedRows[year].forEach(row => {
-                const tr = document.createElement("tr");
-                tr.className = "table-data-row";
-
-                // set up investment return column, if applicable
-                let growthTypeCells = ""
-                if (isGrowthType) {
-                    const returnColorClass =
-                        row.investment_return > 0 ? "growth-positive" :
-                        row.investment_return < 0 ? "growth-negative" :
-                        "growth-neutral";
-                    growthTypeCells = `
-                        <td>${formatCurrency(row.contributions)}</td>
-                        <td class="${returnColorClass}">${formatCurrency(row.investment_return)}</td>
-                    `
-                }
-
-                // set up color for growth column
-                const growthColorClass =
-                    row.growth > 0 ? "growth-positive" :
-                    row.growth < 0 ? "growth-negative" :
-                    "growth-neutral";
-
-                // put it all together
-                tr.innerHTML = `
-                    <td>${formatMonthLabel(row.month)}</td>
-                    <td>${formatCurrency(row.starting_balance)}</td>
-                    ${growthTypeCells}
-                    <td class="${growthColorClass}">${formatCurrency(row.growth)}</td>
-                `;
-                tbody.appendChild(tr);
-            });
-        });
     } catch (error) {
-        tbody.innerHTML = `<tr><td colspan="4">${error.message}</td></tr>`;
+        container.innerHTML = `<p>${error.message}</p>`;
     }
 }
 
+//-----------------------------------------------------
+// Event listener
+//-----------------------------------------------------
 document.addEventListener("DOMContentLoaded", async () => {
     await loadNav();
     loadSummary();
