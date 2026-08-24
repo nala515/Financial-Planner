@@ -455,7 +455,7 @@ select option {
 //---------------------------------------------------*/
 
 .table-wrapper {        /* the cute little box around the table */
-    max-height: 80vh;
+    max-height: 70vh;
     overflow-y: auto;
     overflow-x: auto;
     position: relative;
@@ -506,12 +506,6 @@ select option {
     z-index: 2;
     text-align: left;
     padding: 8px 12px;
-}
-
-.table-year-row td {
-    font-weight: bold;
-    background: #111827;
-    color: #f9fafb;
 }
 
 .table-data-row:hover {
