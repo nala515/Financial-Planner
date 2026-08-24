@@ -4,7 +4,7 @@
 //-----------------------------------------------------
 
 //-----------------------------------------------------
-// Row normalization + column descriptors for buildTable()
+// Row normalization + column descriptors
 //-----------------------------------------------------
 
 // Attaches year/month-label/sort fields to one summary row returned by the API; all other fields pass through untouched.
@@ -21,17 +21,42 @@ function buildSummaryColumnDescriptors(isGrowthType) {
     if (isGrowthType) {
         columns.push(
             { label: "Contributions", getValue: row => row.contributions, isCurrency: true },
-            { label: "Investment Return", getValue: row => row.investment_return, isCurrency: true, canBeNeg: true }
+            { label: "Investment Return", getValue: row => row.investment_return, isCurrency: true, canBeNeg: true },
+            { label: "Growth", getValue: row => row.growth, isCurrency: true, canBeNeg: true }
         );
     }
-    columns.push({ label: "Growth", getValue: row => row.growth, isCurrency: true, canBeNeg: true });
-
+    else {
+        columns.push({ label: "Change", getValue: row => row.growth, isCurrency: true, canBeNeg: true });
+    }
     return columns;
 }
 
 //-----------------------------------------------------
-// Main function
+// Main functions
 //-----------------------------------------------------
+
+async function loadSummary() {
+    const selector = document.getElementById("account-selector");
+    const container = document.getElementById("summary");
+
+    if (!selector || !container) {
+        return;
+    }
+
+    try {
+        const accounts = await loadAccounts();
+        const accountId = await populateAccountDropdown(selector, accounts);
+        // call function to load account summary
+        if (accountId) {
+            // grab category
+            const selectedOption = selector.options[selector.selectedIndex];
+            const category = selectedOption?.dataset.category;
+            await loadSummaryForAccount(accountId, category);
+        }
+    } catch (error) {
+        container.innerHTML = `<p>${error.message}</p>`;
+    }
+}
 
 async function loadSummaryForAccount(accountId, category) {
     const container = document.getElementById("summary");
