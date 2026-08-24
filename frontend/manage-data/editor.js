@@ -57,7 +57,7 @@ async function populateBalances(accountId) {
         <div class="editor-row">
             <span>${b.date}</span>
             <input type="number" name="balance" value="${b.balance_cents / 100}" step="0.01">
-            <input type="hidden" name="date" value="${formatMonthLabel(b.date)} ${formatYearLabel(b.date)}">
+            <input type="hidden" name="date" value="${formatMonthYearLabel(b.date)}">
         </div>
     `).join('');
 }
