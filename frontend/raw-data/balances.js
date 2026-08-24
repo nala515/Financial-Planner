@@ -209,7 +209,7 @@ async function loadBalances() {
         rowsByDate[b.date][b.account_id] = b.balance_cents;
     });
 
-    // NEW: build normalized rows (descending by date) and hand off to buildTable()
+    // build normalized rows (descending by date) and hand off to buildTable()
     const sortedDates = Object.keys(rowsByDate).sort().reverse();
     const rows = sortedDates.map(dateStr => normalizeBalanceRow(dateStr, rowsByDate, accountColumns));
     const columns = buildBalanceColumnDescriptors(accountColumns);
