@@ -30,8 +30,31 @@ function buildSummaryColumnDescriptors(isGrowthType) {
 }
 
 //-----------------------------------------------------
-// Main function
+// Main functions
 //-----------------------------------------------------
+
+async function loadSummary() {
+    const selector = document.getElementById("account-selector");
+    const tbody = document.getElementById("summary-body");
+
+    if (!selector || !tbody) {
+        return;
+    }
+
+    try {
+        const accounts = await loadAccounts();
+        const accountId = await populateAccountDropdown(selector, accounts);
+        // call function to load account summary
+        if (accountId) {
+            // grab category
+            const selectedOption = selector.options[selector.selectedIndex];
+            const category = selectedOption?.dataset.category;
+            await loadSummaryForAccount(accountId, category);
+        }
+    } catch (error) {
+        tbody.innerHTML = `<tr><td colspan="4">${error.message}</td></tr>`;
+    }
+}
 
 async function loadSummaryForAccount(accountId, category) {
     const container = document.getElementById("summary");
