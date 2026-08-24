@@ -35,9 +35,9 @@ function buildSummaryColumnDescriptors(isGrowthType) {
 
 async function loadSummary() {
     const selector = document.getElementById("account-selector");
-    const tbody = document.getElementById("summary-body");
+    const container = document.getElementById("summary");
 
-    if (!selector || !tbody) {
+    if (!selector || !container) {
         return;
     }
 
@@ -52,7 +52,7 @@ async function loadSummary() {
             await loadSummaryForAccount(accountId, category);
         }
     } catch (error) {
-        tbody.innerHTML = `<tr><td colspan="4">${error.message}</td></tr>`;
+        container.innerHTML = `<p>${error.message}</p>`;
     }
 }
 
