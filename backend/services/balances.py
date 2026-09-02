@@ -44,7 +44,7 @@ def create_monthly_entry_batch(db: Session, batch_data: MonthlyEntryBatchCreate)
 		if account is None:
 			raise ValueError(f"Unknown account_id: {entry.account_id}")
 
-	with db.begin():
+	try:
 		for entry in batch_data.entries:
 			balance_date = batch_data.snapshot_date
 			existing_balance = (
@@ -89,6 +89,11 @@ def create_monthly_entry_batch(db: Session, batch_data: MonthlyEntryBatchCreate)
 						amount_cents=entry.contribution_cents,
 					)
 				)
+		db.commit()
+	# end try block
+	except Exception:
+		db.rollback()
+		raise
 
 	return {
 		"status": "created",
