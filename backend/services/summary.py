@@ -114,7 +114,7 @@ def get_dashboard_data(db: Session):
             add_to_category("non_retirement")
 
         # Overlapping Buckets: Cash vs Spendable
-        if category_name == "Cash":
+        if category_name == "Cash" or category_name == "Credit":
             add_to_category("cash")
         if attrs.get("spendable"):
             add_to_category("spendable")
