@@ -30,7 +30,7 @@ function normalizeSavingsRow(row, granularity, sourceIds, useTotals) {
     const prefix = (granularity === "year" && !useTotals)  ? "avg_monthly_" : "";
 
     const normalized = {
-        label: granularity === "month" ? formatMonthYear(row.year, row.month) : row.year,
+        label: granularity === "month" ? formatMonthYearLabel(row.year, row.month) : row.year,
         sortKey: granularity === "month" ? row.year * 12 + row.month : row.year,
         incomeBySource: row[`${prefix}income_by_source`] || {},
         cashIncome: row[`${prefix}cash_income`],
