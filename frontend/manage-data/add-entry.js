@@ -245,9 +245,9 @@ async function loadAddEntryPage() {
                 throw new Error(body.detail || "Unable to save monthly entries.");
             }
 
+            updateSaveButtonState();
             statusBox.textContent = "Saved successfully.";
             statusBox.className = "batch-entry-status batch-entry-status-success";
-            updateSaveButtonState();
         } catch (error) {
             statusBox.textContent = error.message;
             statusBox.className = "batch-entry-status batch-entry-status-error";
