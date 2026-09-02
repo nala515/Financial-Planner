@@ -11,8 +11,8 @@ jobs:
         with:
           python-version: '3.11'
       - run: pip install -r requirements.txt
-      - run: python backend/utilities/importer/import_accounts.py
-      - run: python backend/utilities/importer/import_income.py
+      - run: python -m backend.utilities.importer.import_accounts
+      - run: python -m backend.utilities.importer.import_income
       - name: Commit updated database
         run: |
           git config user.name "github-actions"
