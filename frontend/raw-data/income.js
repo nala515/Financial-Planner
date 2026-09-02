@@ -1,85 +1,62 @@
+//-----------------------------------------------------
+// Row normalization + column descriptors
+//-----------------------------------------------------
+
+// Flattens one date's income events across all sources into a single row object, with a running total.
+function normalizeIncomeRow(dateStr, rowsByDate, sources) {
+    const row = {dateStr, year: Number(dateStr.slice(0, 4)), monthLabel: formatMonthYearLabel(dateStr), sortKey: dateStr};
+
+    let total = 0;
+    sources.forEach(source => {
+        const amount = rowsByDate[dateStr][source.id] || 0;
+        row[source.id] = amount;
+        total += amount;
+    });
+    row.total = total;
+    return row;
+}
+
+// Converts income sources into the {label, getValue, ...} descriptors buildTable() expects.
+function buildIncomeColumnDescriptors(sources) {
+    const columns = [{ label: "Month", getValue: row => row.monthLabel }];
+
+    sources.forEach(source => {
+        columns.push({label: source.name, getValue: row => row[source.id], isCurrency: true, dashIfEmpty: true});
+    });
+    columns.push({label: "Total", getValue: row => row.total, isCurrency: true, canBeNeg: true});
+
+    return columns;
+}
+
+//-----------------------------------------------------
+// Main function
+//-----------------------------------------------------
+
 async function loadIncome() {
     const container = document.getElementById("income");
     if (!container) return;
 
-    // Fetch income sources and events
     const [sources, events] = await Promise.all([
         fetch('/api/income_sources').then(r => r.json()),
         fetch('/api/income_events').then(r => r.json())
     ]);
 
-    // group the raw balance data by date for the matrix view: rowsByDate[date][account_id]
+    // group events by date: rowsByDate[date][source_id] = amount_cents
     const rowsByDate = {};
-    events.forEach(b => {
-        if (!rowsByDate[b.date]) {
-            rowsByDate[b.date] = {};
+    events.forEach(e => {
+        if (!rowsByDate[e.date]) {
+            rowsByDate[e.date] = {};
         }
-        rowsByDate[b.date][b.account_id] = b.balance_cents;
+        rowsByDate[e.date][e.source_id] = e.amount_cents;
     });
 
-    // group dates by Year for section headers
     const sortedDates = Object.keys(rowsByDate).sort().reverse();
-    const groupedByYear = sortedDates.reduce((groups, dateStr) => {
-        const year = formatYearLabel(dateStr);
-        if (!groups[year]) groups[year] = [];
-        groups[year].push(dateStr);
-        return groups;
-    }, {});
+    const rows = sortedDates.map(dateStr => normalizeIncomeRow(dateStr, rowsByDate, sources));
+    const columns = buildIncomeColumnDescriptors(sources);
 
-    // build table DOM
-    const table = document.createElement("table");
-    table.className = "data-table";
-
-    let thHtml = `<thead><tr><th>Month</th>`;
-    sources.forEach(source => {
-        thHtml += `<th data-income-source-id="${source.id}">${source.name}</th>`;
+    container.innerHTML = buildTable(rows, columns, {
+        tableClass: "data-table"
     });
-    thHtml += `<th>Total</th></tr></thead>`;
-    table.innerHTML = thHtml;
-
-    const tbody = document.createElement("tbody");
-
-    // populate rows with Year dividers
-    const years = Object.keys(groupedByYear).sort((a, b) => Number(b) - Number(a));
-    const colCount = sources.length + 2; // Month + Sources + Total
-
-    years.forEach(year => {
-        // year section row
-        const yearRow = document.createElement("tr");
-        yearRow.className = "table-year-row";
-        yearRow.innerHTML = `<td colspan="${colCount}">${year}</td>`;
-        tbody.appendChild(yearRow);
-
-        // monthly rows
-        groupedByYear[year].forEach(dateStr => {
-            const tr = document.createElement("tr");
-            tr.className = "table-data-row";
-
-            let rowHtml = `<td>${formatMonthLabel(dateStr)}</td>`;
-            let monthTotal = 0;
-
-            for (let i = 1; i < colCount - 1; i++) {
-                const source = sources[i - 1];
-                const event = events.find(event =>
-                    event.date === dateStr &&
-                    event.source_id === source.id
-                );
-
-                const amountCents = event ? event.amount_cents : 0;
-                monthTotal += amountCents;
-                rowHtml += `<td>${amountCents ? formatCurrency(amountCents) : '-'}</td>`;
-            }
-
-            // Total column
-            rowHtml += `<td class="growth-positive">${formatCurrency(monthTotal)}</td>`;
-            tr.innerHTML = rowHtml;
-            tbody.appendChild(tr);
-        });
-    });
-
-    table.appendChild(tbody);
-    container.innerHTML = "";
-    container.appendChild(table);
 }
 
 document.addEventListener("DOMContentLoaded", async () => {

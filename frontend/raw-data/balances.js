@@ -1,5 +1,5 @@
 //-----------------------------------------------------
-// Utility functions
+// Filtering and type-selection
 //-----------------------------------------------------
 
 // Track multiple toggle states in one object
@@ -12,9 +12,53 @@ let expandedStates = {
     Retirement: false
 };
 
+// filter accounts by type to only show the ones requested
+function filterAccountsByType(accounts, categories, type) {
+    return accounts.filter(acc => {
+        const categoryInfo = categories[acc.category];
+        // If an account's category isn't in the mapping for some reason,
+        // exclude it rather than crash or silently include it.
+        return categoryInfo ? categoryInfo[type] === true : false;
+    });
+}
 
-// build account columns with groupings as desired
-function buildDisplayColumns(accounts, settings) {
+function formatTypeLabel(key) {
+    // net_worth -> "Net Worth", spendable -> "Spendable"
+    return key
+        .split("_")
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(" ");
+}
+
+async function populateTypeSelector() {
+    const categories = await getAccountCategories();
+    const typeSelector = document.getElementById("type-selector");
+
+    // Derive descriptor keys from any one category entry, since all
+    // entries share the same shape (retirement, spendable, invested, net_worth)
+    const firstCategory = Object.values(categories)[0];
+    const descriptorKeys = Object.keys(firstCategory || {});
+
+    typeSelector.innerHTML = "";
+    descriptorKeys.forEach(key => {
+        const option = document.createElement("option");
+        option.value = key;
+        option.textContent = formatTypeLabel(key);
+        if (key === "net_worth") {
+            option.selected = true;
+        }
+        typeSelector.appendChild(option);
+    });
+}
+
+//-----------------------------------------------------
+// Prep for building table
+//-----------------------------------------------------
+
+// Groups filtered accounts into per-category columns, collapsing multi-account groups behind a +/- toggle.
+//    Input: raw accounts
+//    Output: account-column objects
+function groupAccountsIntoColumns(accounts, settings) {
     const columns = [];
     // categories for grouping
     const groups = ["MyCash", "JointCash", "HSA", "529", "Investment", "Retirement"];
@@ -76,56 +120,70 @@ function buildDisplayColumns(accounts, settings) {
     return columns;
 }
 
-// filter accounts by type to only show the ones requested
-function filterAccountsByType(accounts, categories, type) {
-    return accounts.filter(acc => {
-        const categoryInfo = categories[acc.category];
-        // If an account's category isn't in the mapping for some reason,
-        // exclude it rather than crash or silently include it.
-        return categoryInfo ? categoryInfo[type] === true : false;
+// Converts display columns into the {label, getValue, ...} descriptors buildTable() expects.
+//    Input: account-column objects
+//    Output: descriptor objects
+function buildBalanceColumnDescriptors(accountColumns) {
+    const columns = [
+        { label: "Month", getValue: row => row.monthLabel }
+    ];
+
+    accountColumns.forEach(col => {
+        columns.push({
+            label: col.name, // already contains the [+]/[-] toggle HTML, if any
+            getValue: row => row[col.id],
+            isCurrency: true,
+            dashIfEmpty: true
+        });
     });
+
+    columns.push({
+        label: "Total",
+        getValue: row => row.total,
+        isCurrency: true,
+        isBold: true
+    });
+
+    return columns;
 }
 
-function formatTypeLabel(key) {
-    // net_worth -> "Net Worth", spendable -> "Spendable"
-    return key
-        .split("_")
-        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-        .join(" ");
-}
+// Flattens one date's balances across all display columns into a single row object, with a running total.
+function normalizeBalanceRow(dateStr, rowsByDate, accountColumns) {
+    const row = {
+        dateStr,
+        year: Number(dateStr.slice(0, 4)),
+        monthLabel: formatMonthYearLabel(dateStr),
+        sortKey: dateStr
+    };
 
-async function populateTypeSelector() {
-    const categories = await getAccountCategories();
-    const typeSelector = document.getElementById("type-selector");
-
-    // Derive descriptor keys from any one category entry, since all
-    // entries share the same shape (retirement, spendable, invested, net_worth)
-    const firstCategory = Object.values(categories)[0];
-    const descriptorKeys = Object.keys(firstCategory || {});
-
-    typeSelector.innerHTML = "";
-    descriptorKeys.forEach(key => {
-        const option = document.createElement("option");
-        option.value = key;
-        option.textContent = formatTypeLabel(key);
-        if (key === "net_worth") {
-            option.selected = true;
+    let total = 0;
+    accountColumns.forEach(col => {
+        let cents = 0;
+        if (col.isGroup) {
+            col.memberAccountIds.forEach(accountId => {
+                cents += (rowsByDate[dateStr][accountId] || 0);
+            });
+        } else {
+            cents = rowsByDate[dateStr][col.id] || 0;
         }
-        typeSelector.appendChild(option);
+        row[col.id] = cents;
+        total += cents;
     });
+    row.total = total;
+    return row;
 }
 
 //-----------------------------------------------------
 // Main function
 //-----------------------------------------------------
 
+// Fetches accounts/balances/settings, applies the type filter, and renders the balances table.
 async function loadBalances() {
     const container = document.getElementById("balances");
     if (!container) return;
 
-    // Fetch accounts, all balances, and user settings
     if (!settings || Object.keys(settings).length === 0) {
-        await loadSettings(); 
+        await loadSettings();
     }
 
     const [accounts, balances, categories] = await Promise.all([
@@ -134,7 +192,6 @@ async function loadBalances() {
         getAccountCategories()
     ]);
 
-    // get current type selection from dropdown
     const typeSelector = document.getElementById("type-selector");
     const selectedType = typeSelector ? typeSelector.value : "net_worth";
     const typeFilteredAccounts = filterAccountsByType(accounts, categories, selectedType);
@@ -142,10 +199,8 @@ async function loadBalances() {
         container.innerHTML = "<p>No accounts matching this filter.</p>";
         return;
     }
-    // generate the columns based on the user's settings
-    const displayColumns = buildDisplayColumns(typeFilteredAccounts, settings);
+    const accountColumns = groupAccountsIntoColumns(typeFilteredAccounts, settings);
 
-    // group the raw balance data by date for the matrix view: rowsByDate[date][account_id]
     const rowsByDate = {};
     balances.forEach(b => {
         if (!rowsByDate[b.date]) {
@@ -154,73 +209,20 @@ async function loadBalances() {
         rowsByDate[b.date][b.account_id] = b.balance_cents;
     });
 
-    // group dates by Year for section headers
+    // build normalized rows (descending by date) and hand off to buildTable()
     const sortedDates = Object.keys(rowsByDate).sort().reverse();
-    const groupedByYear = sortedDates.reduce((groups, dateStr) => {
-        const year = formatYearLabel(dateStr);
-        if (!groups[year]) groups[year] = [];
-        groups[year].push(dateStr);
-        return groups;
-    }, {});
+    const rows = sortedDates.map(dateStr => normalizeBalanceRow(dateStr, rowsByDate, accountColumns));
+    const columns = buildBalanceColumnDescriptors(accountColumns);
 
-    // build table DOM
-    const table = document.createElement("table");
-    table.className = "data-table";
-
-    // build Header
-    let thHtml = `<thead><tr><th>Month</th>`;
-    displayColumns.forEach(col => {
-        thHtml += `<th>${col.name}</th>`;
+    container.innerHTML = buildTable(rows, columns, {
+        tableClass: "data-table"
     });
-    thHtml += `<th>Total</th></tr></thead>`;
-    table.innerHTML = thHtml;
-
-    const tbody = document.createElement("tbody");
-
-    // populate rows with Year dividers
-    const years = Object.keys(groupedByYear).sort((a, b) => Number(b) - Number(a));
-    const colCount = displayColumns.length + 2; // Month + Accounts + Total
-
-    years.forEach(year => {
-        // year section row
-        const yearRow = document.createElement("tr");
-        yearRow.className = "table-year-row";
-        yearRow.innerHTML = `<td colspan="${colCount}">${year}</td>`;
-        tbody.appendChild(yearRow);
-
-        // monthly rows
-        groupedByYear[year].forEach(dateStr => {
-            const tr = document.createElement("tr");
-            tr.className = "table-data-row";
-
-            let rowHtml = `<td>${formatMonthLabel(dateStr)}</td>`;
-            let monthTotal = 0;
-
-            displayColumns.forEach(col => {
-                let balanceCents = rowsByDate[dateStr][col.id] || 0;
-                if (col.isGroup) {
-                    col.memberAccountIds.forEach(accountId => {
-                        balanceCents += (rowsByDate[dateStr][accountId] || 0);
-                    });
-                } else {
-                    balanceCents = rowsByDate[dateStr][col.id] || 0;
-                }
-                monthTotal += balanceCents;
-                rowHtml += `<td>${balanceCents ? formatCurrency(balanceCents) : '-'}</td>`;
-            });
-
-            rowHtml += `<td><strong>${formatCurrency(monthTotal)}</strong></td>`;
-            tr.innerHTML = rowHtml;
-            tbody.appendChild(tr);
-        });
-    });
-
-    table.appendChild(tbody);
-    container.innerHTML = "";
-    container.appendChild(table);
 }
 
-// event listeners
+//-----------------------------------------------------
+// Event listeners
+//-----------------------------------------------------
+
 document.addEventListener("DOMContentLoaded", async () => {
     await loadNav();
     await loadSettings();
