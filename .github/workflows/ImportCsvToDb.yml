@@ -1,0 +1,22 @@
+name: Import CSVs to DB
+on:
+  workflow_dispatch:  # manual trigger button in the Actions tab
+
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install -r requirements.txt
+      - run: python backend/utilities/importer/import_accounts.py
+      - run: python backend/utilities/importer/import_income.py
+      - name: Commit updated database
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add finance.db
+          git diff --staged --quiet || git commit -m "Import CSV updates via Actions"
+          git push
