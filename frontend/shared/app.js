@@ -52,10 +52,14 @@ const MONTH_NAMES = [
     "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
 ];
 
+function formatMonthYear(year, month) {
+    return `${MONTH_NAMES[month - 1]} ${year}`;
+}
+
 function formatMonthYearLabel(dateString) {
     const year = dateString.slice(0, 4);
     const month = Number(dateString.slice(5, 7));
-    return `${MONTH_NAMES[month - 1]} ${year}`;
+    return formatMonthYear(year, month);
 }
 
 // adds a [+] or [-] depending on the state of expansion, also adds html attributes (pass in empty string if not needed)
