@@ -29,7 +29,7 @@ def import_csv(csv_file):
         if not rows:
             raise ValueError("CSV file is empty")
 
-        for row in rows[3:]:
+        for row in rows:
             if not row:
                 continue
             if len(row) < 4:
