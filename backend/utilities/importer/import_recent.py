@@ -94,7 +94,7 @@ def import_csv(csv_file):
                 db.add(contribution)
             count += 1
     db.commit()
-    filename = Path(csv_path).name
+    filename = Path(csv_file).name
     print(f"Imported {filename}")
     return count
 
