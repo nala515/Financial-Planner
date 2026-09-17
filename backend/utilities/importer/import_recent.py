@@ -72,6 +72,7 @@ def import_csv(csv_file):
             db.add(balance)
 
             if contribution_cents == 0:
+                count += 1
                 continue
 
             # check for existing contribution, add one if none exists
