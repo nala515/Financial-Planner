@@ -84,4 +84,5 @@ async function loadContributions() {
 document.addEventListener("DOMContentLoaded", async () => {
     await loadNav();
     loadContributions();
+    initSelectableTable(document.getElementById('balances-table'));
 });
