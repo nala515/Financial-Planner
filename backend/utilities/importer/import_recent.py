@@ -44,7 +44,7 @@ def import_csv(csv_file):
             year = int(row[1].strip())
             month = int(row[2].strip())
             balance_cents = int(float(row[3].strip()) * 100)
-            if(len(row) > 3):
+            if(len(row) > 4):
                 contribution_cents = int(float(row[4].strip().strip("$")) * 100)
             else:
                 contribution_cents = 0
