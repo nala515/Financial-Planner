@@ -102,5 +102,5 @@ if __name__ == "__main__":
     initialize_database()
     cur_dir = Path(__file__).resolve().parent
     csv_file = cur_dir/"recent_months.csv"
-    count = import_csv()
+    count = import_csv(csv_file)
     print(f"Imported {count} line(s)")
