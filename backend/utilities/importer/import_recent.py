@@ -7,7 +7,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from ...database import SessionLocal, initialize_database
 from ...models import Account, Contribution, Balance
-
+from ...models import IncomeEvent, IncomeSource
 
 def _get_existing_account(db, name: str):
     return (
