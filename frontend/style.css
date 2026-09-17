@@ -53,6 +53,27 @@ select option {
 }
 
 /*-----------------------------------------------------
+// Cell selection
+//---------------------------------------------------*/
+
+.cell-selected {
+  background-color: rgba(100, 150, 255, 0.25);
+}
+.selection-summary-box {
+  position: absolute;
+  display: none;
+  background: #222;
+  color: #eee;
+  padding: 6px 10px;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  z-index: 1000;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+/*-----------------------------------------------------
 // Batch create entries
 //---------------------------------------------------*/
 
