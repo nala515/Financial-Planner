@@ -16,7 +16,14 @@ def _get_existing_account(db, name: str):
         .first()
     )
 
-def import_csv(csv_file):
+def _get_existing_source(db, name: str):
+    return (
+        db.query(IncomeSource)
+        .filter(IncomeSource.name == name)
+        .first()
+    )
+
+def import_accounts_csv(csv_file):
     if not csv_file.exists():
         raise FileNotFoundError(f"CSV file not found: {csv_file}")
 
@@ -99,9 +106,75 @@ def import_csv(csv_file):
     print(f"Imported {filename}")
     return count
 
+def import_income_csv(csv_file):
+    if not csv_path.exists():
+        raise FileNotFoundError(f"CSV file not found: {csv_path}")
+
+    db = SessionLocal()
+    count = 0
+
+    with csv_path.open(newline="", encoding="utf-8") as handle:
+        rows = list(csv.reader(handle))
+        if not rows:
+            raise ValueError("CSV file is empty")
+
+        for row in rows:
+            if not row:
+                continue
+            if len(row) < 4:
+                continue
+
+            name = row[0].strip()
+            source = _get_existing_source(db, name)
+            if source is None:
+                print(f"Income source {name} not found. Skipping.")
+                continue
+
+            year = int(row[1].strip())
+            month = int(row[2].strip())
+            amount_cents = int(float(row[3].strip()) * 100)
+            if(len(row) > 4):
+                note = row[4].strip()
+            else:
+                note = ""
+
+            event_date = date(year, month, 1)
+
+            # check for existing event, add one if none exists
+            existing_event = (
+                db.query(IncomeEvent)
+                .filter(
+                    IncomeEvent.source_id == source.id,
+                    IncomeEvent.date == event_date,
+                )
+                .first()
+            )
+            if existing_event is not None:
+                existing_event.amount_cents = amount_cents
+                continue
+
+            event = IncomeEvent(
+                source_id=source.id,
+                date=event_date,
+                amount_cents=amount_cents,
+                notes=note
+            )
+            db.add(event)
+            count += 1
+    db.commit()
+    filename = Path(csv_file).name
+    return count
+
 if __name__ == "__main__":
     initialize_database()
     cur_dir = Path(__file__).resolve().parent
+
+    # accounts
     csv_file = cur_dir/"recent_accounts.csv"
-    count = import_csv(csv_file)
-    print(f"Imported {count} line(s)")
+    count = import_accounts_csv(csv_file)
+    print(f"Imported {count} line(s) from {csv_file}")
+
+    # income
+    csv_file = cur_dir/"recent_income.csv"
+    count = import_income_csv(csv_file)
+    print(f"Imported {count} line(s) from {csv_file}")
