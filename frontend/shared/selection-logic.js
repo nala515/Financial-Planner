@@ -53,7 +53,7 @@
 
   function getValues() {
     return Array.from(selectedCells)
-      .map(c => parseFloat(c.dataset.value))
+      .map(c => parseFloat(c.dataset.value) / 100)
       .filter(v => !isNaN(v));
   }
 
