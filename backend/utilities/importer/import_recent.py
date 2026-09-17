@@ -107,13 +107,13 @@ def import_accounts_csv(csv_file):
     return count
 
 def import_income_csv(csv_file):
-    if not csv_path.exists():
-        raise FileNotFoundError(f"CSV file not found: {csv_path}")
+    if not csv_file.exists():
+        raise FileNotFoundError(f"CSV file not found: {csv_file}")
 
     db = SessionLocal()
     count = 0
 
-    with csv_path.open(newline="", encoding="utf-8") as handle:
+    with csv_file.open(newline="", encoding="utf-8") as handle:
         rows = list(csv.reader(handle))
         if not rows:
             raise ValueError("CSV file is empty")
