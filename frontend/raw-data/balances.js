@@ -244,8 +244,6 @@ document.addEventListener("DOMContentLoaded", async () => {
             }
         });
     }
-    
-    initSelectableTable(document.getElementById('balances-table'));
-
     await loadBalances();
+    initSelectableTable(document.getElementById('balances-table'));
 });
