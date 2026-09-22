@@ -110,7 +110,7 @@ function buildTable(rows, columns, options = {}) {
             }
             if (col.isBold) display = `<strong>${display}</strong>`;
 
-            return `<td ${colorAttr}>${display}</td>`;
+            return `<td ${colorAttr} ${otherAttr}>${display}</td>`;
         }).join("");
 
         return `<tr class="${rowClass}">${cells}</tr>`;
