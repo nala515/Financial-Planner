@@ -53,7 +53,7 @@
 
   function getValues() {
     return Array.from(selectedCells)
-      .map(c => parseFloat(c.dataset.value) / 100)
+      .map(c => parseFloat(c.dataset.value))
       .filter(v => !isNaN(v));
   }
 
@@ -72,7 +72,11 @@
     const sum = values.reduce((a, b) => a + b, 0);
     const avg = sum / values.length;
     const b = ensureBox();
-    b.textContent = `Count: ${values.length}   Sum: ${sum.toFixed(2)}   Avg: ${avg.toFixed(2)}`;
+    b.innerHTML = [
+      `Count: ${values.length}`,
+      `Sum: ${formatCurrency(sum)}`,
+      `Avg: ${formatCurrency(avg)}`
+    ].join('<br>');
     const rect = Array.from(selectedCells).pop().getBoundingClientRect();
     b.style.left = `${window.scrollX + rect.right + 8}px`;
     b.style.top = `${window.scrollY + rect.top}px`;
