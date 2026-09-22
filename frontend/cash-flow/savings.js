@@ -159,4 +159,5 @@ document.addEventListener("DOMContentLoaded", async () => {
     await loadNav();
     const savedGranularity = localStorage.getItem(STORAGE_KEYS.granularity) || DEFAULT_GRANULARITY;
     await loadSavingsSummary(savedGranularity);
+    initSelectableTable(document.getElementById('savings'));
 });
