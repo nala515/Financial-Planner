@@ -8,6 +8,7 @@
     table.querySelectorAll('td[data-numeric]').forEach(cell => {
       cell.addEventListener('mousedown', onMouseDown);
       cell.addEventListener('mouseenter', onMouseEnter);
+      cell.addEventListener('touchstart', onTouchStart, { passive: false });
     });
   }
 
@@ -83,6 +84,13 @@
     b.style.display = 'block';
   }
 
+  function onTouchStart(e) {
+    e.preventDefault(); // stop the browser from also firing synthetic mousedown/mouseenter for this touch
+    const cell = e.currentTarget;
+    toggleCell(cell, !selectedCells.has(cell));
+    updateBox();
+  }
+  
   document.addEventListener('mouseup', () => { isSelecting = false; });
   document.addEventListener('click', e => { if (!e.target.closest('table')) clearSelection(); });
 
