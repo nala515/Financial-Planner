@@ -90,7 +90,8 @@ function buildSavingsTable(data, granularity, expanded, useTotals = false) {
 
     const columns = buildColumnDescriptors(incomeSources, expanded);
     columns[0].label = granularity === "month" ? "Month" : "Year";
-
+    const headerName = granularity === "month" ? "Monthly Totals" : useTotals ? "Yearly Totals" : "Monthly Averages";
+    
     return buildTable(normalizedRows, columns, {
         title: headerName,
         tableClass: "data-table savings-summary-table",
