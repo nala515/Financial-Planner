@@ -57,7 +57,7 @@ def import_accounts_csv(csv_file):
                 contribution_cents = 0
 
             balance_date = date(year, month, 1)
-            
+
             # check for existing balance, add one if none exists
             existing_balance = (
                 db.query(Balance)
