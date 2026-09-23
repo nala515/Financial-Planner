@@ -62,4 +62,5 @@ async function loadIncome() {
 document.addEventListener("DOMContentLoaded", async () => {
     await loadNav();
     await loadIncome();
+    initSelectableTable(document.getElementById('income'));
 });

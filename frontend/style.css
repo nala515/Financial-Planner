@@ -53,6 +53,31 @@ select option {
 }
 
 /*-----------------------------------------------------
+// Cell selection
+//---------------------------------------------------*/
+
+.cell-selected {
+  background-color: rgba(77, 163, 255, 0.18); /* accent-color tint */
+  outline: 1px solid var(--accent-color, #4da3ff);
+  outline-offset: -1px;
+}
+
+.selection-summary-box {
+  position: absolute;
+  display: none;
+  background: var(--bg-secondary, #1a1a1a);
+  color: var(--text-primary, #f9fafb);
+  border: 1px solid var(--border-color, #4b5563);
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  z-index: 1000;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+/*-----------------------------------------------------
 // Batch create entries
 //---------------------------------------------------*/
 

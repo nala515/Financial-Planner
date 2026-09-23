@@ -98,6 +98,7 @@ function buildTable(rows, columns, options = {}) {
         const cells = columns.map(col => {
             const value = col.getValue(row);
             const colorAttr = col.canBeNeg ? getGrowthFormatting(value) : "";
+            const otherAttr = col.isCurrency ? `data-numeric data-value="${value}"` : '';
 
             let display;
             if (col.dashIfEmpty && !value) {
@@ -109,7 +110,7 @@ function buildTable(rows, columns, options = {}) {
             }
             if (col.isBold) display = `<strong>${display}</strong>`;
 
-            return `<td ${colorAttr}>${display}</td>`;
+            return `<td ${colorAttr} ${otherAttr}>${display}</td>`;
         }).join("");
 
         return `<tr class="${rowClass}">${cells}</tr>`;
