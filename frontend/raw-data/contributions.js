@@ -83,6 +83,6 @@ async function loadContributions() {
 
 document.addEventListener("DOMContentLoaded", async () => {
     await loadNav();
-    loadContributions();
+    await loadContributions();
     initSelectableTable(document.getElementById('contributions'));
 });
