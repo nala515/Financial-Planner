@@ -74,7 +74,7 @@ async function loadContributions() {
         const rows = sortedDates.map(dateStr => normalizeContributionRow(dateStr, rowsByDate, accountsWithData));
         const columns = buildContributionColumnDescriptors(accountsWithData);
 
-        container.innerHTML = buildTable(rows, columns, {tableClass: "data-table"});
+        container.innerHTML = buildTable(rows, columns);
 
     } catch (error) {
         container.innerHTML = `<p>${error.message}</p>`;
