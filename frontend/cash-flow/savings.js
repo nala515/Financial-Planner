@@ -74,13 +74,13 @@ function buildTables(data, granularity, expanded) {
         return `<p>No savings summary data available.</p>`;
     }
     // if granularity is set to year, build two tables, otherwise just need one
-    table1 = buildTable(data, granularity, expanded);
-    table2 = granularity === "year" ? buildTable(data, granularity, expanded, true) : ``;
+    table1 = buildSavingsTable(data, granularity, expanded);
+    table2 = granularity === "year" ? buildSavingsTable(data, granularity, expanded, true) : ``;
     return `${table1} ${table2}`;
 }
 
 // Generic function to build a table, can build any of the 3 established versions (monthly, averages, or totals)
-function buildTable(data, granularity, expanded, useTotals = false) {
+function buildSavingsTable(data, granularity, expanded, useTotals = false) {
     const incomeSources = Array.isArray(data.income_sources) ? data.income_sources : [];
     const sourceIds = incomeSources.map(source => source.id);
     
@@ -91,30 +91,12 @@ function buildTable(data, granularity, expanded, useTotals = false) {
     const columns = buildColumnDescriptors(incomeSources, expanded);
     columns[0].label = granularity === "month" ? "Month" : "Year";
 
-    const headerName = granularity === "month" ? "Monthly Totals" : useTotals ? "Yearly Totals" : "Monthly Averages";
-    
-    const headerCells = columns.map(col => {
-        const label = col.isToggle ? addExpandCollapseMarker(col.label, "", expanded) : col.label;
-        return `<th>${label}</th>`;
-    }).join("");
-
-    const bodyRows = normalizedRows.map(row => `
-        <tr class="table-data-row">
-            ${columns.map(col => {
-                const value = col.getValue(row);
-                const color = col.canBeNeg ? getGrowthFormatting(value) : "";
-                return `<td ${color}>${col.isCurrency ? formatCurrency(value) : value}</td>`;
-            }).join("")}
-        </tr>
-    `).join("");
-    
-    return `<div class="table-wrapper savings-summary-wrapper">
-                <h2>${headerName}</h2>
-                <table class="data-table savings-summary-table">
-                    <thead><tr>${headerCells}</tr></thead>
-                    <tbody>${bodyRows}</tbody>
-                </table>
-            </div>`;
+    return buildTable(normalizedRows, columns, {
+        title: headerName,
+        tableClass: "data-table savings-summary-table",
+        wrapperClass: "table-wrapper savings-summary-wrapper",
+        expanded
+    });
 }
 
 async function loadSavingsSummary(granularity = DEFAULT_GRANULARITY) {
