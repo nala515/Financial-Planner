@@ -150,15 +150,14 @@ def import_income_csv(csv_file):
             )
             if existing_event is not None:
                 existing_event.amount_cents = amount_cents
-                continue
-
-            event = IncomeEvent(
-                source_id=source.id,
-                date=event_date,
-                amount_cents=amount_cents,
-                notes=note
-            )
-            db.add(event)
+            else:
+                event = IncomeEvent(
+                    source_id=source.id,
+                    date=event_date,
+                    amount_cents=amount_cents,
+                    notes=note
+                )
+                db.add(event)
             count += 1
     db.commit()
     filename = Path(csv_file).name
