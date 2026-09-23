@@ -57,7 +57,7 @@ def import_accounts_csv(csv_file):
                 contribution_cents = 0
 
             balance_date = date(year, month, 1)
-          
+            
             # check for existing balance, add one if none exists
             existing_balance = (
                 db.query(Balance)
@@ -69,14 +69,13 @@ def import_accounts_csv(csv_file):
             )
             if existing_balance is not None:
                 existing_balance.balance_cents = balance_cents
-                continue
-
-            balance = Balance(
-                account_id=account.id,
-                date=balance_date,
-                balance_cents=balance_cents,
-            )
-            db.add(balance)
+            else:
+                balance = Balance(
+                    account_id=account.id,
+                    date=balance_date,
+                    balance_cents=balance_cents,
+                )
+                db.add(balance)
 
             if contribution_cents == 0:
                 count += 1
