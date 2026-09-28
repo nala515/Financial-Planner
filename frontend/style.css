@@ -78,95 +78,6 @@ select option {
 }
 
 /*-----------------------------------------------------
-// Batch create entries
-//---------------------------------------------------*/
-
-.batch-entry-panel {
-    max-width: 980px;
-    padding: 1.25rem;
-    background: #1f2937;
-    border: 1px solid #374151;
-    border-radius: 10px;
-}
-
-.batch-entry-toolbar,
-.batch-entry-actions {
-    display: flex;
-    align-items: end;
-    gap: 1rem;
-    margin-bottom: 1rem;
-}
-
-.batch-entry-toolbar label {
-    display: flex;
-    flex-direction: column;
-    gap: 0.35rem;
-}
-
-.batch-entry-fields {
-    display: grid;
-    grid-template-columns: 2fr 1.25fr 1.25fr auto;
-    gap: 0.75rem;
-    align-items: center;
-    margin-bottom: 0.75rem;
-}
-
-.batch-entry-fields select,
-.batch-entry-fields input,
-.batch-entry-fields button {
-    width: 100%;
-    min-width: 0;
-    margin-bottom: 0;
-}
-
-.batch-entry-fields select,
-.batch-entry-fields input {
-    background: #111827;
-    color: #e5e7eb;
-    border: 1px solid #374151;
-    border-radius: 6px;
-    padding: 0.5rem 0.6rem;
-}
-
-.batch-entry-fields select:focus,
-.batch-entry-fields input:focus {
-    outline: none;
-    border-color: #60a5fa;
-}
-
-.batch-entry-fields input::placeholder {
-    color: #6b7280;
-}
-
-.primary-button,
-.secondary-button {
-    cursor: pointer;
-}
-
-.primary-button:disabled {
-    opacity: 0.45;
-    cursor: not-allowed;
-}
-
-.batch-entry-status {
-    margin-top: 1rem;
-    min-height: 1.5rem;
-    font-weight: 600;
-}
-
-.batch-entry-status-hint {
-    color: #fbbf24;
-}
-
-.batch-entry-status-success {
-    color: #86efac;
-}
-
-.batch-entry-status-error {
-    color: #fca5a5;
-}
-
-/*-----------------------------------------------------
 // Navigation
 //---------------------------------------------------*/
 
@@ -413,66 +324,47 @@ select option {
 // Editors
 //---------------------------------------------------*/
 
-.account-form {
-    border: 1px solid #374151;
-    border-radius: 8px;
-    padding: 1rem;
-    margin-bottom: 1.5rem;
-    background: #1f2937;
+.editor-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
-.form-status {
-    min-height: 1.25rem;
-    margin: 0;
-    color: #93c5fd;
-    font-weight: 600;
+.range-controls {
+  display: flex;
+  gap: 24px;
+  align-items: center;
+  flex-wrap: wrap;
 }
 
-/* The container that holds the three cards */
-.editor-dashboard {
-    display: flex;             /* This forces children into a row */
-    flex-direction: row;       /* Ensures horizontal alignment */
-    gap: 1.5rem;               /* Adds space between the cards */
-    align-items: flex-start;   /* Keeps cards aligned at the top */
-    padding: 1rem;
-    overflow-x: auto;          /* Allows scrolling if the screen is too narrow */
-    width: 75%;                /* Spans 75% of the parent container */
-    max-width: 100%;           /* Prevents breaking on small screens */
+.range-controls input[type="month"] {
+  padding: 0.5rem;
+  background: #374151;
+  color: #f9fafb;
+  border: 1px solid #4b5563;
+  border-radius: 6px;
 }
 
-/* Individual card styling */
-.editor-card {
-    flex: 1 1 0;
-    min-width: 0;
-    background: #1f2937;       /* Dark background */
-    border: 1px solid #374151; /* Border color */
-    border-radius: 8px;
-    padding: 1rem;
-    margin-bottom: 1.5rem;
-    color: #f9fafb;            /* A light text for dark mode */
+#csv-output {
+  width: 100%;
+  max-width: 900px;
+  box-sizing: border-box;
+  white-space: pre;
+  overflow-x: auto;
+  font-family: monospace;
+  padding: 0.75rem;
+  background: #111827;
+  color: #d1d5db;
+  border: 1px solid #374151;
+  border-radius: 6px;
 }
 
-/* Optional: styling for rows inside the scrollable balance/contribution lists */
-.editor-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0.5rem 0;
-    border-bottom: 1px solid #374151;
+#copy-btn {
+  align-self: flex-start;
 }
 
-/* Make the plus sign look like a clickable link */
-.expand-toggle {
-    cursor: pointer;      /* Changes mouse to a hand icon on hover */
-    color: #3b82f6;       /* A distinct blue color to imply interactivity */
-    font-weight: bold;
-    margin-left: 5px;
-    user-select: none;    /* Prevents the text from being highlighted on double-click */
-}
-
-.expand-toggle:hover {
-    text-decoration: underline;
-    color: #60a5fa;       /* Lighten the color on hover */
+#copy-status {
+  color: #86efac;
 }
 
 /*-----------------------------------------------------
@@ -539,6 +431,20 @@ select option {
 
 .year-boundary td {
     border-top: 2px solid var(--border-strong, #4a4a4a);
+}
+
+/* Make the plus sign look like a clickable link */
+.expand-toggle {
+    cursor: pointer;      /* Changes mouse to a hand icon on hover */
+    color: #3b82f6;       /* A distinct blue color to imply interactivity */
+    font-weight: bold;
+    margin-left: 5px;
+    user-select: none;    /* Prevents the text from being highlighted on double-click */
+}
+
+.expand-toggle:hover {
+    text-decoration: underline;
+    color: #60a5fa;       /* Lighten the color on hover */
 }
 
 /*-----------------------------------------------------
@@ -624,5 +530,5 @@ select option {
     margin: 0 0 0.75rem 0;
     font-size: 1.1rem;
     font-weight: 600;
-    color: #cbd5e1; /* adjust to match your existing dark-mode heading color */
+    color: var(--text-muted, #999);
 }

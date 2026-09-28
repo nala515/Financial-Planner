@@ -11,7 +11,6 @@ from .balances import (
     get_all_balances,
     get_account_balances,
     create_balance,
-    create_monthly_entry_batch,
     delete_balance,
 )
 
@@ -20,6 +19,10 @@ from .contributions import (
     get_account_contributions,
     create_contribution,
     delete_contribution,
+)
+
+from .data_integrity import (
+    find_missing_rows,
 )
 
 from .income import (
@@ -58,13 +61,14 @@ __all__ = [
     "get_all_balances",
     "get_account_balances",
     "create_balance",
-    "create_monthly_entry_batch",
     "delete_balance",
     # contributions
     "get_all_contributions",
     "get_account_contributions",
     "create_contribution",
     "delete_contribution",
+    # data integrity
+    "find_missing_rows",
     # income
     "get_income_events",
     "get_income_sources",

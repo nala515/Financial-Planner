@@ -168,11 +168,11 @@ if __name__ == "__main__":
     cur_dir = Path(__file__).resolve().parent
 
     # accounts
-    csv_file = cur_dir/"recent_accounts.csv"
+    csv_file = cur_dir/"myRecents/recent_accounts.csv"
     count = import_accounts_csv(csv_file)
     print(f"Imported {count} line(s) from {csv_file}")
 
     # income
-    csv_file = cur_dir/"recent_income.csv"
+    csv_file = cur_dir/"myRecents/recent_income.csv"
     count = import_income_csv(csv_file)
     print(f"Imported {count} line(s) from {csv_file}")

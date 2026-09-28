@@ -38,10 +38,6 @@ class MonthlyEntryCreate(BaseModel):
     balance_cents: int
     contribution_cents: int = 0
 
-class MonthlyEntryBatchCreate(BaseModel):
-    snapshot_date: date
-    entries: list[MonthlyEntryCreate]
-
 ##-----------------------------------------------------
 ## Updates
 ##-----------------------------------------------------
@@ -62,6 +58,13 @@ class IncomeSourceUpdate(BaseModel):
 ##-----------------------------------------------------
 ## Other
 ##-----------------------------------------------------
+
+class MissingEntryRow(BaseModel):
+    account_name: str
+    year: int
+    month: str
+    balance: str
+    contribution: str
 
 class DebugRequest(BaseModel):
     msg: str

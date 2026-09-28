@@ -2,182 +2,62 @@
 // Editor
 //-----------------------------------------------------
 
-let accountCache = [];
+const startInput = document.getElementById("range-start");
+const endInput = document.getElementById("range-end");
+const output = document.getElementById("csv-output");
 
-//-----------------------------------------------------
-// Populating forms
-//-----------------------------------------------------
+function defaultRange() {
+  const now = new Date();
+  const end = now.toISOString().slice(0, 7); // "YYYY-MM"
 
-function populateAccountForm(account) {
-    document.getElementById("account-name").value = account.name || "";
-    document.getElementById("account-category").value = account.category || "Cash";
-    document.getElementById("account-shared").checked = Boolean(account.shared);
+  const startDate = new Date(now.getFullYear(), now.getMonth() - 3, 1);
+  const start = startDate.toISOString().slice(0, 7);
+
+  return { start, end };
 }
 
+async function fetchAndRender() {
+  const start = startInput.value;
+  const end = endInput.value;
 
-async function populateAccountCategoryOptions(select) {
-    if (!select) {
-        return;
+  output.value = "Loading...";
+
+  const params = new URLSearchParams();
+  if (start) params.set("start", start);
+  if (end) params.set("end", end);
+
+  try {
+    const res = await fetch(`/api/missing-entries?${params}`);
+    if (!res.ok) {
+      output.value = `Error: ${res.status} ${res.statusText}`;
+      return;
     }
-    const categories = await getAccountCategories();
-    select.innerHTML = "";
-
-    Object.keys(categories)
-        .sort()
-        .forEach(categoryName => {
-            const option = document.createElement("option");
-            option.value = categoryName;
-            option.textContent = categoryName;
-            select.appendChild(option);
-        });
+    const rows = await res.json();
+    output.value = rows.length ? buildCsvText(rows) : "No missing entries in this range.";
+  } catch (err) {
+    output.value = `Error: ${err.message}`;
+  }
 }
 
-// uses selected account's info to populate the fields
-async function populateFormsWithAccountData(accountId) {
-    await populateAccountCategoryOptions(document.getElementById("account-category"));
-    const selectedAccount = accountCache.find(a => a.id === accountId);
-    if (selectedAccount) {
-        populateAccountForm(selectedAccount);
-        await populateBalances(accountId);
-        await populateContributions(accountId);
-    }
+function buildCsvText(rows) {
+  return rows
+    .map(r => `${r.account_name},${r.year},${r.month},${r.balance},${r.contribution}`)
+    .join("\n");
 }
 
-async function populateBalances(accountId) {
-    const container = document.getElementById("balances-list-container");
-    const response = await fetch(`/api/accounts/${accountId}/balances`);
-    const balances = await response.json();
+// initialize range inputs and auto-fetch
+const { start, end } = defaultRange();
+startInput.value = start;
+endInput.value = end;
+fetchAndRender();
 
-    if (!Array.isArray(balances) || balances.length === 0) {
-        container.innerHTML = '<div class="editor-row">No balances found.</div>';
-        return;
-    }
+// re-fetch whenever the range changes
+startInput.addEventListener("change", fetchAndRender);
+endInput.addEventListener("change", fetchAndRender);
 
-    container.innerHTML = balances.map(b => `
-        <div class="editor-row">
-            <span>${b.date}</span>
-            <input type="number" name="balance" value="${b.balance_cents / 100}" step="0.01">
-            <input type="hidden" name="date" value="${formatMonthYearLabel(b.date)}">
-        </div>
-    `).join('');
-}
-
-async function populateContributions(accountId) {
-    const container = document.getElementById("contributions-list-container");
-    const response = await fetch(`/api/accounts/${accountId}/contributions`);
-    const contributions = await response.json();
-
-    if (!Array.isArray(contributions) || contributions.length === 0) {
-        container.innerHTML = '<div class="editor-row">No contributions found.</div>';
-        return;
-    }
-
-    container.innerHTML = contributions.map(c => `
-        <div class="editor-row">
-            <span>${c.date}</span>
-            <input type="number" name="amount" value="${c.amount_cents / 100}" step="0.01">
-            <input type="hidden" name="date" value="${formatMonthLabel(c.date)} ${formatYearLabel(c.date)}">
-        </div>
-    `).join('');
-}
-
-//-----------------------------------------------------
-// Handling updates
-//-----------------------------------------------------
-
-async function handleAccountUpdate(event) {
-    event.preventDefault();
-
-    const selector = document.getElementById("account-selector");
-    const status = document.getElementById("account-form-status");
-    const nameInput = document.getElementById("account-name");
-    const categorySelect = document.getElementById("account-category");
-    const sharedInput = document.getElementById("account-shared");
-
-    if (!selector || !status || !nameInput || !categorySelect || !sharedInput) {
-        return;
-    }
-
-    const accountId = Number(selector.value);
-    if (!accountId) {
-        status.textContent = "Please select an account first.";
-        return;
-    }
-
-    const payload = {
-        name: nameInput.value.trim(),
-        shared: sharedInput.checked,
-        category: categorySelect.value,
-    };
-
-    try {
-        const response = await fetch(`/api/accounts/${accountId}`, {
-            method: "PATCH",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify(payload),
-        });
-
-        if (!response.ok) {
-            throw new Error("Unable to update account");
-        }
-        status.textContent = "Account updated.";
-        await initializeEditor();
-    } catch (error) {
-        status.textContent = error.message;
-    }
-}
-
-//-----------------------------------------------------
-// Page setup
-//-----------------------------------------------------
-
-async function initializeEditor() {
-    const selector = document.getElementById("account-selector");
-    try {
-        const accounts = await loadAccounts();
-        accountCache = Array.isArray(accounts) ? accounts : [];
-        const accountId = await populateAccountDropdown(selector, accounts); // returns accountId
-
-        if (accountId) {
-            populateFormsWithAccountData(accountId);
-        }
-    } catch (error) {
-        console.error(error);
-    }
-}
-
-document.addEventListener("DOMContentLoaded", async () => {
-    await loadNav();
-
-    // populate account dropdown and form
-    await initializeEditor(); // Fetches accounts and populates selector
-
-    const selector = document.getElementById("account-selector");
-    const accountForm = document.getElementById("account-form");
-    const resetButton = document.getElementById("reset-account-details");
-
-    // Account selector logic
-    if (selector) {
-        selector.addEventListener("change", async (event) => {
-            accountId = Number(event.target.value);
-            if (!accountId) return;
-            setSelectedAccountId(accountId);
-            await populateFormsWithAccountData(accountId);
-        });
-    }
-    // Reset button
-    if (resetButton) {
-        resetButton.addEventListener("click", async () => {
-            accountId = Number(selector.value);
-            if (accountId) {
-                await populateFormsWithAccountData(accountId);
-            }
-        });
-    }
-    // Update account
-    if (accountForm) {
-        accountForm.addEventListener("submit", handleAccountUpdate);
-    }
+document.getElementById("copy-btn").addEventListener("click", async () => {
+  await navigator.clipboard.writeText(output.value);
+  const status = document.getElementById("copy-status");
+  status.textContent = "Copied!";
+  setTimeout(() => (status.textContent = ""), 1500);
 });
