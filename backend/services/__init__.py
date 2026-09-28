@@ -23,7 +23,7 @@ from .contributions import (
 )
 
 from .data_integrity import (
-    get_missing_entries,
+    find_missing_rows,
 )
 
 from .income import (
@@ -70,7 +70,7 @@ __all__ = [
     "create_contribution",
     "delete_contribution",
     # data integrity
-    "get_missing_entries",
+    "find_missing_rows",
     # income
     "get_income_events",
     "get_income_sources",
