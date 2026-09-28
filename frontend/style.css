@@ -413,66 +413,30 @@ select option {
 // Editors
 //---------------------------------------------------*/
 
-.account-form {
-    border: 1px solid #374151;
-    border-radius: 8px;
-    padding: 1rem;
-    margin-bottom: 1.5rem;
-    background: #1f2937;
+.editor-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
-.form-status {
-    min-height: 1.25rem;
-    margin: 0;
-    color: #93c5fd;
-    font-weight: 600;
+.range-controls {
+  display: flex;
+  gap: 24px;
+  align-items: center;
+  flex-wrap: wrap; /* falls back to stacking only if the window gets too narrow */
 }
 
-/* The container that holds the three cards */
-.editor-dashboard {
-    display: flex;             /* This forces children into a row */
-    flex-direction: row;       /* Ensures horizontal alignment */
-    gap: 1.5rem;               /* Adds space between the cards */
-    align-items: flex-start;   /* Keeps cards aligned at the top */
-    padding: 1rem;
-    overflow-x: auto;          /* Allows scrolling if the screen is too narrow */
-    width: 75%;                /* Spans 75% of the parent container */
-    max-width: 100%;           /* Prevents breaking on small screens */
+#csv-output {
+  width: 100%;
+  max-width: 900px;   /* adjust to taste — this is what controls "wide enough for one line per row" */
+  box-sizing: border-box;
+  white-space: pre;   /* stops long lines from wrapping onto a second visual row */
+  overflow-x: auto;   /* horizontal scroll if a line is still too long for the box */
+  font-family: monospace;
 }
 
-/* Individual card styling */
-.editor-card {
-    flex: 1 1 0;
-    min-width: 0;
-    background: #1f2937;       /* Dark background */
-    border: 1px solid #374151; /* Border color */
-    border-radius: 8px;
-    padding: 1rem;
-    margin-bottom: 1.5rem;
-    color: #f9fafb;            /* A light text for dark mode */
-}
-
-/* Optional: styling for rows inside the scrollable balance/contribution lists */
-.editor-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0.5rem 0;
-    border-bottom: 1px solid #374151;
-}
-
-/* Make the plus sign look like a clickable link */
-.expand-toggle {
-    cursor: pointer;      /* Changes mouse to a hand icon on hover */
-    color: #3b82f6;       /* A distinct blue color to imply interactivity */
-    font-weight: bold;
-    margin-left: 5px;
-    user-select: none;    /* Prevents the text from being highlighted on double-click */
-}
-
-.expand-toggle:hover {
-    text-decoration: underline;
-    color: #60a5fa;       /* Lighten the color on hover */
+#copy-btn {
+  align-self: flex-start; /* keeps the button left-aligned under the box rather than stretching full width */
 }
 
 /*-----------------------------------------------------
@@ -539,6 +503,20 @@ select option {
 
 .year-boundary td {
     border-top: 2px solid var(--border-strong, #4a4a4a);
+}
+
+/* Make the plus sign look like a clickable link */
+.expand-toggle {
+    cursor: pointer;      /* Changes mouse to a hand icon on hover */
+    color: #3b82f6;       /* A distinct blue color to imply interactivity */
+    font-weight: bold;
+    margin-left: 5px;
+    user-select: none;    /* Prevents the text from being highlighted on double-click */
+}
+
+.expand-toggle:hover {
+    text-decoration: underline;
+    color: #60a5fa;       /* Lighten the color on hover */
 }
 
 /*-----------------------------------------------------
