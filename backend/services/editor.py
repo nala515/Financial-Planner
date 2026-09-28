@@ -2,9 +2,9 @@ from sqlalchemy.orm import Session
 from backend.repositories import balances_repository, contributions_repository, accounts_repository
 
 def find_missing_rows(db, start_ym, end_ym):
-    accounts = account_repo.list_all(db)
-    balances_by_account = balance_repo.all_by_account(db)
-    contributions_by_account = contribution_repo.all_by_account(db)
+    accounts = accounts_repository.list_all(db)
+    balances_by_account = balances_repository.all_by_account(db)
+    contributions_by_account = contributions_repository.all_by_account(db)
 
     rows = []
     for a in accounts:
