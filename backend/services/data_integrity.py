@@ -1,5 +1,3 @@
-# services/missing_entries.py
-
 from datetime import date
 from typing import Iterator
 from sqlalchemy.orm import Session
