@@ -18,6 +18,6 @@ def get_missing_entries(
     start_ym = _parse_ym(start)
     end_ym = _parse_ym(end) if end else (date.today().year, date.today().month)
     try:
-        return data_integrity_service.find_missing_rows(db, start_ym, end_ym)
+        return services.find_missing_rows(db, start_ym, end_ym)
     finally:
         db.close()
