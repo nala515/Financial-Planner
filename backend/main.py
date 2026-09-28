@@ -6,7 +6,7 @@ from backend.database import engine, SessionLocal
 from backend.models import Base
 from backend.schemas import DebugRequest
 from backend.account_categories import ACCOUNT_CATEGORIES
-from backend.routers import pages, accounts, balances, contributions, income, settings, summary
+from backend.routers import pages, accounts, balances, contributions, data_integrity, income, settings, summary
 
 app = FastAPI()
 
@@ -36,6 +36,7 @@ app.include_router(pages.router)
 app.include_router(accounts.router)
 app.include_router(balances.router)
 app.include_router(contributions.router)
+app.include_router(data_integrity.router)
 app.include_router(income.router)
 app.include_router(settings.router)
 app.include_router(summary.router)
