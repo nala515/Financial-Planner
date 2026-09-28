@@ -17,8 +17,11 @@ def _parse_ym(s: str) -> tuple[int, int]:
 def get_missing_entries(
     start: str = "2000-01",
     end: str | None = None,
-    db: Session = Depends(get_db),
 ):
+    db = SessionLocal()
     start_ym = _parse_ym(start)
     end_ym = _parse_ym(end) if end else (date.today().year, date.today().month)
-    return data_integrity_service.find_missing_rows(db, start_ym, end_ym)
+    try:
+        return data_integrity_service.find_missing_rows(db, start_ym, end_ym)
+    finally:
+        db.close()
