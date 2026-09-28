@@ -38,10 +38,6 @@ class MonthlyEntryCreate(BaseModel):
     balance_cents: int
     contribution_cents: int = 0
 
-class MonthlyEntryBatchCreate(BaseModel):
-    snapshot_date: date
-    entries: list[MonthlyEntryCreate]
-
 ##-----------------------------------------------------
 ## Updates
 ##-----------------------------------------------------
