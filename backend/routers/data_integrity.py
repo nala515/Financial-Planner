@@ -1,11 +1,7 @@
+from fastapi import APIRouter, HTTPException
 from datetime import date
-
-from fastapi import APIRouter, Depends
-from sqlalchemy.orm import Session
-
-from backend import schemas
-from backend.database import get_db
-from backend.services import data_integrity as data_integrity_service
+from backend.database import SessionLocal
+from backend import services, schemas
 
 router = APIRouter()
 
