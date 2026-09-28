@@ -63,5 +63,12 @@ class IncomeSourceUpdate(BaseModel):
 ## Other
 ##-----------------------------------------------------
 
+class MissingEntryRow(BaseModel):
+    account_name: str
+    year: int
+    month: str
+    balance: str
+    contribution: str
+
 class DebugRequest(BaseModel):
     msg: str
