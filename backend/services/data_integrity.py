@@ -2,11 +2,8 @@
 
 from datetime import date
 from typing import Iterator
-
 from sqlalchemy.orm import Session
-
 from backend.repositories import accounts_repository, balances_repository, contributions_repository
-
 
 def month_iter(start_ym: tuple[int, int], end_ym: tuple[int, int]) -> Iterator[tuple[int, int]]:
     y, m = start_ym
@@ -16,14 +13,12 @@ def month_iter(start_ym: tuple[int, int], end_ym: tuple[int, int]) -> Iterator[t
         if m > 12:
             y, m = y + 1, 1
 
-
 def _group_by_account_month(rows, amount_attr: str) -> dict[int, dict[tuple[int, int], int]]:
     grouped: dict[int, dict[tuple[int, int], int]] = {}
     for r in rows:
         key = (r.date.year, r.date.month)
         grouped.setdefault(r.account_id, {})[key] = getattr(r, amount_attr)
     return grouped
-
 
 def find_missing_rows(db: Session, start_ym: tuple[int, int], end_ym: tuple[int, int]) -> list[dict]:
     accounts = accounts_repository.db_get_accounts(db)
