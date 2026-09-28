@@ -423,20 +423,37 @@ select option {
   display: flex;
   gap: 24px;
   align-items: center;
-  flex-wrap: wrap; /* falls back to stacking only if the window gets too narrow */
+  flex-wrap: wrap;
+}
+
+.range-controls input[type="month"] {
+  padding: 0.5rem;
+  background: #374151;
+  color: #f9fafb;
+  border: 1px solid #4b5563;
+  border-radius: 6px;
 }
 
 #csv-output {
   width: 100%;
-  max-width: 900px;   /* adjust to taste — this is what controls "wide enough for one line per row" */
+  max-width: 900px;
   box-sizing: border-box;
-  white-space: pre;   /* stops long lines from wrapping onto a second visual row */
-  overflow-x: auto;   /* horizontal scroll if a line is still too long for the box */
+  white-space: pre;
+  overflow-x: auto;
   font-family: monospace;
+  padding: 0.75rem;
+  background: #111827;
+  color: #d1d5db;
+  border: 1px solid #374151;
+  border-radius: 6px;
 }
 
 #copy-btn {
-  align-self: flex-start; /* keeps the button left-aligned under the box rather than stretching full width */
+  align-self: flex-start;
+}
+
+#copy-status {
+  color: #86efac;
 }
 
 /*-----------------------------------------------------
@@ -602,5 +619,5 @@ select option {
     margin: 0 0 0.75rem 0;
     font-size: 1.1rem;
     font-weight: 600;
-    color: #cbd5e1; /* adjust to match your existing dark-mode heading color */
+    color: var(--text-muted, #999);
 }
