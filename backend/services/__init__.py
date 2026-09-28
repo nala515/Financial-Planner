@@ -11,7 +11,6 @@ from .balances import (
     get_all_balances,
     get_account_balances,
     create_balance,
-    create_monthly_entry_batch,
     delete_balance,
 )
 
@@ -62,7 +61,6 @@ __all__ = [
     "get_all_balances",
     "get_account_balances",
     "create_balance",
-    "create_monthly_entry_batch",
     "delete_balance",
     # contributions
     "get_all_contributions",
