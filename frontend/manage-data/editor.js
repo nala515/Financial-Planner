@@ -4,6 +4,13 @@
 
 let accountCache = [];
 
+// for generating the importer csv
+function buildCsvText(rows) {
+  return rows
+    .map(r => `${r.account_name},${r.year},${r.month},${r.balance},${r.contribution}`)
+    .join("\n");
+}
+
 //-----------------------------------------------------
 // Populating forms
 //-----------------------------------------------------
