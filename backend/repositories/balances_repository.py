@@ -1,4 +1,4 @@
-from ..models import Balance, MonthlyBalance, MonthlyContribution
+from ..models import Balance, Contribution
 from ..schemas import BalanceCreate
 
 from datetime import date
@@ -77,15 +77,15 @@ def db_get_category_totals(db: Session):
     """
     latest = (
         db.query(
-            MonthlyBalance.account_id.label("account_id"),
-            func.max(MonthlyBalance.date).label("anchor"),
+            Balance.account_id.label("account_id"),
+            func.max(Balance.date).label("anchor"),
         )
-        .group_by(MonthlyBalance.account_id)
+        .group_by(Balance.account_id)
         .subquery()
     )
-    cur = aliased(MonthlyBalance)
-    m1 = aliased(MonthlyBalance)
-    y1 = aliased(MonthlyBalance)
+    cur = aliased(Balance)
+    m1 = aliased(Balance)
+    y1 = aliased(Balance)
 
     return (
         db.query(
@@ -110,17 +110,17 @@ def db_get_monthly_growth(db: Session, categories: list[str], net_of_contributio
     param net_of_contributions: if True, subtracts out contributions, leaving investment gains only.
     Returns {(year, month): cents}, the total growth for accounts in the given categories.
     """
-    cur = aliased(MonthlyBalance)
-    prev = aliased(MonthlyBalance)
+    cur = aliased(Balance)
+    prev = aliased(Balance)
     prev_month = func.strftime("%Y-%m", prev.date)
 
     contrib = (
         db.query(
-            MonthlyContribution.account_id.label("account_id"),
-            func.strftime("%Y-%m", MonthlyContribution.date).label("month"),
-            func.sum(MonthlyContribution.amount_cents).label("total"),
+            Contribution.account_id.label("account_id"),
+            func.strftime("%Y-%m", Contribution.date).label("month"),
+            func.sum(Contribution.amount_cents).label("total"),
         )
-        .group_by(MonthlyContribution.account_id, "month")
+        .group_by(Contribution.account_id, "month")
         .subquery()
     )
 
