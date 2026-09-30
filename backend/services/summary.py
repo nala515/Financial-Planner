@@ -134,12 +134,8 @@ def calculate_monthly_savings_metrics(db: Session, income_sources: list):
     income_by_source = get_income_by_source(income_sources, income_events, months)
     source_ids = [source.id for source in income_sources]
 
-    invested_spendable_growth = balances_repository.db_get_monthly_growth(
-        db, INVESTED_SPENDABLE_CATEGORIES, net_of_contributions=True
-    )
-    spendable_growth = balances_repository.db_get_monthly_growth(
-        db, SPENDABLE_NON_RETIREMENT_CATEGORIES
-    )
+    invested_spendable_growth = balances_repository.db_get_monthly_growth(db, INVESTED_SPENDABLE_CATEGORIES, net_of_contributions=True)
+    spendable_growth = balances_repository.db_get_monthly_growth(db, SPENDABLE_NON_RETIREMENT_CATEGORIES)
 
     # gather together
     monthly_rows = []
@@ -190,25 +186,17 @@ def get_savings_summary(db: Session, granularity: str = "month"):
         if year not in yearly_totals:
             yearly_totals[year] = {
                 "month_count": 0,
-                "cash_income": 0,
-                "investment_gains": 0,
-                "total_income": 0,
-                "spending": 0,
-                "cash_savings": 0,
-                "total_savings": 0,
+                **{f: 0 for f in SUMMED_FIELDS},
                 "income_by_source": {source_id: 0 for source_id in source_ids},
             }
-
-        yearly_totals[year]["month_count"] += 1
-        yearly_totals[year]["cash_income"] += row["cash_income"]
-        yearly_totals[year]["investment_gains"] += row["investment_gains"]
-        yearly_totals[year]["total_income"] += row["total_income"]
-        yearly_totals[year]["spending"] += row["spending"]
-        yearly_totals[year]["cash_savings"] += row["cash_savings"]
-        yearly_totals[year]["total_savings"] += row["total_savings"]
-
+    
+        totals = yearly_totals[year]
+        totals["month_count"] += 1
+        for f in SUMMED_FIELDS:
+            totals[f] += row[f]
+    
         for source_id, amount in row["income_by_source"].items():
-            yearly_totals[year]["income_by_source"][int(source_id)] += amount
+            totals["income_by_source"][int(source_id)] += amount
 
     yearly_rows = []
     for year, data in sorted(yearly_totals.items(), reverse=True):
@@ -221,15 +209,10 @@ def get_savings_summary(db: Session, granularity: str = "month"):
             income_by_source[str(source_id)] = total
             avg_monthly_income_by_source[str(source_id)] = round(total / months)
     
-        row = {
-            "year": year,
-            "income_by_source": income_by_source,
-            "avg_monthly_income_by_source": avg_monthly_income_by_source,
-        }
+        row = {"year": year, "income_by_source": income_by_source, "avg_monthly_income_by_source": avg_monthly_income_by_source}
         for f in SUMMED_FIELDS:
             row[f] = data[f]
             row[f"avg_monthly_{f}"] = round(data[f] / months)
-    
         yearly_rows.append(row)
 
     return {
