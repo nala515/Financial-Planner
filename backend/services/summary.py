@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 from datetime import date
 from dateutil.relativedelta import relativedelta
-from backend.repositories import balances_repository, contributions_repository, accounts_repository, income_repository
+from backend.repositories import balances_repository, contributions_repository, income_repository
 from backend.account_categories import get_category_attributes, INVESTED_SPENDABLE_CATEGORIES, SPENDABLE_NON_RETIREMENT_CATEGORIES
 
 # returns a map of contributions for easy access by date
