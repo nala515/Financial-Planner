@@ -2,7 +2,14 @@ from sqlalchemy.orm import Session
 from datetime import date
 from dateutil.relativedelta import relativedelta
 from backend.repositories import balances_repository, contributions_repository, accounts_repository, income_repository
-from backend.account_categories import get_category_attributes
+from backend.account_categories import get_category_attributes, INVESTED_SPENDABLE_CATEGORIES, SPENDABLE_NON_RETIREMENT_CATEGORIES
+
+# returns a map of contributions for easy access by date
+def build_contributions_map(contributions: list):
+    contrib_map: dict[tuple[int, int, int], int] = {}
+    for c in contributions:
+        contrib_map[(c.account_id, c.date.year, c.date.month)] = c.amount_cents
+    return contrib_map
 
 
 def calculate_growth(
@@ -12,10 +19,8 @@ def calculate_growth(
     end: date,
 ):
     # Fetch balances and contributions and create maps
-    raw_balances = balances_repository.db_get_account_balances(db, account_id, start, end)
-    raw_contributions = contributions_repository.db_get_account_contributions(db, account_id, start, end)
-    balance_map = build_balance_map(raw_balances)
-    contrib_map = build_contributions_map(raw_contributions)
+    balances = balances_repository.db_get_account_balances(db, account_id, start, end)
+    contributions = contributions_repository.db_get_account_contributions(db, account_id, start, end)
 
     # Sort balances to ensure correct month-over-month pairing
     balances = sorted(raw_balances, key=lambda b: b.date)
@@ -97,29 +102,6 @@ def get_dashboard_data(db: Session):
     return {"net_worth": net_worth, "categories": categories}
 
 
-# returns a list containing category attributes for each account that exists, by ID
-def get_account_attrs(db: Session):
-    accounts = accounts_repository.db_get_accounts(db)
-    account_attrs = {
-        account.id: get_category_attributes(account.category)
-        for account in accounts
-    }
-    return account_attrs
-
-# returns a map of balances for easy access by date
-def build_balance_map(balances: list):
-    balance_map: dict[tuple[int, int, int], int] = {}
-    for balance in balances:
-        balance_map[(balance.account_id, balance.date.year, balance.date.month)] = balance.balance_cents
-    return balance_map
-
-# returns a map of contributions for easy access by date
-def build_contributions_map(contributions: list):
-    contrib_map: dict[tuple[int, int, int], int] = {}
-    for c in contributions:
-        contrib_map[(c.account_id, c.date.year, c.date.month)] = c.amount_cents
-    return contrib_map
-
 # returns total cash income for each month in a list
 def get_cash_income(income_events: list) -> dict[tuple[int, int], int]:
     cash_income = {}
@@ -127,62 +109,6 @@ def get_cash_income(income_events: list) -> dict[tuple[int, int], int]:
         key = (event.date.year, event.date.month)
         cash_income[key] = cash_income.get(key, 0) + event.amount_cents
     return cash_income
-
-# returns total gains for each month for accounts that are invested + spendable
-def get_invested_spendable_growth(balances: list,
-                                  account_attrs: dict,
-                                  balance_map: dict,
-                                  contrib_map: dict,
-                                  months: set) -> dict[tuple[int, int], int]:
-    growth = {key: 0 for key in months}
-
-    for balance in balances:
-        attrs = account_attrs.get(balance.account_id, get_category_attributes(None))
-
-        # Determine the previous month for the balance delta
-        prev_date = balance.date - relativedelta(months=1)
-        prev_key = (balance.account_id, prev_date.year, prev_date.month)
-        prev_balance = balance_map.get(prev_key)
-        if prev_balance is None:
-            continue
-
-        month_key = (prev_date.year, prev_date.month)
-        if month_key not in growth:
-            continue
-
-        # Filter by "invested spendable" criteria
-        if attrs.get("invested") and attrs.get("spendable"):
-            # Grab the contributions made in the previous month to subtract it out from overall growth
-            monthly_contrib = contrib_map.get(prev_key, 0)
-
-            # Calculate gain: balance change - contribution
-            net_gain = (balance.balance_cents - prev_balance) - monthly_contrib
-            growth[month_key] += net_gain
-    return growth
-
-# returns total balance growth for each month for accounts that are spendable
-def get_spendable_growth(balances: list,
-                         account_attrs: dict,
-                         balance_map: dict,
-                         months: set) -> dict[tuple[int, int], int]:
-    growth = {key: 0 for key in months}
-
-    for balance in balances:
-        attrs = account_attrs.get(balance.account_id, get_category_attributes(None))
-        prev_date = balance.date - relativedelta(months=1)
-        prev_key = (balance.account_id, prev_date.year, prev_date.month)
-        prev_balance = balance_map.get(prev_key)
-        if prev_balance is None:
-            continue
-
-        month_key = (prev_date.year, prev_date.month)
-        if month_key not in growth:
-            continue
-
-        if not attrs.get("retirement") and attrs.get("spendable"):
-            growth[month_key] += balance.balance_cents - prev_balance
-
-    return growth
 
 
 def get_income_by_source(income_sources: list, income_events: list, months: set):
@@ -198,21 +124,19 @@ def get_income_by_source(income_sources: list, income_events: list, months: set)
 
 
 def calculate_monthly_savings_metrics(db: Session, income_sources: list):
-    # get starting data
+    # collect starting data
     income_events = income_repository.db_get_income_events(db)
-    balances = balances_repository.db_get_all_balances(db)
-    balance_map = build_balance_map(balances)
-    contributions = contributions_repository.db_get_all_contributions(db)
-    contrib_map = build_contributions_map(contributions)
-    account_attrs = get_account_attrs(db)
-
-    # parse the data with these function calls
     cash_income = get_cash_income(income_events)
     months = set(cash_income.keys())
-    invested_spendable_growth = get_invested_spendable_growth(balances, account_attrs, balance_map, contrib_map, months)
-    spendable_growth = get_spendable_growth(balances, account_attrs, balance_map, months)
     income_by_source = get_income_by_source(income_sources, income_events, months)
     source_ids = [source.id for source in income_sources]
+
+    invested_spendable_growth = balances_repository.db_get_monthly_growth(
+        db, INVESTED_SPENDABLE_CATEGORIES, net_of_contributions=True
+    )
+    spendable_growth = balances_repository.db_get_monthly_growth(
+        db, SPENDABLE_NON_RETIREMENT_CATEGORIES
+    )
 
     # gather together
     monthly_rows = []
