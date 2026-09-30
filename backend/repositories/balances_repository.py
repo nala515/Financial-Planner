@@ -72,11 +72,11 @@ def db_get_account_balances(
 # for dashboard page
 def db_get_category_totals(db: Session):
     """Per category: (category, current_cents, one_month_ago_cents, one_year_ago_cents).
-    Each account is compared against its own latest snapshot date."""
+    Each account is compared against its own latest date."""
     latest = (
         db.query(
             MonthlyBalance.account_id.label("account_id"),
-            func.max(MonthlyBalance.snapshot_date).label("anchor"),
+            func.max(MonthlyBalance.date).label("anchor"),
         )
         .group_by(MonthlyBalance.account_id)
         .subquery()
@@ -94,11 +94,11 @@ def db_get_category_totals(db: Session):
         )
         .join(latest, latest.c.account_id == Account.id)
         .join(cur, and_(cur.account_id == Account.id,
-                        cur.snapshot_date == latest.c.anchor))
+                        cur.date == latest.c.anchor))
         .outerjoin(m1, and_(m1.account_id == Account.id,
-                            m1.snapshot_date == func.date(latest.c.anchor, "-1 month")))
+                            m1.date == func.date(latest.c.anchor, "-1 month")))
         .outerjoin(y1, and_(y1.account_id == Account.id,
-                            y1.snapshot_date == func.date(latest.c.anchor, "-1 year")))
+                            y1.date == func.date(latest.c.anchor, "-1 year")))
         .group_by(Account.category)
         .all()
     )
