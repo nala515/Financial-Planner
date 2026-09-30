@@ -181,9 +181,6 @@ def get_savings_summary(db: Session, granularity: str = "month"):
             "rows": monthly_rows,
         }
 
-    if granularity != "year":
-        raise ValueError("granularity must be 'month' or 'year'")
-
     yearly_totals: dict[int, dict] = {}
     for row in monthly_rows:
         year = row["year"]
