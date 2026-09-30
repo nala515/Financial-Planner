@@ -1,4 +1,4 @@
-from ..models import Balance, Contribution
+from ..models import Account, Balance, Contribution
 from ..schemas import BalanceCreate
 
 from datetime import date
