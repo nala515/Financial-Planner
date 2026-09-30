@@ -64,71 +64,37 @@ def calculate_growth(
     return results
 
 
+#-------------------------
+# Get dashboard data
+#-------------------------
+BUCKETS = ("retirement", "non_retirement", "cash", "spendable")
+
+def empty_stats():
+    return {"current": 0, "1m": 0, "1y": 0}
+
 def get_dashboard_data(db: Session):
-    accounts = accounts_repository.db_get_accounts(db)
+    categories = {key: empty_stats() for key in BUCKETS}
 
-    # initialize data
-    def empty_stats():
-        return {"current": 0, "1m": 0, "1y": 0}
+    for category, current, m_ago, y_ago in balances_repository.db_get_category_totals(db):
+        name = category or "Cash"
+        attrs = get_category_attributes(name)
 
-    categories = {
-        "retirement": empty_stats(),
-        "non_retirement": empty_stats(),
-        "cash": empty_stats(),
-        "spendable": empty_stats(),
-    }
-
-    # aggregate the data
-    for account in accounts:
-        balances = balances_repository.db_get_account_balances(db, account.id)
-        if not balances:
-            continue
-
-        latest_balance_record = balances[-1]
-        current_cents = latest_balance_record.balance_cents
-
-        # use this account's latest date as the "Anchor" date for comparisons
-        anchor_date = latest_balance_record.date
-        one_month_ago = anchor_date - relativedelta(months=1)
-        one_year_ago = anchor_date - relativedelta(years=1)
-
-        # map balances by date for easy historical lookup
-        balance_map = {b.date: b.balance_cents for b in balances}
-        m_ago_cents = balance_map.get(one_month_ago, 0)
-        y_ago_cents = balance_map.get(one_year_ago, 0)
-
-        # apply category aggregation
-        category_name = account.category or "Cash"
-        attrs = get_category_attributes(category_name)
-
-        # helper to add balances to a given category bucket
-        def add_to_category(key):
-            categories[key]["current"] += current_cents
-            categories[key]["1m"] += m_ago_cents
-            categories[key]["1y"] += y_ago_cents
-
-        # Master Buckets: Retirement vs Non-Retirement
-        if attrs.get("retirement"):
-            add_to_category("retirement")
-        else:
-            add_to_category("non_retirement")
-
-        # Overlapping Buckets: Cash vs Spendable
-        if category_name == "Cash" or category_name == "Credit":
-            add_to_category("cash")
+        keys = ["retirement" if attrs.get("retirement") else "non_retirement"]
+        if name in ("Cash", "Credit"):
+            keys.append("cash")
         if attrs.get("spendable"):
-            add_to_category("spendable")
+            keys.append("spendable")
 
-    net_worth = empty_stats()
-    net_worth["current"] = categories["retirement"]["current"] + categories["non_retirement"]["current"]
-    net_worth["1m"] = categories["retirement"]["1m"] + categories["non_retirement"]["1m"]
-    net_worth["1y"] = categories["retirement"]["1y"] + categories["non_retirement"]["1y"]
+        for key in keys:
+            categories[key]["current"] += current
+            categories[key]["1m"] += m_ago
+            categories[key]["1y"] += y_ago
 
-    return {
-        "net_worth": net_worth,
-        "categories": categories,
+    net_worth = {
+        period: categories["retirement"][period] + categories["non_retirement"][period]
+        for period in ("current", "1m", "1y")
     }
-
+    return {"net_worth": net_worth, "categories": categories}
 
 
 # returns a list containing category attributes for each account that exists, by ID
