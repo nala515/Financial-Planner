@@ -71,8 +71,10 @@ def db_get_account_balances(
 
 # for dashboard page
 def db_get_category_totals(db: Session):
-    """Per category: (category, current_cents, one_month_ago_cents, one_year_ago_cents).
-    Each account is compared against its own latest date."""
+    """
+    Returns one row per account category: (category, current_cents, one_month_ago_cents, one_year_ago_cents).
+    Used for calculating the growth from a month or a year ago to today.
+    """
     latest = (
         db.query(
             MonthlyBalance.account_id.label("account_id"),
@@ -102,6 +104,43 @@ def db_get_category_totals(db: Session):
         .group_by(Account.category)
         .all()
     )
+
+def db_get_monthly_growth(db: Session, categories: list[str], net_of_contributions: bool = False):
+    """
+    param net_of_contributions: if True, subtracts out contributions, leaving investment gains only.
+    Returns {(year, month): cents}, the total growth for accounts in the given categories.
+    """
+    cur = aliased(MonthlyBalance)
+    prev = aliased(MonthlyBalance)
+    prev_month = func.strftime("%Y-%m", prev.date)
+
+    contrib = (
+        db.query(
+            MonthlyContribution.account_id.label("account_id"),
+            func.strftime("%Y-%m", MonthlyContribution.date).label("month"),
+            func.sum(MonthlyContribution.amount_cents).label("total"),
+        )
+        .group_by(MonthlyContribution.account_id, "month")
+        .subquery()
+    )
+
+    gain = cur.balance_cents - prev.balance_cents
+    if net_of_contributions:
+        gain = gain - func.coalesce(contrib.c.total, 0)
+
+    rows = (
+        db.query(prev_month, func.sum(gain))
+        .select_from(prev)
+        .join(Account, Account.id == prev.account_id)
+        .join(cur, and_(cur.account_id == prev.account_id,
+                        cur.date == func.date(prev.date, "+1 month")))
+        .outerjoin(contrib, and_(contrib.c.account_id == prev.account_id,
+                                 contrib.c.month == prev_month))
+        .filter(Account.category.in_(categories))
+        .group_by(prev_month)
+        .all()
+    )
+    return {(int(m[:4]), int(m[5:7])): total for m, total in rows}
 
 
 def db_delete_balance(db: Session, balance_id: int):
