@@ -75,14 +75,24 @@ def db_get_category_totals(db: Session):
     Returns one row per account category: (category, current_cents, one_month_ago_cents, one_year_ago_cents).
     Used for calculating the growth from a month or a year ago to today.
     """
-    latest = (
-        db.query(
-            Balance.account_id.label("account_id"),
-            func.max(Balance.date).label("anchor"),
+    anchor_date = db.query(func.max(Balance.date)).scalar_subquery()
+
+    def latest_entry_on_or_before(target):
+        # per account: the date of its latest entry on or before `target`
+        return (
+            db.query(
+                Balance.account_id.label("account_id"),
+                func.max(Balance.date).label("anchor"),
+            )
+            .filter(Balance.date <= target)
+            .group_by(Balance.account_id)
+            .subquery()
         )
-        .group_by(Balance.account_id)
-        .subquery()
-    )
+
+    cur_dates = latest_entry_on_or_before(global_anchor)
+    m1_dates = latest_entry_on_or_before(func.date(anchor_date, "-1 month"))
+    y1_dates = latest_entry_on_or_before(func.date(anchor_date, "-1 year"))
+
     cur = aliased(Balance)
     m1 = aliased(Balance)
     y1 = aliased(Balance)
@@ -94,13 +104,12 @@ def db_get_category_totals(db: Session):
             func.coalesce(func.sum(m1.balance_cents), 0),
             func.coalesce(func.sum(y1.balance_cents), 0),
         )
-        .join(latest, latest.c.account_id == Account.id)
-        .join(cur, and_(cur.account_id == Account.id,
-                        cur.date == latest.c.anchor))
-        .outerjoin(m1, and_(m1.account_id == Account.id,
-                            m1.date == func.date(latest.c.anchor, "-1 month")))
-        .outerjoin(y1, and_(y1.account_id == Account.id,
-                            y1.date == func.date(latest.c.anchor, "-1 year")))
+        .join(cur_dates, cur_dates.c.account_id == Account.id)
+        .join(cur, and_(cur.account_id == Account.id, cur.date == cur_dates.c.anchor))
+        .outerjoin(m1_dates, m1_dates.c.account_id == Account.id)
+        .outerjoin(m1, and_(m1.account_id == Account.id, m1.date == m1_dates.c.anchor))
+        .outerjoin(y1_dates, y1_dates.c.account_id == Account.id)
+        .outerjoin(y1, and_(y1.account_id == Account.id, y1.date == y1_dates.c.anchor))
         .group_by(Account.category)
         .all()
     )
