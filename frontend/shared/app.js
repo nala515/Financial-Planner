@@ -36,6 +36,11 @@ async function getAccountCategories() {
 // Formatting
 //-----------------------------------------------------
 
+function formatTypeLabel(key) { 
+    // Example: "net_worth" -> "Net Worth", "spendable" -> "Spendable"
+    return key
+        .split("_")
+
 function formatCurrency(cents) {
     // check for a string before doing numerical logic
     if (cents === "TBD") {
