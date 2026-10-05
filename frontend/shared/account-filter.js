@@ -5,9 +5,28 @@ const AccountFilter = (() => {
   let selectedIds = new Set();
   let onChange = () => {};
 
-  let elTrigger, elLabel, elPanel, elPresets, elList;
+  let elRoot, elTrigger, elLabel, elPanel, elPresets, elList;
+  let outsideClickHandler = null;
 
-  function init({ accounts: accts, categories: cats, defaultType = "net_worth", onChange: cb }) {
+  const TEMPLATE = `
+    <button type="button" id="account-filter-trigger" class="account-filter-trigger">
+      <span id="account-filter-label" class="account-filter-label"></span>
+      <span class="account-filter-caret" aria-hidden="true">&#9662;</span>
+    </button>
+    <div id="account-filter-panel" class="account-filter-panel" hidden>
+      <div id="account-filter-presets" class="account-filter-presets"></div>
+      <div class="account-filter-actions">
+        <button type="button" data-action="select-all">Select all</button>
+        <button type="button" data-action="clear">Clear</button>
+      </div>
+      <div id="account-filter-list" class="account-filter-list"></div>
+    </div>
+  `;
+
+  function init({ container, accounts: accts, categories: cats, defaultType = "net_worth", onChange: cb }) {
+    elRoot = typeof container === "string" ? document.querySelector(container) : container;
+    if (!elRoot) throw new Error("AccountFilter.init: container element not found");
+
     accounts = accts;
     categories = cats;
     onChange = cb || (() => {});
@@ -15,20 +34,28 @@ const AccountFilter = (() => {
     const firstCategory = Object.values(categories)[0];
     descriptorKeys = Object.keys(firstCategory || {});
 
-    elTrigger = document.getElementById("account-filter-trigger");
-    elLabel = document.getElementById("account-filter-label");
-    elPanel = document.getElementById("account-filter-panel");
-    elPresets = document.getElementById("account-filter-presets");
-    elList = document.getElementById("account-filter-list");
+    // Inject markup (replaces any previous render, so re-init is safe)
+    if (!elRoot.id) elRoot.id = "account-filter";
+    elRoot.classList.add("account-filter");
+    elRoot.innerHTML = TEMPLATE;
+
+    elTrigger = elRoot.querySelector("#account-filter-trigger");
+    elLabel = elRoot.querySelector("#account-filter-label");
+    elPanel = elRoot.querySelector("#account-filter-panel");
+    elPresets = elRoot.querySelector("#account-filter-presets");
+    elList = elRoot.querySelector("#account-filter-list");
 
     buildPresets();
     buildAccountList();
     applyPreset(defaultType);
 
     elTrigger.addEventListener("click", togglePanel);
-    document.addEventListener("click", (e) => {
-      if (!document.getElementById("account-filter").contains(e.target)) closePanel();
-    });
+
+    if (outsideClickHandler) document.removeEventListener("click", outsideClickHandler);
+    outsideClickHandler = (e) => {
+      if (!elRoot.contains(e.target)) closePanel();
+    };
+    document.addEventListener("click", outsideClickHandler);
 
     elPanel.querySelector('[data-action="select-all"]').addEventListener("click", selectAll);
     elPanel.querySelector('[data-action="clear"]').addEventListener("click", clearAll);
