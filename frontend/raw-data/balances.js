@@ -22,14 +22,6 @@ function filterAccountsByType(accounts, categories, type) {
     });
 }
 
-function formatTypeLabel(key) {
-    // net_worth -> "Net Worth", spendable -> "Spendable"
-    return key
-        .split("_")
-        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-        .join(" ");
-}
-
 async function populateTypeSelector() {
     const categories = await getAccountCategories();
     const typeSelector = document.getElementById("type-selector");
