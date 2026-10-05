@@ -12,16 +12,6 @@ let expandedStates = {
     Retirement: false
 };
 
-// filter accounts by type to only show the ones requested
-function filterAccountsByType(accounts, categories, type) {
-    return accounts.filter(acc => {
-        const categoryInfo = categories[acc.category];
-        // If an account's category isn't in the mapping for some reason,
-        // exclude it rather than crash or silently include it.
-        return categoryInfo ? categoryInfo[type] === true : false;
-    });
-}
-
 async function populateTypeSelector() {
     const categories = await getAccountCategories();
     const typeSelector = document.getElementById("type-selector");
