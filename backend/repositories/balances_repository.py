@@ -89,7 +89,7 @@ def db_get_category_totals(db: Session):
             .subquery()
         )
 
-    cur_dates = latest_entry_on_or_before(global_anchor)
+    cur_dates = latest_entry_on_or_before(anchor_date)
     m1_dates = latest_entry_on_or_before(func.date(anchor_date, "-1 month"))
     y1_dates = latest_entry_on_or_before(func.date(anchor_date, "-1 year"))
 
