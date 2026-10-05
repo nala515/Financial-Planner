@@ -12,27 +12,6 @@ let expandedStates = {
     Retirement: false
 };
 
-async function populateTypeSelector() {
-    const categories = await getAccountCategories();
-    const typeSelector = document.getElementById("type-selector");
-
-    // Derive descriptor keys from any one category entry, since all
-    // entries share the same shape (retirement, spendable, invested, net_worth)
-    const firstCategory = Object.values(categories)[0];
-    const descriptorKeys = Object.keys(firstCategory || {});
-
-    typeSelector.innerHTML = "";
-    descriptorKeys.forEach(key => {
-        const option = document.createElement("option");
-        option.value = key;
-        option.textContent = formatTypeLabel(key);
-        if (key === "net_worth") {
-            option.selected = true;
-        }
-        typeSelector.appendChild(option);
-    });
-}
-
 //-----------------------------------------------------
 // Prep for building table
 //-----------------------------------------------------
@@ -174,10 +153,8 @@ async function loadBalances() {
         getAccountCategories()
     ]);
 
-    const typeSelector = document.getElementById("type-selector");
-    const selectedType = typeSelector ? typeSelector.value : "net_worth";
-    const typeFilteredAccounts = filterAccountsByType(accounts, categories, selectedType);
-    if (!Array.isArray(typeFilteredAccounts) || typeFilteredAccounts.length === 0) {
+    const typeFilteredAccounts = AccountFilter.getSelectedAccounts();
+    if (typeFilteredAccounts.length === 0) {
         container.innerHTML = "<p>No accounts matching this filter.</p>";
         return;
     }
@@ -208,12 +185,14 @@ async function loadBalances() {
 document.addEventListener("DOMContentLoaded", async () => {
     await loadNav();
     await loadSettings();
-    await populateTypeSelector();
 
-    // type filtering
     const typeSelector = document.getElementById("type-selector");
-    typeSelector.addEventListener("change", () => {
-        loadBalances();
+    AccountFilter.init({
+        container: typeSelector,
+        accounts,
+        categories,
+        defaultType: "net_worth",
+        onChange: () => loadBalances()
     });
     // [+] or [-] toggles
     const container = document.getElementById("balances");
