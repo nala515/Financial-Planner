@@ -7,7 +7,7 @@ ACCOUNT_CATEGORIES = {
     },
     "Credit": {
         "retirement": False,
-        "spendable": False,
+        "spendable": True,
         "invested": False,
         "net_worth": True,
     },
