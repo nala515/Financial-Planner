@@ -86,21 +86,41 @@ const AccountFilter = (() => {
 
   function buildAccountList() {
     elList.innerHTML = "";
+  
+    // One group per category defined in ACCOUNT_CATEGORIES, in the order the backend defines them
+    const groups = new Map(Object.keys(categories).map(key => [key, []]));
+    const other = [];
+  
     accounts.forEach(account => {
-      const row = document.createElement("label");
-      row.className = "account-filter-row";
-
-      const checkbox = document.createElement("input");
-      checkbox.type = "checkbox";
-      checkbox.value = account.id;
-      checkbox.addEventListener("change", () => toggleAccount(account.id, checkbox.checked));
-
-      const span = document.createElement("span");
-      span.textContent = account.name;
-
-      row.appendChild(checkbox);
-      row.appendChild(span);
-      elList.appendChild(row);
+      if (groups.has(account.category)) groups.get(account.category).push(account);
+      else other.push(account);   // category not in ACCOUNT_CATEGORIES
+    });
+    if (other.length) groups.set("Other", other);
+  
+    groups.forEach((members, key) => {
+      if (members.length === 0) return;   // skip empty categories
+  
+      const header = document.createElement("div");
+      header.className = "account-filter-group-header";
+      header.textContent = key;
+      elList.appendChild(header);
+  
+      members.forEach(account => {
+        const row = document.createElement("label");
+        row.className = "account-filter-row";
+  
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.value = account.id;
+        checkbox.addEventListener("change", () => toggleAccount(account.id, checkbox.checked));
+  
+        const span = document.createElement("span");
+        span.textContent = account.name;
+  
+        row.appendChild(checkbox);
+        row.appendChild(span);
+        elList.appendChild(row);
+      });
     });
   }
 
