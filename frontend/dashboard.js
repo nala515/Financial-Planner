@@ -5,7 +5,7 @@
 const DASHBOARD_BLURBS = {
     net_worth: "All assets minus all debts.",
     retirement: "Retirement and HSA accounts only.",
-    non_retirement: "Everything outside retirement funds.",
+    non_retirement: "Cash and investments, includes 529 but not HSA.",
     cash: "Checking and savings balances only.",
     spendable: "Cash and investments you could spend."
 };
