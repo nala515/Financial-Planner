@@ -48,23 +48,33 @@ async function loadAccounts() {
 
         const categoryOrder = [
             { key: "Cash", label: "Cash" },
+            { key: "Credit", label: "Credit" },
             { key: "Investment", label: "Investments" },
             { key: "Retirement", label: "Retirement" },
             { key: "HSA", label: "HSA" },
             { key: "529", label: "Education" },
         ];
-         // Group accounts by category
+        const OTHER_KEY = "Other";
+        const knownKeys = new Set(categoryOrder.map(c => c.key));
+
+        // Group accounts by category; anything not in categoryOrder goes to "Other"
         const accountsByCategory = new Map();
         accounts.forEach(account => {
-            const category = account.category || "Cash";
+            let category = account.category || "Cash";
+            if (!knownKeys.has(category)) {
+                category = OTHER_KEY;
+            }
             if (!accountsByCategory.has(category)) {
                 accountsByCategory.set(category, []);
             }
             accountsByCategory.get(category).push(account);
         });
 
+        // Known categories in order, then "Other" last
+        const sections = [...categoryOrder, { key: OTHER_KEY, label: "Other" }];
+
         // Render each section in order, skipping empty ones
-        categoryOrder.forEach(({ key, label }) => {
+        sections.forEach(({ key, label }) => {
             const categoryAccounts = accountsByCategory.get(key);
             if (!categoryAccounts || categoryAccounts.length === 0) return;
 
