@@ -11,9 +11,10 @@ async function loadAccounts() {
     }
 
     try {
-        const [accountsResponse, balancesResponse] = await Promise.all([
+        const [accountsResponse, balancesResponse, categories] = await Promise.all([
             fetch(`/api/accounts`),
             fetch(`/api/balances`),
+            getAccountCategories(),
         ]);
 
         if (!accountsResponse.ok) {
@@ -43,21 +44,13 @@ async function loadAccounts() {
             }
         });
 
-        const list = document.createElement("ul");
-        list.className = "account-list";
-
-        const categoryOrder = [
-            { key: "Cash", label: "Cash" },
-            { key: "Credit", label: "Credit" },
-            { key: "Investment", label: "Investments" },
-            { key: "Retirement", label: "Retirement" },
-            { key: "HSA", label: "HSA" },
-            { key: "529", label: "Education" },
-        ];
+        // Known categories come from ACCOUNT_CATEGORIES (in the order the backend
+        // defines them); anything not in there goes to "Other", which is shown last
         const OTHER_KEY = "Other";
-        const knownKeys = new Set(categoryOrder.map(c => c.key));
+        const knownKeys = new Set(Object.keys(categories));
+        const sectionKeys = [...knownKeys, OTHER_KEY];
 
-        // Group accounts by category; anything not in categoryOrder goes to "Other"
+        // Group accounts by category
         const accountsByCategory = new Map();
         accounts.forEach(account => {
             let category = account.category || "Cash";
@@ -70,17 +63,14 @@ async function loadAccounts() {
             accountsByCategory.get(category).push(account);
         });
 
-        // Known categories in order, then "Other" last
-        const sections = [...categoryOrder, { key: OTHER_KEY, label: "Other" }];
-
         // Render each section in order, skipping empty ones
-        sections.forEach(({ key, label }) => {
+        sectionKeys.forEach(key => {
             const categoryAccounts = accountsByCategory.get(key);
             if (!categoryAccounts || categoryAccounts.length === 0) return;
 
             const heading = document.createElement("h3");
             heading.className = "account-section-header";
-            heading.textContent = label;
+            heading.textContent = key;
             div.appendChild(heading);
 
             const list = document.createElement("ul");
