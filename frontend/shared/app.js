@@ -36,6 +36,15 @@ async function getAccountCategories() {
 // Formatting
 //-----------------------------------------------------
 
+
+function formatTypeLabel(key) {
+    // net_worth -> "Net Worth", spendable -> "Spendable"
+    return key
+        .split("_")
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(" ");
+}
+
 function formatCurrency(cents) {
     // check for a string before doing numerical logic
     if (cents === "TBD") {
