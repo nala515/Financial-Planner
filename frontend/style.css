@@ -248,6 +248,12 @@ select option {
     grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
 }
 
+.dashboard-blurb {
+    margin: 0.15rem 0 0.5rem;
+    font-size: 0.8rem;
+    color: #9ca3af;
+}
+
 /*-----------------------------------------------------
 // Accounts
 //---------------------------------------------------*/
