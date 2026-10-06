@@ -543,6 +543,17 @@ select option {
     margin-bottom: 1rem;
 }
 
+.account-filter-group-header {
+    margin: 0.75rem 0 0.25rem;
+    padding-bottom: 0.2rem;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #9ca3af;
+    border-bottom: 1px solid #374151;
+}
+.account-filter-group-header:first-child { margin-top: 0; }
+
 .account-filter-trigger {
     display: flex;
     align-items: center;
