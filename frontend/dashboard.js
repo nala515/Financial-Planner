@@ -46,14 +46,28 @@ function renderGrowth(currentCents, pastCents) {
 //-----------------------------------------------------
 
 async function loadDashboard() {
-    const dashboard = await response.json();
-    container.innerHTML = renderDashboardCard("net_worth", dashboard.net_worth, { heading: "h2", mainClass: "" });
-    
-    const keys = ["retirement", "non_retirement", "cash", "spendable"];
-    const grid = document.createElement("div");
-    grid.className = "dashboard-grid";
-    grid.innerHTML = keys.map(key => renderDashboardCard(key, dashboard.categories[key])).join("");
-    container.appendChild(grid);
+    const container = document.getElementById("dashboard");
+
+    if (!container) {
+        return;
+    }
+
+    try {
+        const response = await fetch(`/api/dashboard`);
+        if (!response.ok) {
+            throw new Error("Unable to load dashboard");
+        }
+        const dashboard = await response.json();
+        container.innerHTML = renderDashboardCard("net_worth", dashboard.net_worth, { heading: "h2", mainClass: "" });
+        
+        const keys = ["retirement", "non_retirement", "cash", "spendable"];
+        const grid = document.createElement("div");
+        grid.className = "dashboard-grid";
+        grid.innerHTML = keys.map(key => renderDashboardCard(key, dashboard.categories[key])).join("");
+        container.appendChild(grid);
+    } catch (error) {
+        container.innerHTML = `<p>${error.message}</p>`;
+    }
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
