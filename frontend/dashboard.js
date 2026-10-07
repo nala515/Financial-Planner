@@ -13,6 +13,7 @@ const DASHBOARD_BLURBS = {
 function renderDashboardCard(key, data, { heading = "h3", mainClass = "main-balance" } = {}) {
     const d = data || { current: 0, "1m": 0, "1y": 0 };
     const blurb = DASHBOARD_BLURBS[key];
+    const href = `/balances?filter=${encodeURIComponent(key)}`;
     return `
         <div class="dashboard-card">
             <${heading}>${formatTypeLabel(key)}</${heading}>
@@ -22,6 +23,7 @@ function renderDashboardCard(key, data, { heading = "h3", mainClass = "main-bala
                 <small><span>1M: ${renderGrowth(d.current, d["1m"])}</span></small>
                 <small><span>1Y: ${renderGrowth(d.current, d["1y"])}</span></small>
             </div>
+            <small class="dashboard-card-link"><a href="${href}">View balances</a></small>
         </div>
     `;
 }
