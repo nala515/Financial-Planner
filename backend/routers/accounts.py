@@ -31,6 +31,10 @@ def api_get_account(account_id: int):
 def api_get_account_categories():
     return ACCOUNT_CATEGORIES
 
+@router.get("/api/account-views")
+def get_account_views():
+    return ACCOUNT_VIEWS
+
 
 @router.post("/api/account")
 def create_account(account_data: schemas.AccountCreate):
