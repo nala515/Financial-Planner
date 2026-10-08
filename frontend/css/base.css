@@ -1,0 +1,50 @@
+
+body {
+    font-family: Arial, sans-serif;
+    margin: 2rem;
+    color: #f3f4f6;
+    background: #111827;
+}
+
+.checkbox-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 500;
+    margin-bottom: 0.1rem;
+}
+
+.checkbox-row input {
+    margin: 0;
+}
+
+.checkbox-row input {
+    margin-bottom: 0;
+    min-width: auto;
+}
+
+label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
+
+select,
+input[type="text"],
+button {
+    margin-bottom: 1rem;
+    padding: 0.5rem;
+    min-width: 240px;
+    background: #374151;
+    color: #f9fafb;
+    border: 1px solid #4b5563;
+    border-radius: 6px;
+}
+
+select optgroup {
+    font-weight: 600;
+}
+
+select option {
+    font-weight: normal;
+}
