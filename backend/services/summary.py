@@ -75,34 +75,22 @@ def calculate_growth(
 #-------------------------
 # Get dashboard data
 #-------------------------
-BUCKETS = ("retirement", "non_retirement", "cash", "spendable")
-
 def empty_stats():
     return {"current": 0, "1m": 0, "1y": 0}
 
 def get_dashboard_data(db: Session):
-    categories = {key: empty_stats() for key in BUCKETS}
+    totals = {key: empty_stats() for key in ACCOUNT_VIEWS}
 
     for category, current, m_ago, y_ago in balances_repository.db_get_category_totals(db):
-        name = category or "Cash"
-        attrs = get_category_attributes(name)
+        name = normalize_category(category)
+        for key, members in VIEW_CATEGORIES.items():
+            if name in members:
+                totals[key]["current"] += current
+                totals[key]["1m"] += m_ago
+                totals[key]["1y"] += y_ago
 
-        keys = ["retirement" if attrs.get("retirement") else "non_retirement"]
-        if name in ("Cash", "Credit"):
-            keys.append("cash")
-        if attrs.get("spendable"):
-            keys.append("spendable")
-
-        for key in keys:
-            categories[key]["current"] += current
-            categories[key]["1m"] += m_ago
-            categories[key]["1y"] += y_ago
-
-    net_worth = {
-        period: categories["retirement"][period] + categories["non_retirement"][period]
-        for period in ("current", "1m", "1y")
-    }
-    return {"net_worth": net_worth, "categories": categories}
+    net_worth = totals.pop("net_worth")
+    return {"net_worth": net_worth, "categories": totals}
 
 
 # returns total cash income for each month in a list
