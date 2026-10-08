@@ -1,0 +1,41 @@
+
+/*-----------------------------------------------------
+// Dashboard
+//---------------------------------------------------*/
+
+.dashboard-card {
+    border: 1px solid #374151;
+    border-radius: 8px;
+    padding: 1rem;
+    background: #1f2937;
+    margin-bottom: 1rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+.dashboard-grid {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.dashboard-blurb {
+    margin: 0.15rem 0 0.5rem;
+    font-size: 0.8rem;
+    color: #9ca3af;
+}
+
+.dashboard-card-link {
+    display: block;
+    margin-top: 10px;
+}
+
+.dashboard-card a {
+    color: #d1d5db;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.dashboard-card a:hover {
+    color: #4da3ff;
+    text-decoration: underline;
+}
