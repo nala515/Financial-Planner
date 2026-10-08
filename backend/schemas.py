@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from datetime import date
 
 ##-----------------------------------------------------
@@ -9,11 +9,6 @@ class AccountCreate(BaseModel):
     name: str
     shared: bool
     category: str
-
-class SettingsCreate(BaseModel):
-    group_cash_accounts: bool
-    hide_disabled_accounts: bool
-    show_retirement_accounts: bool
 
 class BalanceCreate(BaseModel):
     account_id: int
@@ -48,9 +43,7 @@ class AccountUpdate(BaseModel):
     category: str | None = None
 
 class SettingsUpdate(BaseModel):
-    group_cash_accounts: bool | None = None
     hide_disabled_accounts: bool | None = None
-    show_retirement_accounts: bool | None = None
 
 class IncomeSourceUpdate(BaseModel):
     name: str | None = None
@@ -58,6 +51,10 @@ class IncomeSourceUpdate(BaseModel):
 ##-----------------------------------------------------
 ## Other
 ##-----------------------------------------------------
+
+class SettingsResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    hide_disabled_accounts: bool
 
 class MissingEntryRow(BaseModel):
     account_name: str
