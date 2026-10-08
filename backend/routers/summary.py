@@ -3,6 +3,7 @@ from fastapi import APIRouter, Query
 from datetime import date
 from backend.database import SessionLocal
 from backend import services
+from typing import Literal
 
 router = APIRouter()
 
