@@ -1,36 +1,11 @@
-
-from fastapi import APIRouter
-from backend.database import SessionLocal
-from backend import services, schemas
-
-router = APIRouter()
+from sqlalchemy.orm import Session
+from backend.schemas import SettingsUpdate
+from backend.repositories import settings_repository
 
 
-@router.get("/api/settings")
-def get_settings():
-    db = SessionLocal()
-
-    try:
-        return services.get_settings(db)
-    finally:
-        db.close()
+def get_settings(db: Session):
+	return settings_repository.db_get_settings(db)
 
 
-@router.post("/api/settings")
-def create_settings(settings_data: schemas.SettingsCreate):
-    db = SessionLocal()
-
-    try:
-        return services.create_settings(db, settings_data)
-    finally:
-        db.close()
-
-
-@router.patch("/api/settings")
-def update_settings(settings_data: schemas.SettingsUpdate):
-    db = SessionLocal()
-
-    try:
-        return services.update_settings(db, settings_data)
-    finally:
-        db.close()
+def update_settings(db: Session, settings_data: SettingsUpdate):
+	return settings_repository.db_update_settings(db, settings_data)
