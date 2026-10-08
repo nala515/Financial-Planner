@@ -23,9 +23,7 @@ async function handleSettingsUpdate(event) {
     const status = document.getElementById("settings-form-status");
 
     const updatedSettings = {
-        group_cash_accounts: document.getElementById("setting-group-cash").checked,
-        hide_disabled_accounts: document.getElementById("setting-hide-disabled").checked,
-        show_retirement_accounts: document.getElementById("setting-show-retirement").checked
+        hide_disabled_accounts: document.getElementById("setting-hide-disabled").checked
     };
 
     try {
