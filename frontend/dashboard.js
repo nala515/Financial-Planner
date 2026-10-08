@@ -62,7 +62,7 @@ async function loadDashboard() {
         const dashboard = await response.json();
         container.innerHTML = renderDashboardCard("net_worth", dashboard.net_worth, { heading: "h2", mainClass: "" });
         
-        Object.keys(dashboard.categories)
+        const keys = Object.keys(dashboard.categories)
         const grid = document.createElement("div");
         grid.className = "dashboard-grid";
         grid.innerHTML = keys.map(key => renderDashboardCard(key, dashboard.categories[key])).join("");
