@@ -16,9 +16,6 @@ body {
 
 .checkbox-row input {
     margin: 0;
-}
-
-.checkbox-row input {
     margin-bottom: 0;
     min-width: auto;
 }
