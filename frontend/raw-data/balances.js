@@ -171,6 +171,7 @@ async function loadBalances() {
     container.innerHTML = buildTable(rows, columns, {
         tableClass: "data-table"
     });
+    initSelectableTable(container);
 }
 
 //-----------------------------------------------------
@@ -206,5 +207,4 @@ document.addEventListener("DOMContentLoaded", async () => {
             }
         });
     }
-    initSelectableTable(document.getElementById('balances'));
 });
