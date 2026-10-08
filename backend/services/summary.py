@@ -32,7 +32,7 @@ def calculate_growth(
     contributions = contributions_repository.db_get_account_contributions(db, account_id, start, end)
 
     # Sort balances to ensure correct month-over-month pairing
-    balances = sorted(raw_balances, key=lambda b: b.date)
+    balances = sorted(balances, key=lambda b: b.date)
     if not balances:
         return []
 
