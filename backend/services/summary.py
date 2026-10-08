@@ -2,7 +2,13 @@ from sqlalchemy.orm import Session
 from datetime import date
 from dateutil.relativedelta import relativedelta
 from backend.repositories import balances_repository, contributions_repository, income_repository
-from backend.account_categories import get_category_attributes, VIEW_CATEGORIES, ACCOUNT_VIEWS, INVESTED_SPENDABLE_CATEGORIES, SPENDABLE_NON_RETIREMENT_CATEGORIES
+from backend.account_categories import (
+    ACCOUNT_VIEWS,
+    INVESTED_SPENDABLE_CATEGORIES,
+    SPENDABLE_NON_RETIREMENT_CATEGORIES,
+    categories_matching,
+    normalize_category,
+)
 
 SUMMED_FIELDS = ("cash_income", "investment_gains", "total_income",
                  "spending", "cash_savings", "total_savings")
