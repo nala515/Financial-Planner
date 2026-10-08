@@ -254,6 +254,22 @@ select option {
     color: #9ca3af;
 }
 
+.dashboard-card-link {
+    display: block;
+    margin-top: 10px;
+}
+
+.dashboard-card a {
+    color: #d1d5db;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.dashboard-card a:hover {
+    color: #4da3ff;
+    text-decoration: underline;
+}
+
 /*-----------------------------------------------------
 // Accounts
 //---------------------------------------------------*/
