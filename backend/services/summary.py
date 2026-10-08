@@ -85,11 +85,12 @@ def empty_stats():
     return {"current": 0, "1m": 0, "1y": 0}
 
 def get_dashboard_data(db: Session):
+    view_members = {key: set(categories_matching(c)) for key, c in ACCOUNT_VIEWS.items()}
     totals = {key: empty_stats() for key in ACCOUNT_VIEWS}
 
     for category, current, m_ago, y_ago in balances_repository.db_get_category_totals(db):
         name = normalize_category(category)
-        for key, members in VIEW_CATEGORIES.items():
+        for key, members in view_members.items():
             if name in members:
                 totals[key]["current"] += current
                 totals[key]["1m"] += m_ago
