@@ -1,0 +1,47 @@
+
+/*-----------------------------------------------------
+// Editors
+//---------------------------------------------------*/
+
+.editor-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.range-controls {
+  display: flex;
+  gap: 24px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.range-controls input[type="month"] {
+  padding: 0.5rem;
+  background: #374151;
+  color: #f9fafb;
+  border: 1px solid #4b5563;
+  border-radius: 6px;
+}
+
+#csv-output {
+  width: 100%;
+  max-width: 900px;
+  box-sizing: border-box;
+  white-space: pre;
+  overflow-x: auto;
+  font-family: monospace;
+  padding: 0.75rem;
+  background: #111827;
+  color: #d1d5db;
+  border: 1px solid #374151;
+  border-radius: 6px;
+}
+
+#copy-btn {
+  align-self: flex-start;
+}
+
+#copy-status {
+  color: #86efac;
+}
