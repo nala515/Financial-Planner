@@ -33,7 +33,6 @@ const AccountFilter = (() => {
     onChange = cb || (() => {});
 
     if (!views[defaultView]) defaultView = "net_worth";
-    applyPreset(defaultView);
 
     // Inject markup (replaces any previous render, so re-init is safe)
     if (!elRoot.id) elRoot.id = "account-filter";
