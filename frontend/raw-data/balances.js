@@ -188,14 +188,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         getAccountCategories(),
         getAccountViews()
     ]);
-    AccountFilter.init({
-        container: typeSelector,
-        accounts,
-        categories,
-        views,
-        defaultView: new URLSearchParams(location.search).get("filter") || "net_worth",
-        onChange: () => loadBalances()
-    });
     // [+] or [-] toggles
     const container = document.getElementById("balances");
     if (container) {
@@ -207,4 +199,12 @@ document.addEventListener("DOMContentLoaded", async () => {
             }
         });
     }
+    AccountFilter.init({
+        container: typeSelector,
+        accounts,
+        categories,
+        views,
+        defaultView: new URLSearchParams(location.search).get("filter") || "net_worth",
+        onChange: () => loadBalances()
+    });
 });
