@@ -1,0 +1,106 @@
+
+/*-----------------------------------------------------
+// Cell selection
+//---------------------------------------------------*/
+
+.cell-selected {
+  background-color: rgba(77, 163, 255, 0.18); /* accent-color tint */
+  outline: 1px solid var(--accent-color, #4da3ff);
+  outline-offset: -1px;
+}
+
+.selection-summary-box {
+  position: absolute;
+  display: none;
+  background: var(--bg-secondary, #1a1a1a);
+  color: var(--text-primary, #f9fafb);
+  border: 1px solid var(--border-color, #4b5563);
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  z-index: 1000;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+
+/*-----------------------------------------------------
+// Tables
+//---------------------------------------------------*/
+
+.table-wrapper {        /* the cute little box around the table */
+    max-height: 70vh;
+    overflow-y: auto;
+    overflow-x: auto;
+    position: relative;
+    border: 1px solid #374151;
+    border-radius: 8px;
+    width: fit-content;
+    max-width: 100%;      /* safety net: prevents overflow past the page on small screens */
+    margin-left: 0;
+    margin-right: auto;
+}
+
+.table-wrapper.wide {
+    width: 100%;
+}
+
+.data-table {
+    width: auto;              /* or use a percentage like 75% — but this lets the table size to its columns, not the container */
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+
+.data-table th,
+.data-table td {
+    width: 15ch;               /* ~20 characters wide, per column */
+    border: 1px solid #374151;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;       /* prevents wrapping from fighting the fixed width */
+    padding: 6px 12px;
+    color: #d1d5db;
+}
+
+.data-table.wide {
+    width: 100%;                /* wide tables fill the container fully */
+    min-width: 100%;
+}
+
+.data-table.wide th,
+.data-table.wide td {
+    width: auto;                 /* let wide tables distribute space normally across columns */
+}
+
+.data-table thead th {
+    position: sticky;
+    top: 0;
+    background: #1f2937;
+    color: #f9fafb;
+    z-index: 2;
+    text-align: left;
+    padding: 8px 12px;
+}
+
+.table-data-row:hover {
+    background: #1f2937;
+}
+
+.year-boundary td {
+    border-top: 2px solid var(--border-strong, #4a4a4a);
+}
+
+/* Make the plus sign look like a clickable link */
+.expand-toggle {
+    cursor: pointer;      /* Changes mouse to a hand icon on hover */
+    color: #3b82f6;       /* A distinct blue color to imply interactivity */
+    font-weight: bold;
+    margin-left: 5px;
+    user-select: none;    /* Prevents the text from being highlighted on double-click */
+}
+
+.expand-toggle:hover {
+    text-decoration: underline;
+    color: #60a5fa;       /* Lighten the color on hover */
+}
