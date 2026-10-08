@@ -54,4 +54,4 @@ class Settings(Base):
     __tablename__ = "settings"
 
     id = Column(Integer, primary_key=True)
-    show_retirement_accounts = Column(Boolean, default=True)
+    hide_disabled_accounts = Column(Boolean, default=False)
