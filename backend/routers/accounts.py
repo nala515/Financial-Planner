@@ -2,7 +2,7 @@
 from fastapi import APIRouter
 from backend.database import SessionLocal
 from backend import services, schemas
-from backend.account_categories import ACCOUNT_CATEGORIES
+from backend.account_categories import ACCOUNT_CATEGORIES, ACCOUNT_VIEWS
 
 router = APIRouter()
 
