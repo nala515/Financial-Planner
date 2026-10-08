@@ -2,7 +2,7 @@
 from fastapi import APIRouter
 from backend.database import SessionLocal
 from backend import services, schemas
-from backend.account_categories import ACCOUNT_CATEGORIES
+from backend.account_categories import ACCOUNT_CATEGORIES, ACCOUNT_VIEWS
 
 router = APIRouter()
 
@@ -30,6 +30,10 @@ def api_get_account(account_id: int):
 @router.get("/api/account-categories")
 def api_get_account_categories():
     return ACCOUNT_CATEGORIES
+
+@router.get("/api/account-views")
+def get_account_views():
+    return ACCOUNT_VIEWS
 
 
 @router.post("/api/account")

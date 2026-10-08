@@ -182,15 +182,17 @@ document.addEventListener("DOMContentLoaded", async () => {
     await loadSettings();
 
     const typeSelector = document.getElementById("type-selector");
-    const [accounts, categories] = await Promise.all([
+    const [accounts, categories, views] = await Promise.all([
         fetch('/api/accounts').then(r => r.json()),
-        getAccountCategories()
+        getAccountCategories(),
+        getAccountViews()
     ]);
     AccountFilter.init({
         container: typeSelector,
         accounts,
         categories,
-        defaultType: "net_worth",
+        views,
+        defaultView: new URLSearchParams(location.search).get("filter") || "net_worth",
         onChange: () => loadBalances()
     });
     // [+] or [-] toggles

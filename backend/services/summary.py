@@ -2,7 +2,13 @@ from sqlalchemy.orm import Session
 from datetime import date
 from dateutil.relativedelta import relativedelta
 from backend.repositories import balances_repository, contributions_repository, income_repository
-from backend.account_categories import get_category_attributes, INVESTED_SPENDABLE_CATEGORIES, SPENDABLE_NON_RETIREMENT_CATEGORIES
+from backend.account_categories import (
+    ACCOUNT_VIEWS,
+    INVESTED_SPENDABLE_CATEGORIES,
+    SPENDABLE_NON_RETIREMENT_CATEGORIES,
+    categories_matching,
+    normalize_category,
+)
 
 SUMMED_FIELDS = ("cash_income", "investment_gains", "total_income",
                  "spending", "cash_savings", "total_savings")
@@ -75,34 +81,23 @@ def calculate_growth(
 #-------------------------
 # Get dashboard data
 #-------------------------
-BUCKETS = ("retirement", "non_retirement", "cash", "spendable")
-
 def empty_stats():
     return {"current": 0, "1m": 0, "1y": 0}
 
 def get_dashboard_data(db: Session):
-    categories = {key: empty_stats() for key in BUCKETS}
+    view_members = {key: set(categories_matching(c)) for key, c in ACCOUNT_VIEWS.items()}
+    totals = {key: empty_stats() for key in ACCOUNT_VIEWS}
 
     for category, current, m_ago, y_ago in balances_repository.db_get_category_totals(db):
-        name = category or "Cash"
-        attrs = get_category_attributes(name)
+        name = normalize_category(category)
+        for key, members in view_members.items():
+            if name in members:
+                totals[key]["current"] += current
+                totals[key]["1m"] += m_ago
+                totals[key]["1y"] += y_ago
 
-        keys = ["retirement" if attrs.get("retirement") else "non_retirement"]
-        if name in ("Cash", "Credit"):
-            keys.append("cash")
-        if attrs.get("spendable"):
-            keys.append("spendable")
-
-        for key in keys:
-            categories[key]["current"] += current
-            categories[key]["1m"] += m_ago
-            categories[key]["1y"] += y_ago
-
-    net_worth = {
-        period: categories["retirement"][period] + categories["non_retirement"][period]
-        for period in ("current", "1m", "1y")
-    }
-    return {"net_worth": net_worth, "categories": categories}
+    net_worth = totals.pop("net_worth")
+    return {"net_worth": net_worth, "categories": totals}
 
 
 # returns total cash income for each month in a list

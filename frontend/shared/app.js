@@ -32,6 +32,12 @@ async function getAccountCategories() {
     return accountCategories;
 }
 
+async function getAccountViews() {
+    const response = await fetch(`/api/account-views`);
+    accountViews = await response.json();
+    return accountViews;
+}
+
 //-----------------------------------------------------
 // Formatting
 //-----------------------------------------------------
