@@ -38,7 +38,6 @@ from .income import (
 
 from .settings import (
     get_settings,
-    create_settings,
     update_settings,
 )
 
@@ -80,7 +79,6 @@ __all__ = [
     "update_income_source",
     # settings
     "get_settings",
-    "create_settings",
     "update_settings",
     # summary
     "calculate_growth",
