@@ -1,7 +1,7 @@
 const AccountFilter = (() => {
   let accounts = [];
   let categories = {};
-  let descriptorKeys = [];
+  let views = {};
   let selectedIds = new Set();
   let onChange = () => {};
 
@@ -23,16 +23,17 @@ const AccountFilter = (() => {
     </div>
   `;
 
-  function init({ container, accounts: accts, categories: cats, defaultType = "net_worth", onChange: cb }) {
+  function init({ container, accounts: accts, categories: cats, views: v, defaultView = "net_worth", onChange: cb }) {
     elRoot = typeof container === "string" ? document.querySelector(container) : container;
     if (!elRoot) throw new Error("AccountFilter.init: container element not found");
 
     accounts = accts;
     categories = cats;
+    views = v;
     onChange = cb || (() => {});
 
-    const firstCategory = Object.values(categories)[0];
-    descriptorKeys = Object.keys(firstCategory || {});
+    if (!views[defaultView]) defaultView = "net_worth";
+    applyPreset(defaultView);
 
     // Inject markup (replaces any previous render, so re-init is safe)
     if (!elRoot.id) elRoot.id = "account-filter";
@@ -47,7 +48,7 @@ const AccountFilter = (() => {
 
     buildPresets();
     buildAccountList();
-    applyPreset(defaultType);
+    applyPreset(defaultView);
 
     elTrigger.addEventListener("click", togglePanel);
 
@@ -62,18 +63,18 @@ const AccountFilter = (() => {
   }
 
   // filter accounts by type to only show the ones requested
-  function filterAccountsByType(accounts, categories, type) {
+  function filterAccountsByView(accounts, categories, criteria) {
       return accounts.filter(acc => {
-          const categoryInfo = categories[acc.category];
-          // If an account's category isn't in the mapping for some reason,
-          // exclude it rather than crash or silently include it.
-          return categoryInfo ? categoryInfo[type] === true : false;
+          const attrs = categories[acc.category];
+          // Unknown category: exclude rather than crash or silently include.
+          if (!attrs) return false;
+          return Object.entries(criteria).every(([k, v]) => attrs[k] === v);
       });
   }
 
   function buildPresets() {
     elPresets.innerHTML = "";
-    descriptorKeys.forEach(key => {
+    Object.keys(views).forEach(key => {
       const btn = document.createElement("button");
       btn.type = "button";
       btn.className = "account-filter-preset";
@@ -124,8 +125,8 @@ const AccountFilter = (() => {
     });
   }
 
-  function idsForType(typeKey) {
-    return new Set(filterAccountsByType(accounts, categories, typeKey).map(a => a.id));
+  function idsForType(key) {
+      return new Set(filterAccountsByView(accounts, categories, views[key]).map(a => a.id));
   }
 
   function applyPreset(typeKey) {
@@ -169,7 +170,7 @@ const AccountFilter = (() => {
 
   function updateLabelAndActivePreset() {
     let matchedKey = null;
-    for (const key of descriptorKeys) {
+    for (const key of Object.keys(views)) {
       if (setsEqual(selectedIds, idsForType(key))) { matchedKey = key; break; }
     }
     elLabel.textContent = matchedKey ? formatTypeLabel(matchedKey) : "Custom";
