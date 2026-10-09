@@ -5,6 +5,10 @@ from ..account_categories import normalize_category
 from datetime import date
 from sqlalchemy.orm import Session
 
+##-----------------------------------------------------
+## CREATE
+##-----------------------------------------------------
+
 def db_create_account(db: Session, account_data: AccountCreate):
 
     category_name = normalize_category(account_data.category)
@@ -18,9 +22,11 @@ def db_create_account(db: Session, account_data: AccountCreate):
     db.add(account)
     db.commit()
     db.refresh(account)
-
     return account
 
+##-----------------------------------------------------
+## GET
+##-----------------------------------------------------
 
 def db_get_account(db: Session, account_id: int):
     return (
@@ -29,10 +35,20 @@ def db_get_account(db: Session, account_id: int):
         .first()
     )
 
-
 def db_get_accounts(db: Session):
     return db.query(Account).all()
 
+def db_get_accounts_by_ids(db: Session, account_ids: list[int], categories: list[str]):
+    return (
+        db.query(Account)
+        .filter(Account.id.in_(account_ids), Account.category.in_(categories))
+        .order_by(Account.id)
+        .all()
+    )
+
+##-----------------------------------------------------
+## UPDATE
+##-----------------------------------------------------
 
 def db_update_account(db: Session, account_id: int, account_data: AccountUpdate):
     account = db.query(Account).filter(Account.id == account_id).first()
@@ -51,9 +67,11 @@ def db_update_account(db: Session, account_id: int, account_data: AccountUpdate)
 
     db.commit()
     db.refresh(account)
-
     return account
 
+##-----------------------------------------------------
+## DELETE
+##-----------------------------------------------------
 
 def db_delete_account(db: Session, account_id: int):
     account = db.query(Account).filter(Account.id == account_id).first()
@@ -65,7 +83,6 @@ def db_delete_account(db: Session, account_id: int):
     db.query(Contribution).filter(Contribution.account_id == account_id).delete(synchronize_session=False)
     db.query(Account).filter(Account.id == account_id).delete(synchronize_session=False)
     db.commit()
-
     return True
 
 
@@ -80,5 +97,4 @@ def db_delete_all_accounts(db: Session):
 
     db.query(Account).delete(synchronize_session=False)
     db.commit()
-
     return len(account_ids)
