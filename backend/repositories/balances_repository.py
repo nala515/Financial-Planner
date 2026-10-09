@@ -1,9 +1,9 @@
-from ..models import Account, Balance
+from ..models import Balance
 from ..schemas import BalanceCreate
 
 from datetime import date
-from sqlalchemy import and_, func
-from sqlalchemy.orm import Session, aliased
+from sqlalchemy import func
+from sqlalchemy.orm import Session
 
 ##-----------------------------------------------------
 ## CREATE
