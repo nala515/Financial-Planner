@@ -1,10 +1,7 @@
 from ..models import Account, Balance, Contribution
-from ..schemas import BalanceCreate
 
-from datetime import date
 from sqlalchemy import and_, func
 from sqlalchemy.orm import Session, aliased
-
 
 # for dashboard page
 def db_get_category_totals(db: Session):
