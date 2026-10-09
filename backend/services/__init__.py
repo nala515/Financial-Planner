@@ -41,6 +41,11 @@ from .settings import (
     update_settings,
 )
 
+from .growth import (
+    GrowthError,
+    get_growth_projection,
+)
+
 from .summary import (
     calculate_growth,
     get_dashboard_data,
@@ -80,6 +85,9 @@ __all__ = [
     # settings
     "get_settings",
     "update_settings",
+    # growth
+    "GrowthError",
+    "get_growth_projection",
     # summary
     "calculate_growth",
     "get_dashboard_data",
