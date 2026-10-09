@@ -71,5 +71,10 @@ def categories_matching(criteria: dict[str, bool]) -> list[str]:
 
 VIEW_CATEGORIES = {key: set(categories_matching(c)) for key, c in ACCOUNT_VIEWS.items()}
 
+# premade categories: invested, spendable, non-retirement, etc.
+INVESTED_CATEGORIES = categories_matching({"invested": True})
 INVESTED_SPENDABLE_CATEGORIES = categories_matching({"invested": True, "spendable": True})
+INVESTED_NON_RETIREMENT_CATEGORIES = categories_matching({"invested": True, "retirement": False})
+INVESTED_RETIREMENT_CATEGORIES = categories_matching({"invested": True, "retirement": True})
 SPENDABLE_NON_RETIREMENT_CATEGORIES = categories_matching({"spendable": True, "retirement": False})
+
