@@ -1,6 +1,5 @@
 from sqlalchemy.orm import Session
 from datetime import date
-from dateutil.relativedelta import relativedelta
 from backend.repositories import balances_repository, contributions_repository, income_repository, summary_repository
 from backend.account_categories import (
     ACCOUNT_VIEWS,
