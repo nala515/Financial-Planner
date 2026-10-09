@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 from datetime import date
 from dateutil.relativedelta import relativedelta
-from backend.repositories import balances_repository, contributions_repository, income_repository
+from backend.repositories import balances_repository, contributions_repository, income_repository, summary_repository
 from backend.account_categories import (
     ACCOUNT_VIEWS,
     INVESTED_SPENDABLE_CATEGORIES,
@@ -89,7 +89,7 @@ def get_dashboard_data(db: Session):
     view_members = {key: set(categories_matching(c)) for key, c in ACCOUNT_VIEWS.items()}
     totals = {key: empty_stats() for key in ACCOUNT_VIEWS}
 
-    for category, current, m_ago, y_ago in balances_repository.db_get_category_totals(db):
+    for category, current, m_ago, y_ago in summary_repository.db_get_category_totals(db):
         name = normalize_category(category)
         for key, members in view_members.items():
             if name in members:
@@ -130,8 +130,8 @@ def calculate_monthly_savings_metrics(db: Session, income_sources: list):
     income_by_source = get_income_by_source(income_sources, income_events, months)
     source_ids = [source.id for source in income_sources]
 
-    invested_spendable_growth = balances_repository.db_get_monthly_growth(db, INVESTED_SPENDABLE_CATEGORIES, net_of_contributions=True)
-    spendable_growth = balances_repository.db_get_monthly_growth(db, SPENDABLE_NON_RETIREMENT_CATEGORIES)
+    invested_spendable_growth = summary_repository.db_get_monthly_growth(db, INVESTED_SPENDABLE_CATEGORIES, net_of_contributions=True)
+    spendable_growth = summary_repository.db_get_monthly_growth(db, SPENDABLE_NON_RETIREMENT_CATEGORIES)
 
     # gather together
     monthly_rows = []
