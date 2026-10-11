@@ -44,6 +44,7 @@
       inflationPct: 3,
       logScale: false,
       selectedIds: null,
+      pinnedMonths: [],
       plans: {
         non_retirement: { schedule: null, targetId: null },
         retirement: { schedule: null, targetId: null },
@@ -67,6 +68,11 @@
     return clean;
   }
 
+  function sanitizePinnedMonths(value) {
+    if (!Array.isArray(value)) return [];
+    return [...new Set(value.filter((month) => typeof month === "string" && MONTH_RE.test(month)))];
+  }
+
   function loadPrefs() {
     const defaults = defaultPrefs();
     try {
@@ -85,6 +91,7 @@
         inflationPct: Math.min(Math.max(number(raw.inflationPct, defaults.inflationPct), 0), 20),
         logScale: raw.logScale === true,
         selectedIds: Array.isArray(raw.selectedIds) ? raw.selectedIds.filter(Number.isInteger) : null,
+        pinnedMonths: sanitizePinnedMonths(raw.pinnedMonths),
         plans: {
           non_retirement: sanitizePlan(raw.plans?.non_retirement),
           retirement: sanitizePlan(raw.plans?.retirement),
@@ -228,6 +235,12 @@
   function syncControlStates() {
     byId("growth-window").disabled = prefs.returnMode === "manual";
     byId("growth-inflation-pct").disabled = !prefs.inflation;
+  }
+
+  function syncPinnedControls() {
+    const clearPins = byId("growth-clear-pins");
+    if (!clearPins) return;
+    clearPins.hidden = !prefs.pinnedMonths.length;
   }
 
   //-----------------------------------------------------
@@ -500,7 +513,17 @@
   }
 
   function renderChart() {
-    GrowthChart.render(byId("growth-chart"), lastResponse, { log: prefs.logScale, inflation: prefs.inflation });
+    GrowthChart.render(byId("growth-chart"), lastResponse, {
+      log: prefs.logScale,
+      inflation: prefs.inflation,
+      pins: prefs.pinnedMonths,
+      onPinsChange: (nextPins) => {
+        prefs.pinnedMonths = nextPins;
+        savePrefs();
+        syncPinnedControls();
+        if (lastResponse) renderResults();
+      },
+    });
   }
 
   function statTile(label, value, note) {
@@ -595,7 +618,7 @@
     const holder = byId("growth-data-table");
     holder.innerHTML = "";
     if (!lastResponse.dates.length || byId("growth-table-toggle").getAttribute("aria-expanded") !== "true") return;
-    holder.appendChild(GrowthChart.buildTable(lastResponse));
+    holder.appendChild(GrowthChart.buildTable(lastResponse, prefs.pinnedMonths));
   }
 
   function buildTableToggle() {
@@ -622,9 +645,18 @@
   document.addEventListener("DOMContentLoaded", async () => {
     await loadNav();
 
+    byId("growth-clear-pins").addEventListener("click", (event) => {
+      event.preventDefault();
+      prefs.pinnedMonths = [];
+      savePrefs();
+      syncPinnedControls();
+      if (lastResponse) renderResults();
+    });
+
     buildControls();
     buildPlans();
     buildTableToggle();
+    syncPinnedControls();
 
     let views;
     try {
