@@ -23,7 +23,8 @@ const AccountFilter = (() => {
     </div>
   `;
 
-  function init({ container, accounts: accts, categories: cats, views: v, defaultView = "net_worth", onChange: cb }) {
+  function init({ container, accounts: accts, categories: cats, views: v,
+                  defaultView = "net_worth", initialSelectedIds = null, onChange: cb }) {
     elRoot = typeof container === "string" ? document.querySelector(container) : container;
     if (!elRoot) throw new Error("AccountFilter.init: container element not found");
 
@@ -47,7 +48,12 @@ const AccountFilter = (() => {
 
     buildPresets();
     buildAccountList();
-    applyPreset(defaultView);
+
+    // Restore a saved selection when there is one (ids that no longer exist are dropped); otherwise use the default view.
+    const knownIds = new Set(accounts.map(a => a.id));
+    const restoredIds = (initialSelectedIds || []).filter(id => knownIds.has(id));
+    if (restoredIds.length > 0) applySelection(restoredIds);
+    else applyPreset(defaultView);
 
     elTrigger.addEventListener("click", togglePanel);
 
@@ -130,6 +136,13 @@ const AccountFilter = (() => {
 
   function applyPreset(typeKey) {
     selectedIds = idsForType(typeKey);
+    syncCheckboxes();
+    updateLabelAndActivePreset();
+    onChange(getSelectedAccounts());
+  }
+
+  function applySelection(ids) {
+    selectedIds = new Set(ids);
     syncCheckboxes();
     updateLabelAndActivePreset();
     onChange(getSelectedAccounts());

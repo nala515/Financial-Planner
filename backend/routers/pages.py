@@ -44,13 +44,9 @@ def get_savings():
 def get_summary():
     return FileResponse("frontend/growth/summary.html")
 
-@router.get("/growth-investment")
-def get_growth_investment():
-    return FileResponse("frontend/growth/growth-investment.html")
-
-@router.get("/growth-retirement")
-def get_growth_retirement():
-    return FileResponse("frontend/growth/growth-retirement.html")
+@router.get("/growth")
+def get_growth():
+    return FileResponse("frontend/growth/growth.html")
 
 @router.get("/editor")
 def get_editor():
