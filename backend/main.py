@@ -6,7 +6,9 @@ from backend.database import engine, SessionLocal
 from backend.models import Base
 from backend.schemas import DebugRequest
 from backend.account_categories import ACCOUNT_CATEGORIES
-from backend.routers import pages, accounts, balances, contributions, data_integrity, growth, income, settings, summary
+from backend.routers import (
+    pages, accounts, balances, contributions, data_integrity, growth, income, settings, summary
+)
 
 app = FastAPI()
 
