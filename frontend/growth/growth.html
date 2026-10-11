@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Growth Projection - Finance Tracker</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="icon" href="/static/favicon.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body data-page="growth">
+
+<div id="nav-container"></div>
+<h1>Growth Projection</h1>
+
+<div id="growth-controls"></div>
+<div id="growth-plans"></div>
+
+<p id="growth-status" class="gp-status" role="alert" hidden></p>
+
+<div id="growth-summary" class="gp-stats"></div>
+
+<div id="growth-chart-card" class="gp-card">
+    <div class="gp-chart-toolbar">
+        <label class="checkbox-row"><input type="checkbox" id="growth-log"> Log scale</label>
+    </div>
+    <div id="growth-chart"></div>
+    <button type="button" id="growth-table-toggle" class="gp-link-button" aria-expanded="false" aria-controls="growth-data-table">Show data table</button>
+    <div id="growth-data-table"></div>
+</div>
+
+<div id="growth-rates"></div>
+
+<script src="/static/shared/app.js"></script>
+<script src="/static/shared/nav.js"></script>
+<script src="/static/shared/account-filter.js"></script>
+<script src="/static/growth/growth-chart.js"></script>
+<script src="/static/growth/growth.js"></script>
+
+</body>
+</html>

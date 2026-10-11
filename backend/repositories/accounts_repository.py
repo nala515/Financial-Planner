@@ -1,9 +1,13 @@
-from ..models import Account, Balance, Contribution, Settings
-from ..schemas import AccountCreate, AccountUpdate, SettingsCreate, SettingsUpdate
+from ..models import Account, Balance, Contribution
+from ..schemas import AccountCreate, AccountUpdate
 from ..account_categories import normalize_category
 
 from datetime import date
 from sqlalchemy.orm import Session
+
+##-----------------------------------------------------
+## CREATE
+##-----------------------------------------------------
 
 def db_create_account(db: Session, account_data: AccountCreate):
 
@@ -18,27 +22,11 @@ def db_create_account(db: Session, account_data: AccountCreate):
     db.add(account)
     db.commit()
     db.refresh(account)
-
     return account
 
-def db_create_settings(db: Session, settings_data: SettingsCreate):
-    settings = db.query(Settings).first()
-    if settings is not None:
-        print("Settings object already exists. Not creating a new one.")
-        return settings
-
-    settings = Settings(
-        group_cash_accounts=settings_data.group_cash_accounts,
-        hide_disabled_accounts=settings_data.hide_disabled_accounts,
-        show_retirement_accounts=settings_data.show_retirement_accounts,
-    )
-
-    db.add(settings)
-    db.commit()
-    db.refresh(settings)
-
-    return settings
-
+##-----------------------------------------------------
+## GET
+##-----------------------------------------------------
 
 def db_get_account(db: Session, account_id: int):
     return (
@@ -47,14 +35,20 @@ def db_get_account(db: Session, account_id: int):
         .first()
     )
 
-
 def db_get_accounts(db: Session):
     return db.query(Account).all()
 
+def db_get_accounts_by_ids(db: Session, account_ids: list[int], categories: list[str]):
+    return (
+        db.query(Account)
+        .filter(Account.id.in_(account_ids), Account.category.in_(categories))
+        .order_by(Account.id)
+        .all()
+    )
 
-def db_get_settings(db: Session):
-    return db.query(Settings).first()
-
+##-----------------------------------------------------
+## UPDATE
+##-----------------------------------------------------
 
 def db_update_account(db: Session, account_id: int, account_data: AccountUpdate):
     account = db.query(Account).filter(Account.id == account_id).first()
@@ -73,30 +67,11 @@ def db_update_account(db: Session, account_id: int, account_data: AccountUpdate)
 
     db.commit()
     db.refresh(account)
-
     return account
 
-
-def db_update_settings(db: Session, settings_data: SettingsUpdate):
-    settings = db.query(Settings).first()
-
-    if settings is None:
-        return None
-
-    if settings_data.group_cash_accounts is not None:
-        settings.group_cash_accounts = settings_data.group_cash_accounts
-
-    if settings_data.hide_disabled_accounts is not None:
-        settings.hide_disabled_accounts = settings_data.hide_disabled_accounts
-
-    if settings_data.show_retirement_accounts is not None:
-        settings.show_retirement_accounts = settings_data.show_retirement_accounts
-
-    db.commit()
-    db.refresh(settings)
-
-    return settings
-
+##-----------------------------------------------------
+## DELETE
+##-----------------------------------------------------
 
 def db_delete_account(db: Session, account_id: int):
     account = db.query(Account).filter(Account.id == account_id).first()
@@ -108,7 +83,6 @@ def db_delete_account(db: Session, account_id: int):
     db.query(Contribution).filter(Contribution.account_id == account_id).delete(synchronize_session=False)
     db.query(Account).filter(Account.id == account_id).delete(synchronize_session=False)
     db.commit()
-
     return True
 
 
@@ -123,5 +97,4 @@ def db_delete_all_accounts(db: Session):
 
     db.query(Account).delete(synchronize_session=False)
     db.commit()
-
     return len(account_ids)

@@ -8,16 +8,8 @@ async function populateSettings() {
 
     container.innerHTML = `
         <div class="editor-row">
-            <span>Group Cash Accounts</span>
-            <input type="checkbox" id="setting-group-cash" ${settings.group_cash_accounts ? 'checked' : ''}>
-        </div>
-        <div class="editor-row">
             <span>Hide Disabled Accounts</span>
             <input type="checkbox" id="setting-hide-disabled" ${settings.hide_disabled_accounts ? 'checked' : ''}>
-        </div>
-        <div class="editor-row">
-            <span>Show Retirement Accounts</span>
-            <input type="checkbox" id="setting-show-retirement" ${settings.show_retirement_accounts ? 'checked' : ''}>
         </div>
         <div class="form-actions">
             <button type="submit" class="primary-button">Save Settings</button>
@@ -31,9 +23,7 @@ async function handleSettingsUpdate(event) {
     const status = document.getElementById("settings-form-status");
 
     const updatedSettings = {
-        group_cash_accounts: document.getElementById("setting-group-cash").checked,
-        hide_disabled_accounts: document.getElementById("setting-hide-disabled").checked,
-        show_retirement_accounts: document.getElementById("setting-show-retirement").checked
+        hide_disabled_accounts: document.getElementById("setting-hide-disabled").checked
     };
 
     try {

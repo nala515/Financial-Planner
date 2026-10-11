@@ -71,5 +71,19 @@ def categories_matching(criteria: dict[str, bool]) -> list[str]:
 
 VIEW_CATEGORIES = {key: set(categories_matching(c)) for key, c in ACCOUNT_VIEWS.items()}
 
+# premade categories: invested, spendable, non-retirement, etc.
+INVESTED_CATEGORIES = categories_matching({"invested": True})
 INVESTED_SPENDABLE_CATEGORIES = categories_matching({"invested": True, "spendable": True})
+INVESTED_NON_RETIREMENT_CATEGORIES = categories_matching({"invested": True, "retirement": False})
+INVESTED_RETIREMENT_CATEGORIES = categories_matching({"invested": True, "retirement": True})
 SPENDABLE_NON_RETIREMENT_CATEGORIES = categories_matching({"spendable": True, "retirement": False})
+
+def get_invested_group(category: str | None) -> str | None:
+    """'retirement' or 'non_retirement' for an invested category, or None if the category isn't invested."""
+    normalized = normalize_category(category)
+    if normalized in INVESTED_RETIREMENT_CATEGORIES:
+        return "retirement"
+    if normalized in INVESTED_NON_RETIREMENT_CATEGORIES:
+        return "non_retirement"
+
+    return None

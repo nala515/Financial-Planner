@@ -38,8 +38,12 @@ from .income import (
 
 from .settings import (
     get_settings,
-    create_settings,
     update_settings,
+)
+
+from .growth import (
+    GrowthError,
+    get_growth_projection,
 )
 
 from .summary import (
@@ -80,8 +84,10 @@ __all__ = [
     "update_income_source",
     # settings
     "get_settings",
-    "create_settings",
     "update_settings",
+    # growth
+    "GrowthError",
+    "get_growth_projection",
     # summary
     "calculate_growth",
     "get_dashboard_data",
