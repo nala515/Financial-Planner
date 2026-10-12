@@ -97,7 +97,7 @@ __all__ = [
     "get_growth_projection",
     # account summary
     "calculate_growth",
-    get_account_summary,
+    "get_account_summary",
     # dashboard
     "get_dashboard_data",
     # savings
