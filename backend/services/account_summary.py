@@ -159,6 +159,8 @@ def _build_monthly_account_rows(accounts: list, balance_rows: list, contribution
             "invested_balance": m["invested"],
             "cash_balance": m["cash"],
             "opening_balance": cum_opening,
+            "opening_balance": cum_opening,
+            "money_in": cum_opening + cum_contributions,
             "cumulative_contributions": cum_contributions,
             "cumulative_gain": cum_gain,
             "contributions": m["contributions"],
@@ -211,6 +213,7 @@ def _roll_up_account_years(monthly_rows: list):
             "invested_balance": first["invested_balance"],
             "cash_balance": first["cash_balance"],
             "opening_balance": first["opening_balance"],
+            "money_in": first["money_in"],
             "cumulative_contributions": first["cumulative_contributions"],
             "cumulative_gain": first["cumulative_gain"],
             "contributions": contributions,
@@ -224,6 +227,9 @@ def _roll_up_account_years(monthly_rows: list):
         end = yearly[i + 1] if i + 1 < len(yearly) else latest
         row["end_total_balance"] = end["total_balance"]
         row["end_invested_balance"] = end["invested_balance"]
+        row["end_invested_balance"] = end["invested_balance"]
+        row["end_money_in"] = end["money_in"]
+        row["end_cumulative_gain"] = end["cumulative_gain"]
         row["end_cash_balance"] = end["cash_balance"]
 
     return yearly
