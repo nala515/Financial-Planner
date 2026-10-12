@@ -1,0 +1,38 @@
+
+/*-----------------------------------------------------
+// Account Summary page
+// (classes are prefixed acs-)
+//---------------------------------------------------*/
+
+.acs-controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 0 1.25rem;
+}
+
+.acs-tile-label {
+    margin: 0;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #9ca3af;
+}
+
+.acs-tile-value {
+    margin: 0.35rem 0 0;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #f9fafb;
+    white-space: nowrap;
+}
+
+/* the two gain colors win over the default tile color */
+.acs-tile-value.growth-positive { color: #4ade80; }
+.acs-tile-value.growth-negative { color: #f87171; }
+
+.acs-table th,
+.acs-table td {
+    width: 14ch;
+}
