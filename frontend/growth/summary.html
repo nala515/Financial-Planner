@@ -1,24 +1,30 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Summary - Finance Tracker</title>
+    <title>Account Summary - Finance Tracker</title>
     <link rel="stylesheet" href="/static/style.css">
-    <link rel="icon" href="/static/favicon.png"> 
+    <link rel="icon" href="/static/favicon.png">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body data-page="summary">
 
 <div id="nav-container"></div>
-<h1>Monthly Summary</h1>
+<h1>Account Summary</h1>
 
-<label for="account-selector">Select account</label>
-<select id="account-selector"></select>
+<div class="acs-controls">
+    <div id="account-filter-container"></div>
+    <div id="summary-toggle" class="savings-toggle-group"></div>
+</div>
 
+<div id="summary-stats"></div>
+<div id="summary-chart"></div>
 <div id="summary"></div>
 
 <script src="/static/shared/app.js"></script>
 <script src="/static/shared/nav.js"></script>
+<script src="/static/shared/account-filter.js"></script>
 <script src="/static/shared/selection-logic.js"></script>
+<script src="/static/growth/account-summary-chart.js"></script>
 <script src="/static/growth/summary.js"></script>
 
 </body>
