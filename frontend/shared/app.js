@@ -62,6 +62,14 @@ function formatCurrency(cents) {
     });
 }
 
+// null/undefined (e.g. a month with no gain yet) shows as a dash
+function formatPercent(value) {
+    if (value === null || value === undefined) {
+        return "-";
+    }
+    return `${value.toFixed(2)}%`;
+}
+
 const MONTH_NAMES = [
     "Jan", "Feb", "Mar", "Apr", "May", "Jun",
     "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
@@ -120,6 +128,8 @@ function buildTable(rows, columns, options = {}) {
                 display = "-";
             } else if (col.isCurrency) {
                 display = formatCurrency(value);
+            } else if (col.isPercent) {
+                display = formatPercent(value);
             } else {
                 display = value;
             }
