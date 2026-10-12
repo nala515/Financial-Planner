@@ -8,7 +8,7 @@ from backend.schemas import DebugRequest
 from backend.account_categories import ACCOUNT_CATEGORIES
 from backend.routers import (
     pages, accounts, account_summary, balances, contributions,
-    data_integrity, growth, income, savings, settings
+    dashboard, data_integrity, growth, income, savings, settings
 )
 
 app = FastAPI()
