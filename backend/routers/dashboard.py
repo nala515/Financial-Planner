@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Query
+from fastapi import APIRouter
 from backend.database import SessionLocal
 from backend import services
 
