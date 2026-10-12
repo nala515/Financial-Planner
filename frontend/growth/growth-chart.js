@@ -8,10 +8,12 @@ const GrowthChart = (() => {
   const MARGIN = { top: 16, right: 16, bottom: 30, left: 64 };
 
   let container = null;
-  let elLegend, elWrap, elSvg, elTooltip, elEmpty;
+  let elLegend, elWrap, elSvg, elTooltip, elEmpty, elPinLayer;
   let data = null;
   let options = { log: false, inflation: false };
   let hoverIndex = null;
+  let pinMonths = [];
+  let onPinsChange = null;
   let geometry = null;      // scales and sizes from the last draw
   let resizeObserver = null;
 
@@ -133,11 +135,14 @@ const GrowthChart = (() => {
     elTooltip.className = "gp-tooltip";
     elTooltip.hidden = true;
 
+    elPinLayer = document.createElement("div");
+    elPinLayer.className = "gp-pin-layer";
+
     elEmpty = document.createElement("p");
     elEmpty.className = "gp-empty";
     elEmpty.hidden = true;
 
-    elWrap.append(elSvg, elTooltip, elEmpty);
+    elWrap.append(elSvg, elPinLayer, elTooltip, elEmpty);
     container.append(elLegend, elWrap);
 
     elSvg.addEventListener("keydown", onKeyDown);
@@ -163,6 +168,8 @@ const GrowthChart = (() => {
     }
     data = newData;
     options = Object.assign({ log: false, inflation: false }, newOptions);
+    pinMonths = Array.isArray(newOptions?.pins) ? newOptions.pins.filter((month) => typeof month === "string") : [];
+    onPinsChange = typeof newOptions?.onPinsChange === "function" ? newOptions.onPinsChange : null;
     hoverIndex = null;
     draw();
   }
@@ -285,6 +292,66 @@ const GrowthChart = (() => {
       svgEl("path", { class: "gp-line gp-line-actual", d: pathFor(history) }, elSvg);
     }
 
+    const pinIndexes = data.dates
+      .map((month, index) => (pinMonths.includes(month) ? index : -1))
+      .filter((index) => index >= 0);
+
+    pinIndexes.forEach((index) => {
+      const px = x(index);
+      svgEl("line", {
+        class: "gp-pin-line",
+        x1: px, x2: px,
+        y1: MARGIN.top, y2: MARGIN.top + plotHeight,
+      }, elSvg);
+    });
+
+    geometry = { width, height, plotWidth, plotHeight, n, start, x, y: scale.y, series: { actual, low, base, high } };
+
+    const pinPopups = [];
+    pinIndexes.forEach((index) => {
+      pinPopups.push({ index, x: x(index) });
+    });
+    const offsets = new Map();
+    pinPopups.forEach((entry) => {
+      let offset = 0;
+      pinPopups.forEach((other) => {
+        if (other.index === entry.index) return;
+        if (Math.abs(other.x - entry.x) < 48) offset = Math.max(offset, (offsets.get(other.index) || 0) + 1);
+      });
+      offsets.set(entry.index, offset);
+    });
+
+    elPinLayer.innerHTML = "";
+    pinPopups.forEach((entry) => {
+      const stack = offsets.get(entry.index) || 0;
+      const popup = document.createElement("div");
+      popup.className = "gp-pin-tooltip";
+      popup.style.left = `${entry.x}px`;
+      popup.style.top = `${MARGIN.top + 10 + stack * 18}px`;
+
+      const heading = document.createElement("div");
+      heading.className = "gp-pin-tooltip-heading";
+      heading.textContent = formatMonth(data.dates[entry.index]);
+      popup.appendChild(heading);
+
+      const rows = tooltipRows(entry.index).rows;
+      rows.forEach(([kind, label, valueDollars]) => {
+        const row = document.createElement("div");
+        row.className = "gp-pin-tooltip-row";
+        const key = document.createElement("span");
+        key.className = `gp-key gp-key-${kind}`;
+        const value = document.createElement("strong");
+        value.textContent = formatDollars(valueDollars * 100);
+        const labelEl = document.createElement("span");
+        labelEl.className = "gp-pin-tooltip-label";
+        labelEl.textContent = label;
+        row.append(key, value, labelEl);
+        popup.appendChild(row);
+      });
+
+      elPinLayer.appendChild(popup);
+    });
+
     // Hover layer: guide line, dots, and a transparent target covering the whole plot
     svgEl("line", { class: "gp-hover-line", x1: 0, x2: 0, y1: MARGIN.top, y2: MARGIN.top + plotHeight, visibility: "hidden" }, elSvg);
     ["actual", "high", "base", "low"].forEach((name) => {
@@ -295,23 +362,43 @@ const GrowthChart = (() => {
       class: "gp-overlay", x: MARGIN.left, y: MARGIN.top, width: plotWidth, height: plotHeight,
     }, elSvg);
     overlay.addEventListener("pointermove", onPointerMove);
-    overlay.addEventListener("pointerdown", onPointerMove);
+    overlay.addEventListener("pointerdown", onPointerDown);
     // A finger lifting off the screen also fires pointerleave; keep the readout up for touch.
     overlay.addEventListener("pointerleave", (event) => { if (event.pointerType !== "touch") hideHover(); });
-
-    geometry = { width, height, plotWidth, plotHeight, n, start, x, y: scale.y, series: { actual, low, base, high } };
   }
 
   //-----------------------------------------------------
   // Hover and keyboard
   //-----------------------------------------------------
 
-  function onPointerMove(event) {
-    if (!geometry) return;
+  function monthIndexFromEvent(event) {
+    if (!geometry) return null;
     const box = elSvg.getBoundingClientRect();
     const share = (event.clientX - box.left - MARGIN.left) / geometry.plotWidth;
     const index = Math.round(share * (geometry.n - 1));
-    showHover(Math.min(Math.max(index, 0), geometry.n - 1));
+    return Math.min(Math.max(index, 0), geometry.n - 1);
+  }
+
+  function onPointerMove(event) {
+    const index = monthIndexFromEvent(event);
+    if (index === null) return;
+    showHover(index);
+  }
+
+  function onPointerDown(event) {
+    const index = monthIndexFromEvent(event);
+    if (index === null) return;
+    togglePin(index);
+  }
+
+  function togglePin(index) {
+    if (!geometry || !data || !data.dates[index]) return;
+    const month = data.dates[index];
+    const nextPins = pinMonths.includes(month)
+      ? pinMonths.filter((value) => value !== month)
+      : [...pinMonths, month];
+    pinMonths = nextPins;
+    if (onPinsChange) onPinsChange(nextPins.slice());
   }
 
   function onKeyDown(event) {
@@ -323,7 +410,11 @@ const GrowthChart = (() => {
     else if (event.key === "ArrowLeft") index -= step;
     else if (event.key === "Home") index = 0;
     else if (event.key === "End") index = geometry.n - 1;
-    else if (event.key === "Escape") { hideHover(); return; }
+    else if (event.key === "Enter" || event.key === " " || event.key === "Spacebar") {
+      event.preventDefault();
+      if (hoverIndex !== null) togglePin(hoverIndex);
+      return;
+    } else if (event.key === "Escape") { hideHover(); return; }
     else return;
 
     event.preventDefault();
@@ -416,9 +507,10 @@ const GrowthChart = (() => {
   //-----------------------------------------------------
 
   // One row per January, plus the first month, the latest entry and the last month.
-  function buildTable(tableData) {
+  function buildTable(tableData, pinnedMonths = []) {
     const table = document.createElement("table");
     table.className = "gp-table";
+    const pinned = new Set(Array.isArray(pinnedMonths) ? pinnedMonths : []);
 
     const head = table.createTHead().insertRow();
     ["Month", "Actual", "Base", "Low", "High"].forEach((text) => {
@@ -435,9 +527,14 @@ const GrowthChart = (() => {
       if (!(i === 0 || i === start || i === last || month.endsWith("-01"))) return;
       const row = body.insertRow();
       if (i === start) row.className = "gp-table-start";
+      if (pinned.has(month)) row.classList.add("gp-table-pinned");
 
       const monthCell = row.insertCell();
-      monthCell.textContent = formatMonth(month);
+      if (pinned.has(month)) {
+        monthCell.innerHTML = `${formatMonth(month)} <span class="gp-table-pin-tag">Pinned</span>`;
+      } else {
+        monthCell.textContent = formatMonth(month);
+      }
       [tableData.actual[i], tableData.base[i], tableData.low[i], tableData.high[i]].forEach((cents) => {
         const cell = row.insertCell();
         cell.textContent = cents === null ? "-" : formatDollars(cents);

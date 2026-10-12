@@ -189,13 +189,78 @@
 
 .gp-chart-toolbar {
     display: flex;
-    justify-content: flex-end;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
     margin-bottom: 0.4rem;
     font-size: 0.85rem;
     color: #d1d5db;
 }
 
 .gp-chart-toolbar .checkbox-row { margin: 0; }
+
+.gp-pin-layer {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+
+.gp-pin-line {
+    stroke: #b26d00;
+    stroke-width: 1.5;
+    stroke-dasharray: 4 3;
+    opacity: 0.9;
+    pointer-events: none;
+}
+
+.gp-pin-tooltip {
+    position: absolute;
+    min-width: 132px;
+    padding: 0.4rem 0.5rem;
+    background: rgba(255, 249, 238, 0.96);
+    color: #2f3b48;
+    border: 1px solid rgba(178, 109, 0, 0.4);
+    border-radius: 8px;
+    box-shadow: 0 6px 18px rgba(38, 53, 69, 0.15);
+    font-size: 0.75rem;
+    line-height: 1.4;
+    z-index: 3;
+    transform: translateX(-50%);
+    pointer-events: none;
+}
+
+.gp-pin-tooltip-heading {
+    margin-bottom: 0.2rem;
+    font-weight: 700;
+}
+
+.gp-pin-tooltip-row {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    column-gap: 0.5rem;
+    align-items: center;
+}
+
+.gp-pin-tooltip-label { opacity: 0.8; }
+.gp-pin-tooltip strong { justify-self: end; }
+
+.gp-table-pinned {
+    background: rgba(255, 191, 84, 0.06);
+}
+
+.gp-table-pinned .gp-table-pin-tag {
+    display: inline-block;
+    margin-left: 0.5rem;
+    padding: 0.1rem 0.45rem;
+    background: rgba(188, 118, 20, 0.12);
+    color: #7a4a00;
+    border-radius: 999px;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
 
 .gp-legend {
     display: flex;
