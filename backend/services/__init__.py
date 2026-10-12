@@ -46,11 +46,17 @@ from .growth import (
     get_growth_projection,
 )
 
-from .summary import (
+from .account_summary import (
     calculate_growth,
-    get_dashboard_data,
+)
+
+from .savings import (,
     get_savings_summary,
     calculate_monthly_savings_metrics,
+)
+
+from .dashboard import (
+    get_dashboard_data,
 )
 
 __all__ = [
@@ -88,9 +94,11 @@ __all__ = [
     # growth
     "GrowthError",
     "get_growth_projection",
-    # summary
+    # account summary
     "calculate_growth",
+    # dashboard
     "get_dashboard_data",
+    # savings
     "get_savings_summary",
     "calculate_monthly_savings_metrics",
 ]
