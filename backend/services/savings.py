@@ -1,5 +1,6 @@
 from sqlalchemy.orm import Session
-from backend.repositories import income_repository
+from backend.repositories import income_repository, summary_repository
+from backend.account_categories import INVESTED_SPENDABLE_CATEGORIES, SPENDABLE_NON_RETIREMENT_CATEGORIES
 
 SUMMED_FIELDS = ("cash_income", "investment_gains", "total_income",
                  "spending", "cash_savings", "total_savings")
