@@ -2,7 +2,6 @@ from sqlalchemy.orm import Session
 from datetime import date
 from backend.repositories import accounts_repository, balances_repository, contributions_repository, income_repository
 from backend.account_categories import get_category_attributes
-)
 
 # returns a map of contributions for easy access by date
 def build_contributions_map(contributions: list):
