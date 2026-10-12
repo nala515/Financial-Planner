@@ -48,6 +48,7 @@ from .growth import (
 
 from .account_summary import (
     calculate_growth,
+    get_account_summary,
 )
 
 from .savings import (,
@@ -96,6 +97,7 @@ __all__ = [
     "get_growth_projection",
     # account summary
     "calculate_growth",
+    get_account_summary,
     # dashboard
     "get_dashboard_data",
     # savings
