@@ -198,12 +198,11 @@ def _roll_up_account_years(monthly_rows: list):
 
         return_pct = None
         if n:
-            base = first["invested_balance"]
-            for i, r in enumerate(complete_rows):
-                inflow = r["contributions"] + (r["opening_added"] if i > 0 else 0)
-                base += inflow * (n - i) / n
-            if base > 0:
-                return_pct = round(gain / base * 100, 2)
+            growth_factor = 1.0
+            for r in complete_rows:
+                if r["return_pct"] is not None:
+                    growth_factor *= 1 + r["return_pct"] / 100
+            return_pct = round((growth_factor - 1) * 100, 2)
 
         yearly.append({
             "year": year,
