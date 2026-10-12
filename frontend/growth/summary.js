@@ -95,6 +95,45 @@ function buildAccountSummaryColumnDescriptors(data, granularity) {
     return columns;
 }
 
+// One chart point per row, oldest first. Yearly points are the year-end values (the backend's end_* fields),
+// and the current year ends at the latest entry.
+function normalizeAccountSummaryChartPoint(row, granularity, latest) {
+    if (granularity === "month") {
+        const heading = formatMonthYear(row.year, row.month);
+        return {
+            year: row.year, month: row.month, heading,
+            invested: row.invested_balance, cash: row.cash_balance, total: row.total_balance,
+            moneyIn: row.money_in, gain: row.cumulative_gain,
+        };
+    }
+
+    const heading = row.complete ? `End of ${row.year}` : `Latest entry, ${formatMonthYear(latest.year, latest.month)}`;
+    return {
+        year: row.year, month: null, heading,
+        invested: row.end_invested_balance, cash: row.end_cash_balance, total: row.end_total_balance,
+        moneyIn: row.end_money_in, gain: row.end_cumulative_gain,
+    };
+}
+
+function buildAccountSummaryChartData(data, granularity) {
+    const points = data.rows
+        .map(row => ({ row, key: granularity === "month" ? row.year * 12 + row.month : row.year }))
+        .sort((a, b) => a.key - b.key)
+        .map(({ row }) => normalizeAccountSummaryChartPoint(row, granularity, data.latest));
+    return { points, hasInvested: data.has_invested, hasCash: data.has_cash };
+}
+
+function renderAccountSummaryChart(data, granularity) {
+    const chartContainer = document.getElementById("summary-chart");
+    if (!chartContainer || typeof AccountSummaryChart === "undefined") return;
+    AccountSummaryChart.render(chartContainer, buildAccountSummaryChartData(data, granularity));
+}
+
+function clearAccountSummaryChart() {
+    const chartContainer = document.getElementById("summary-chart");
+    if (chartContainer && typeof AccountSummaryChart !== "undefined") AccountSummaryChart.clear(chartContainer);
+}
+
 //-----------------------------------------------------
 // Rendering
 //-----------------------------------------------------
@@ -139,7 +178,7 @@ function buildAccountSummaryStats(data) {
     const asOf = formatMonthYear(latest.year, latest.month);
     return `
         <p class="dashboard-blurb">As of the latest entry, ${asOf}</p>
-        <div class="dashboard-grid">${cards}</div>`;
+        <div class="dashboard-grid acs-tiles">${cards}</div>`;
 }
 
 function buildAccountSummaryTable(data, granularity) {
@@ -168,11 +207,14 @@ async function loadAccountSummary() {
 
     if (selected.length === 0) {
         statsContainer.innerHTML = "";
+        clearAccountSummaryChart();
         tableContainer.innerHTML = "<p>Select at least one account.</p>";
         return;
     }
 
     const requestId = ++summaryRequestId;
+    const chartContainer = document.getElementById("summary-chart");
+    if (chartContainer) chartContainer.classList.add("acs-chart-loading");   // the old chart stays, dimmed, until the new data arrives
     tableContainer.innerHTML = `<p>Loading ${summaryGranularity} summary...</p>`;
 
     try {
@@ -189,16 +231,21 @@ async function loadAccountSummary() {
 
         if (!Array.isArray(data.rows) || data.rows.length === 0) {
             statsContainer.innerHTML = "";
+            clearAccountSummaryChart();
             tableContainer.innerHTML = "<p>No data found for the selected accounts.</p>";
             return;
         }
 
         statsContainer.innerHTML = buildAccountSummaryStats(data);
+        renderAccountSummaryChart(data, summaryGranularity);
         tableContainer.innerHTML = buildAccountSummaryTable(data, summaryGranularity);
     } catch (error) {
         if (requestId !== summaryRequestId) return;
         statsContainer.innerHTML = "";
+        clearAccountSummaryChart();
         tableContainer.innerHTML = `<p>${error.message}</p>`;
+    } finally {
+        if (requestId === summaryRequestId && chartContainer) chartContainer.classList.remove("acs-chart-loading");
     }
 }
 
