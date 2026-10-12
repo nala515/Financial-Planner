@@ -72,34 +72,27 @@ def calculate_growth(
 #-------------------------
 # Account summary
 #-------------------------
-def _month_idx(d: date) -> int:
-    # months since year 0, so consecutive months differ by exactly 1
-    return d.year * 12 + d.month - 1
+def _month_idx(month: str) -> int:
+    # "YYYY-MM" -> months since year 0, so consecutive months differ by exactly 1
+    return int(month[:4]) * 12 + int(month[5:7]) - 1
 
 
-def _build_account_series(balances: list, contributions: list, last_idx: int):
+def _carry_forward_balances(entries: dict[int, int], last_idx: int) -> dict[int, int]:
     """
     One account's monthly balances from its first entry through last_idx.
     A month with no entry carries the previous balance forward, so a stale
     account shows $0 gain rather than a shifted window.
-    Returns (first_idx, {idx: balance_cents}, {idx: contribution_cents}).
     """
-    entries = {_month_idx(b.date): b.balance_cents for b in balances}
-    contribs: dict[int, int] = {}
-    for c in contributions:
-        idx = _month_idx(c.date)
-        contribs[idx] = contribs.get(idx, 0) + c.amount_cents
-
     first_idx = min(entries)
     series = {}
     balance = entries[first_idx]
     for idx in range(first_idx, last_idx + 1):
         balance = entries.get(idx, balance)
         series[idx] = balance
-    return first_idx, series, contribs
+    return series
 
 
-def _build_monthly_account_rows(accounts: list, balances: list, contributions: list):
+def _build_monthly_account_rows(accounts: list, balance_rows: list, contribution_rows: list):
     """
     One row per month. Balances are the start-of-month entry; contributions and
     gain are what happened DURING that month (gain(M) = balance(M+1) - balance(M) - contribution(M)).
@@ -110,28 +103,28 @@ def _build_monthly_account_rows(accounts: list, balances: list, contributions: l
     """
     invested_ids = {a.id for a in accounts if get_category_attributes(a.category)["invested"]}
 
-    balances_by_account: dict[int, list] = {}
-    for b in balances:
-        balances_by_account.setdefault(b.account_id, []).append(b)
-    contribs_by_account: dict[int, list] = {}
-    for c in contributions:
-        contribs_by_account.setdefault(c.account_id, []).append(c)
+    entries_by_account: dict[int, dict[int, int]] = {}
+    for account_id, month, cents in balance_rows:
+        entries_by_account.setdefault(account_id, {})[_month_idx(month)] = cents
+    contribs_by_account: dict[int, dict[int, int]] = {}
+    for account_id, month, cents in contribution_rows:
+        contribs_by_account.setdefault(account_id, {})[_month_idx(month)] = cents
 
-    if not balances_by_account:
+    if not entries_by_account:
         return []
 
-    last_idx = max(_month_idx(b.date) for b in balances)
-    first_idx = min(_month_idx(b.date) for b in balances)
+    all_idx = [idx for entries in entries_by_account.values() for idx in entries]
+    first_idx, last_idx = min(all_idx), max(all_idx)
 
     months = {
         idx: {"invested": 0, "cash": 0, "contributions": 0, "gain": 0, "opening_added": 0}
         for idx in range(first_idx, last_idx + 1)
     }
 
-    for account_id, account_balances in balances_by_account.items():
-        acct_first, series, contribs = _build_account_series(
-            account_balances, contribs_by_account.get(account_id, []), last_idx
-        )
+    for account_id, entries in entries_by_account.items():
+        acct_first = min(entries)
+        series = _carry_forward_balances(entries, last_idx)
+        contribs = contribs_by_account.get(account_id, {})
         is_invested = account_id in invested_ids
 
         for idx, balance in series.items():
@@ -242,10 +235,11 @@ def get_account_summary(db: Session, account_ids: list[int], granularity: str = 
     accounts = accounts_repository.db_get_accounts_by_ids(db, account_ids)
     ids = [a.id for a in accounts]
 
-    balances = balances_repository.db_get_balances_for_accounts(db, ids)
-    contributions = contributions_repository.db_get_contributions_for_accounts(db, ids)
+    balance_rows = balances_repository.db_get_monthly_balances_for_accounts(db, ids)
+    contribution_rows = contributions_repository.db_get_monthly_contributions_for_accounts(db, ids)
 
-    monthly_rows = _build_monthly_account_rows(accounts, balances, contributions)
+    monthly_rows = _build_monthly_account_rows(accounts, balance_rows, contribution_rows)
+
     if not monthly_rows:
         return {"has_invested": False, "has_cash": False, "latest": None, "rows": []}
 
