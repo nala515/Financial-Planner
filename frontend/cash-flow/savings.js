@@ -1,8 +1,53 @@
 const DEFAULT_GRANULARITY = "month";
 const STORAGE_KEYS = {
     granularity: "savingsSummaryGranularity",
-    expanded: "savingsSummaryExpanded"
+    expanded: "savingsSummaryExpanded",
+    includeGains: "savingsChartsIncludeGains"
 };
+
+let lastSavingsData = null;
+let lastGranularity = DEFAULT_GRANULARITY;
+
+function getSavedIncludeGains() {
+    return localStorage.getItem(STORAGE_KEYS.includeGains) !== "false";
+}
+
+function setSavedIncludeGains(value) {
+    localStorage.setItem(STORAGE_KEYS.includeGains, value ? "true" : "false");
+}
+
+// One chart point per row. Yearly points use the monthly averages, like the first yearly table.
+function normalizeSavingsChartPoint(row, granularity) {
+    const prefix = granularity === "year" ? "avg_monthly_" : "";
+    return {
+        heading: granularity === "month" ? formatMonthYear(row.year, row.month) : `${row.year} (monthly avg)`,
+        year: row.year,
+        month: granularity === "month" ? row.month : null,
+        cashIncome: row[`${prefix}cash_income`],
+        totalIncome: row[`${prefix}total_income`],
+        spending: row[`${prefix}spending`],
+        cashSavings: row[`${prefix}cash_savings`],
+        investmentGains: row[`${prefix}investment_gains`],
+        totalSavings: row[`${prefix}total_savings`],
+        spendingAvg12: granularity === "month" ? row.spending_avg_12m : null,
+    };
+}
+
+function renderSavingsCharts(data, granularity) {
+    const target = document.getElementById("savings-charts");
+    if (!target || typeof SavingsCharts === "undefined") return;
+
+    if (!data || !Array.isArray(data.rows) || data.rows.length === 0) {
+        SavingsCharts.clear(target);
+        return;
+    }
+
+    const points = data.rows
+        .map(row => ({ row, key: granularity === "month" ? row.year * 12 + row.month : row.year }))
+        .sort((a, b) => a.key - b.key)
+        .map(({ row }) => normalizeSavingsChartPoint(row, granularity));
+    SavingsCharts.render(target, { points, includeGains: getSavedIncludeGains(), granularity });
+}
 
 function getSavingsSummaryUrl(granularity) {
     return `/api/analytics/savings-summary?granularity=${encodeURIComponent(granularity)}`;
@@ -115,9 +160,14 @@ async function loadSavingsSummary(granularity = DEFAULT_GRANULARITY) {
         }
 
         const data = await response.json();
-        container.innerHTML = `${buildToggleButtons(granularity)}${buildTables(data, granularity, expanded)}`;
+        lastSavingsData = data;
+        lastGranularity = granularity;
+        const toggleContainer = document.getElementById("savings-toggle");
+        if (toggleContainer) toggleContainer.innerHTML = buildToggleButtons(granularity);
+        container.innerHTML = buildTables(data, granularity, expanded);
+        renderSavingsCharts(data, granularity);
 
-        container.querySelectorAll(".savings-toggle-button").forEach(button => {
+        document.querySelectorAll("#savings-toggle .savings-toggle-button").forEach(button => {
             button.addEventListener("click", () => {
                 const selectedGranularity = button.dataset.granularity;
                 if (selectedGranularity && selectedGranularity !== granularity) {
@@ -135,11 +185,20 @@ async function loadSavingsSummary(granularity = DEFAULT_GRANULARITY) {
         });
     } catch (error) {
         container.innerHTML = `<p>${error.message}</p>`;
+        renderSavingsCharts(null, granularity);
     }
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
     await loadNav();
+    const includeGainsBox = document.getElementById("savings-include-gains");
+    if (includeGainsBox) {
+        includeGainsBox.checked = getSavedIncludeGains();
+        includeGainsBox.addEventListener("change", () => {
+            setSavedIncludeGains(includeGainsBox.checked);
+            if (lastSavingsData) renderSavingsCharts(lastSavingsData, lastGranularity);
+        });
+    }
     const savedGranularity = localStorage.getItem(STORAGE_KEYS.granularity) || DEFAULT_GRANULARITY;
     await loadSavingsSummary(savedGranularity);
     initSelectableTable(document.getElementById('savings'));
