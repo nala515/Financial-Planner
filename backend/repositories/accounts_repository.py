@@ -38,13 +38,11 @@ def db_get_account(db: Session, account_id: int):
 def db_get_accounts(db: Session):
     return db.query(Account).all()
 
-def db_get_accounts_by_ids(db: Session, account_ids: list[int], categories: list[str]):
-    return (
-        db.query(Account)
-        .filter(Account.id.in_(account_ids), Account.category.in_(categories))
-        .order_by(Account.id)
-        .all()
-    )
+def db_get_accounts_by_ids(db: Session, account_ids: list[int], categories: list[str] | None = None):
+    query = db.query(Account).filter(Account.id.in_(account_ids))
+    if categories is not None:
+        query = query.filter(Account.category.in_(categories))
+    return query.order_by(Account.id).all()
 
 ##-----------------------------------------------------
 ## UPDATE
