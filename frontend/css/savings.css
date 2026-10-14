@@ -56,7 +56,7 @@
     font-size: 1.1rem;
     font-weight: 600;
     color: var(--text-muted, #999);
-
+}
 
 /*-----------------------------------------------------
 // Savings charts (cash-flow/savings-chart.js)
@@ -94,4 +94,3 @@
 .svc-c-net { background: #f3f4f6; fill: #f3f4f6; }
 
 .svc-hover-band { fill: rgba(255, 255, 255, 0.06); pointer-events: none; }
-}
