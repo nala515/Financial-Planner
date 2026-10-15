@@ -126,7 +126,7 @@ const SavingsCharts = (() => {
         title: "Cash savings",
         note: "Cash income minus spending." + yearlyNote,
         layout: "stacked",
-        series: [{ label: "Cash savings", cls: "svc-c-cash", signed: true, value: (p) => p.cashSavings }],
+        series: [{ label: "Cash savings", cls: "svc-c-cash", signed: true, value: (p) => p.cashSavings, incomeBase: (p) => p.cashIncome }],
       };
 
     return [incomeVsSpending, increase];
@@ -375,7 +375,16 @@ const SavingsCharts = (() => {
     if (!p.geometry) return;
     const box = p.svg.getBoundingClientRect();
     const index = Math.floor((event.clientX - box.left - MARGIN.left) / p.geometry.slot);
-    showHover(p, Math.min(Math.max(index, 0), p.geometry.n - 1));
+    const rows = spec.series.map((s) => {
+      let text = s.signed ? formatSigned(s.value(pt)) : formatDollars(s.value(pt));
+      if (s.incomeBase) {
+        const income = s.incomeBase(pt);
+        const saved = s.value(pt);
+        // no percentage when nothing was saved or there was no income
+        if (income > 0 && saved >= 0) text += ` (${Math.round((saved / income) * 100)}%)`;
+      }
+      return ["acs-key-box " + s.cls, s.label, text];
+    });
   }
 
   function onKeyDown(p, event) {
