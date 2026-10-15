@@ -375,16 +375,7 @@ const SavingsCharts = (() => {
     if (!p.geometry) return;
     const box = p.svg.getBoundingClientRect();
     const index = Math.floor((event.clientX - box.left - MARGIN.left) / p.geometry.slot);
-    const rows = spec.series.map((s) => {
-      let text = s.signed ? formatSigned(s.value(pt)) : formatDollars(s.value(pt));
-      if (s.incomeBase) {
-        const income = s.incomeBase(pt);
-        const saved = s.value(pt);
-        // no percentage when nothing was saved or there was no income
-        if (income > 0 && saved >= 0) text += ` (${Math.round((saved / income) * 100)}%)`;
-      }
-      return ["acs-key-box " + s.cls, s.label, text];
-    });
+    showHover(p, Math.min(Math.max(index, 0), p.geometry.n - 1));
   }
 
   function onKeyDown(p, event) {
@@ -434,7 +425,17 @@ const SavingsCharts = (() => {
     }
 
     // Tooltip: the value leads, the label follows
-    const rows = spec.series.map((s) => ["acs-key-box " + s.cls, s.label, s.signed ? formatSigned(s.value(pt)) : formatDollars(s.value(pt))]);
+    const rows = spec.series.map((s) => {
+      let text = s.signed ? formatSigned(s.value(pt)) : formatDollars(s.value(pt));
+      if (s.incomeBase) {
+        const income = s.incomeBase(pt);
+        const saved = s.value(pt);
+        // no percentage when nothing was saved or there was no income
+        if (income > 0 && saved >= 0) text += ` (${Math.round((saved / income) * 100)}%)`;
+      }
+      return ["acs-key-box " + s.cls, s.label, text];
+    });
+
     if (spec.net) rows.push(["acs-key-box svc-c-net", spec.net.label, formatSigned(spec.net.value(pt))]);
     const lv = lineValue(spec, pt);
     if (lv != null) rows.push(["acs-key-line acs-s-total", spec.line.label, formatDollars(lv)]);
