@@ -57,3 +57,40 @@
     font-weight: 600;
     color: var(--text-muted, #999);
 }
+
+/*-----------------------------------------------------
+// Savings charts (cash-flow/savings-chart.js)
+// Panels, legend, axes and tooltip reuse the acs- classes from account-summary.css.
+// Colors: blue #3987e5, orange #d95926, aqua #199e70 (first three dataviz slots, dark-mode steps).
+//---------------------------------------------------*/
+
+.svc-controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0 1.25rem;
+}
+
+.svc-checkbox {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0 0 1rem;
+    color: #d1d5db;
+    cursor: pointer;
+}
+
+.svc-checkbox input {
+    margin: 0;
+    min-width: 0;
+    width: auto;
+}
+
+/* each class colors both the HTML key (background) and the SVG bar (fill) */
+.svc-c-income { background: #3987e5; fill: #3987e5; }
+.svc-c-gains { background: #3987e5; fill: #3987e5; }
+.svc-c-spending { background: #d95926; fill: #d95926; }
+.svc-c-cash { background: #199e70; fill: #199e70; }
+.svc-c-net { background: #f3f4f6; fill: #f3f4f6; }
+
+.svc-hover-band { fill: rgba(255, 255, 255, 0.06); pointer-events: none; }
