@@ -38,12 +38,8 @@
     border-color: #4da3ff;
 }
 
-.savings-summary-table th:nth-child(1),
-.savings-summary-table td:nth-child(1),
-.savings-summary-table th:nth-child(3),
-.savings-summary-table td:nth-child(3),
-.savings-summary-table th:nth-child(4),
-.savings-summary-table td:nth-child(4){
+.data-table th[data-divider],
+.data-table td[data-divider] {
     border-right: 2px solid #6b7280;
 }
 
