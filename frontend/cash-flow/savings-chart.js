@@ -124,10 +124,10 @@ const SavingsCharts = (() => {
       }
       : {
         title: "Cash savings",
-        note: "Cash income minus spending. The line is the running total since the first month of data." + yearlyNote,
+        note: "Cash income minus spending. The line is the trailing 12-month average." + yearlyNote,
         layout: "stacked",
         series: [{ label: "Cash savings", cls: "svc-c-cash", signed: true, value: (p) => p.cashSavings, incomeBase: (p) => p.cashIncome }],
-        line: { label: "Running total", value: (p) => p.cumulativeCashSavings },
+        line: d.granularity === "month" ? { label: "12-month avg cash savings", value: (p) => p.cashSavingsAvg12 } : null,
       };
 
     return [incomeVsSpending, increase];
