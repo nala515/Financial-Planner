@@ -64,7 +64,7 @@ function normalizeSavingsChartPoint(row, granularity) {
         investmentGains: row[`${prefix}investment_gains`],
         totalSavings: row[`${prefix}total_savings`],
         spendingAvg12: granularity === "month" ? row.spending_avg_12m : null,
-        cashSavingsTotal: row.cash_savings,   // the period's total, even in yearly view where the bars show averages
+        cashSavingsAvg12: granularity === "month" ? row.cash_savings_avg_12m : null,
     };
 }
 
@@ -81,11 +81,7 @@ function renderSavingsCharts(data, granularity) {
     const points = data.rows
         .map(row => ({ row, key: granularity === "month" ? row.year * 12 + row.month : row.year }))
         .sort((a, b) => a.key - b.key)
-        .map(({ row }) => normalizeSavingsChartPoint(row, granularity))
-        .map(pt => {
-            running += pt.cashSavingsTotal;
-            return { ...pt, cumulativeCashSavings: running };
-        });
+        .map(({ row }) => normalizeSavingsChartPoint(row, granularity));
     SavingsCharts.render(target, { points, includeGains: getSavedIncludeGains(), granularity });
 }
 
