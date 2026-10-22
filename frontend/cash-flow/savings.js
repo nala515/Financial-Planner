@@ -96,19 +96,24 @@ function normalizeSavingsRow(row, granularity, sourceIds, useTotals) {
 
 function buildColumnDescriptors(incomeSources, expanded) {
     const columns = [];
-    columns.push({label: "", isCurrency: false, canBeNeg: false, getValue: row => row.label});
+    columns.push({label: "", isCurrency: false, canBeNeg: false, dividerAfter: true, getValue: row => row.label});
 
     if (expanded) {
-        incomeSources.forEach(source => {
-            columns.push({label: source.name, isCurrency: true, canBeNeg: false, getValue: row => row.incomeBySource[String(source.id)] || 0});
+        incomeSources.forEach((source, i) => {
+            const isLast = i === incomeSources.length - 1;
+            columns.push({
+                label: source.name, isCurrency: true, canBeNeg: false,
+                dividerAfter: isLast,   // line after the last income source ("Other")
+                getValue: row => row.incomeBySource[String(source.id)] || 0
+            });
         });
     }
     columns.push({label: "Cash Income", isCurrency: true, canBeNeg: false, isToggle: true, getValue: row => row.cashIncome});
 
     columns.push({label: "Investment Gains", isCurrency: true, canBeNeg: true, getValue: row => row.investmentIncome});
-    columns.push({label: "Total Income", isCurrency: true, canBeNeg: false, getValue: row => row.totalIncome});
-    columns.push({label: "Spending", isCurrency: true, canBeNeg: false, getValue: row => row.spending});
-    columns.push({label: "Cash Savings", isCurrency: true, canBeNeg: true, getValue: row => row.cashSavings});
+    columns.push({label: "Total Income", isCurrency: true, canBeNeg: false, dividerAfter: true, getValue: row => row.totalIncome});
+    columns.push({label: "Spending", isCurrency: true, canBeNeg: false, dividerAfter: true, getValue: row => row.spending});
+    columns.push({label: "Cash Increase", isCurrency: true, canBeNeg: true, getValue: row => row.cashSavings});
     columns.push({label: "Total Increase", isCurrency: true, canBeNeg: true, getValue: row => row.totalSavings});
     return columns;
 }
