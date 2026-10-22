@@ -121,6 +121,7 @@ const SavingsCharts = (() => {
           { label: "Investment gains", cls: "svc-c-gains", signed: true, value: (p) => p.investmentGains },
         ],
         net: { label: "Total increase", value: (p) => p.totalSavings },
+        line: d.granularity === "month" ? { label: "12-month avg total increase", value: (p) => p.totalSavingsAvg12 } : null,
       }
       : {
         title: "Cash savings",
