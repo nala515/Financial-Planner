@@ -96,46 +96,55 @@ const SavingsCharts = (() => {
 
   function buildSpecs(d) {
     const includeGains = d.includeGains;
+    const monthly = d.granularity === "month";
     const yearlyNote = d.granularity === "year" ? " Yearly view shows monthly averages." : "";
 
     const incomeVsSpending = {
       title: "Income vs. spending",
       note: (includeGains
         ? "Income includes investment gains. Spending comes from income and balance changes, so market moves don't affect it."
-        : "Cash income only, without investment gains.") + yearlyNote,
+        : "Cash income only, without investment gains.") + " Lines are trailing 12-month averages." + yearlyNote,
       layout: "grouped",
       series: [
         { label: includeGains ? "Total income" : "Cash income", cls: "svc-c-income", value: (p) => (includeGains ? p.totalIncome : p.cashIncome) },
         { label: "Spending", cls: "svc-c-spending", value: (p) => p.spending },
       ],
-      line: d.granularity === "month" ? { label: "12-month avg spending", value: (p) => p.spendingAvg12 } : null,
+      lines: monthly ? [
+        { label: "12-month avg income", cls: "svc-l-income", value: (p) => (includeGains ? p.totalIncomeAvg12 : p.cashIncomeAvg12) },
+        { label: "12-month avg spending", cls: "svc-l-spending", value: (p) => p.spendingAvg12 },
+      ] : [],
     };
 
     const increase = includeGains
       ? {
         title: "Where the increase came from",
-        note: "Cash savings plus investment gains make up the total increase." + yearlyNote,
+        note: "Cash savings plus investment gains make up the total increase. The line is the trailing 12-month average of the total increase." + yearlyNote,
         layout: "stacked",
         series: [
           { label: "Cash savings", cls: "svc-c-cash", signed: true, value: (p) => p.cashSavings },
           { label: "Investment gains", cls: "svc-c-gains", signed: true, value: (p) => p.investmentGains },
         ],
         net: { label: "Total increase", value: (p) => p.totalSavings },
-        line: d.granularity === "month" ? { label: "12-month avg total increase", value: (p) => p.totalSavingsAvg12 } : null,
+        lines: monthly ? [{ label: "12-month avg total increase", cls: "svc-l-avg", value: (p) => p.totalSavingsAvg12 }] : [],
       }
       : {
         title: "Cash savings",
         note: "Cash income minus spending. The line is the trailing 12-month average." + yearlyNote,
         layout: "stacked",
         series: [{ label: "Cash savings", cls: "svc-c-cash", signed: true, value: (p) => p.cashSavings, incomeBase: (p) => p.cashIncome }],
-        line: d.granularity === "month" ? { label: "12-month avg cash savings", value: (p) => p.cashSavingsAvg12 } : null,
+        lines: monthly ? [{ label: "12-month avg cash savings", cls: "svc-l-avg", value: (p) => p.cashSavingsAvg12 }] : [],
       };
 
     return [incomeVsSpending, increase];
   }
 
-  function lineValue(spec, point) {
-    return spec.line ? spec.line.value(point) : null;
+  function linesOf(spec) {
+    return spec.lines || [];
+  }
+
+  // Only lines with at least one value get a legend entry (the first 11 months have none).
+  function activeLines(p) {
+    return linesOf(p.spec).filter((l) => p.points.some((pt) => l.value(pt) != null));
   }
 
   //-----------------------------------------------------
@@ -197,10 +206,6 @@ const SavingsCharts = (() => {
     data = null;
   }
 
-  function hasLine(p) {
-    return !!p.spec.line && p.points.some((pt) => lineValue(p.spec, pt) != null);
-  }
-
   function buildLegend(p) {
     const { spec } = p;
     p.title.textContent = spec.title;
@@ -208,7 +213,7 @@ const SavingsCharts = (() => {
 
     const items = spec.series.map((s) => ["acs-key-box " + s.cls, s.label]);
     if (spec.net) items.push(["acs-key-box svc-c-net", spec.net.label]);
-    if (hasLine(p)) items.push(["acs-key-line acs-s-total", spec.line.label]);
+    activeLines(p).forEach((l) => items.push(["acs-key-line svc-key-line " + l.cls, l.label]));
 
     // A single series needs no legend: the title already says what is plotted.
     p.legend.hidden = items.length < 2;
@@ -258,8 +263,10 @@ const SavingsCharts = (() => {
       } else {
         spec.series.forEach((s) => values.push(s.value(pt) / 100));
       }
-      const lv = lineValue(spec, pt);
-      if (lv != null) values.push(lv / 100);
+      linesOf(spec).forEach((l) => {
+        const lv = l.value(pt);
+        if (lv != null) values.push(lv / 100);
+      });
       if (spec.net) values.push(spec.net.value(pt) / 100);
     });
     const scale = linearScale(Math.min(...values), Math.max(...values), plotHeight);
@@ -337,18 +344,18 @@ const SavingsCharts = (() => {
       }
     });
 
-    // Average line (skips months without enough history)
-    if (spec.line) {
+    // Average lines (skip months without enough history)
+    linesOf(spec).forEach((l) => {
       let d = "";
       let penDown = false;
       points.forEach((pt, i) => {
-        const v = lineValue(spec, pt);
+        const v = l.value(pt);
         if (v == null) { penDown = false; return; }
         d += `${penDown ? "L" : "M"}${cx(i).toFixed(1)} ${scale.y(v / 100).toFixed(1)} `;
         penDown = true;
       });
-      if (d) svgEl("path", { class: "acs-line acs-s-total", d: d.trim() }, svg);
-    }
+      if (d) svgEl("path", { class: `acs-line svc-line ${l.cls}`, d: d.trim() }, svg);
+    });
 
     // Net marker on stacked columns
     if (spec.net) {
@@ -359,9 +366,9 @@ const SavingsCharts = (() => {
 
     p.geometry = { width, plotWidth, slot, cx, y: scale.y, n };
 
-    if (spec.line) {
-      svgEl("circle", { class: "acs-hover-dot acs-dot-total svc-hover-dot", r: 4, cx: 0, cy: 0, visibility: "hidden" }, svg);
-    }
+    linesOf(spec).forEach((l, i) => {
+      svgEl("circle", { class: `acs-hover-dot svc-hover-dot ${l.cls}`, "data-line": i, r: 4, cx: 0, cy: 0, visibility: "hidden" }, svg);
+    });
 
     const overlay = svgEl("rect", { class: "acs-overlay", x: MARGIN.left, y: MARGIN.top, width: plotWidth, height: plotHeight }, svg);
     overlay.addEventListener("pointermove", (event) => onPointer(p, event));
@@ -414,9 +421,10 @@ const SavingsCharts = (() => {
     band.setAttribute("x", MARGIN.left + g.slot * index);
     band.setAttribute("visibility", "visible");
 
-    const dot = p.svg.querySelector(".svc-hover-dot");
-    if (dot) {
-      const lv = lineValue(spec, pt);
+    linesOf(spec).forEach((l, i) => {
+      const dot = p.svg.querySelector(`.svc-hover-dot[data-line="${i}"]`);
+      if (!dot) return;
+      const lv = l.value(pt);
       if (lv == null) {
         dot.setAttribute("visibility", "hidden");
       } else {
@@ -424,7 +432,7 @@ const SavingsCharts = (() => {
         dot.setAttribute("cy", g.y(lv / 100));
         dot.setAttribute("visibility", "visible");
       }
-    }
+    });
 
     // Tooltip: the value leads, the label follows
     const rows = spec.series.map((s) => {
@@ -439,8 +447,10 @@ const SavingsCharts = (() => {
     });
 
     if (spec.net) rows.push(["acs-key-box svc-c-net", spec.net.label, formatSigned(spec.net.value(pt))]);
-    const lv = lineValue(spec, pt);
-    if (lv != null) rows.push(["acs-key-line acs-s-total", spec.line.label, formatDollars(lv)]);
+    linesOf(spec).forEach((l) => {
+      const lv = l.value(pt);
+      if (lv != null) rows.push(["acs-key-line svc-key-line " + l.cls, l.label, formatDollars(lv)]);
+    });
 
     p.tip.innerHTML = "";
     p.tip.appendChild(htmlEl("div", "acs-tooltip-heading", pt.heading));
