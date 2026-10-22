@@ -2,11 +2,45 @@ const DEFAULT_GRANULARITY = "month";
 const STORAGE_KEYS = {
     granularity: "savingsSummaryGranularity",
     expanded: "savingsSummaryExpanded",
-    includeGains: "savingsChartsIncludeGains"
+    includeGains: "savingsChartsIncludeGains",
+    view: "savingsSummaryView"
 };
 
 let lastSavingsData = null;
 let lastGranularity = DEFAULT_GRANULARITY;
+
+function getSavedView() {
+    return localStorage.getItem(STORAGE_KEYS.view) === "graph" ? "graph" : "table";
+}
+
+function setSavedView(view) {
+    localStorage.setItem(STORAGE_KEYS.view, view);
+}
+
+function buildViewToggleButtons(current) {
+    return `
+        <div class="savings-toggle-group">
+            <button class="savings-toggle-button ${current === "table" ? "active" : ""}" data-view="table">Table</button>
+            <button class="savings-toggle-button ${current === "graph" ? "active" : ""}" data-view="graph">Graph</button>
+        </div>
+    `;
+}
+
+// Shows either the table or the graphs, never both. The "include gains" checkbox only matters for graphs.
+function applyView(view) {
+    const showGraph = view === "graph";
+    document.getElementById("savings").hidden = showGraph;
+    document.getElementById("savings-charts").hidden = !showGraph;
+
+    const gainsLabel = document.querySelector(".svc-checkbox");
+    if (gainsLabel) gainsLabel.hidden = !showGraph;
+
+    const viewToggle = document.getElementById("savings-view-toggle");
+    if (viewToggle) viewToggle.innerHTML = buildViewToggleButtons(view);
+
+    // Charts measure their width when drawn, so redraw now that they're visible.
+    if (showGraph && lastSavingsData) renderSavingsCharts(lastSavingsData, lastGranularity);
+}
 
 function getSavedIncludeGains() {
     return localStorage.getItem(STORAGE_KEYS.includeGains) !== "false";
@@ -30,6 +64,7 @@ function normalizeSavingsChartPoint(row, granularity) {
         investmentGains: row[`${prefix}investment_gains`],
         totalSavings: row[`${prefix}total_savings`],
         spendingAvg12: granularity === "month" ? row.spending_avg_12m : null,
+        cashSavingsTotal: row.cash_savings,   // the period's total, even in yearly view where the bars show averages
     };
 }
 
@@ -42,10 +77,15 @@ function renderSavingsCharts(data, granularity) {
         return;
     }
 
+    let running = 0;
     const points = data.rows
         .map(row => ({ row, key: granularity === "month" ? row.year * 12 + row.month : row.year }))
         .sort((a, b) => a.key - b.key)
-        .map(({ row }) => normalizeSavingsChartPoint(row, granularity));
+        .map(({ row }) => normalizeSavingsChartPoint(row, granularity))
+        .map(pt => {
+            running += pt.cashSavingsTotal;
+            return { ...pt, cumulativeCashSavings: running };
+        });
     SavingsCharts.render(target, { points, includeGains: getSavedIncludeGains(), granularity });
 }
 
@@ -170,6 +210,7 @@ async function loadSavingsSummary(granularity = DEFAULT_GRANULARITY) {
         const toggleContainer = document.getElementById("savings-toggle");
         if (toggleContainer) toggleContainer.innerHTML = buildToggleButtons(granularity);
         container.innerHTML = buildTables(data, granularity, expanded);
+        initSelectableTable(container);
         renderSavingsCharts(data, granularity);
 
         document.querySelectorAll("#savings-toggle .savings-toggle-button").forEach(button => {
@@ -196,6 +237,16 @@ async function loadSavingsSummary(granularity = DEFAULT_GRANULARITY) {
 
 document.addEventListener("DOMContentLoaded", async () => {
     await loadNav();
+
+    const viewToggle = document.getElementById("savings-view-toggle");
+    viewToggle.addEventListener("click", (event) => {
+        const button = event.target.closest("[data-view]");
+        if (!button) return;
+        setSavedView(button.dataset.view);
+        applyView(button.dataset.view);
+    });
+    applyView(getSavedView());
+
     const includeGainsBox = document.getElementById("savings-include-gains");
     if (includeGainsBox) {
         includeGainsBox.checked = getSavedIncludeGains();
@@ -206,5 +257,4 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
     const savedGranularity = localStorage.getItem(STORAGE_KEYS.granularity) || DEFAULT_GRANULARITY;
     await loadSavingsSummary(savedGranularity);
-    initSelectableTable(document.getElementById('savings'));
 });
