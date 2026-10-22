@@ -124,9 +124,10 @@ const SavingsCharts = (() => {
       }
       : {
         title: "Cash savings",
-        note: "Cash income minus spending." + yearlyNote,
+        note: "Cash income minus spending. The line is the running total since the first month of data." + yearlyNote,
         layout: "stacked",
         series: [{ label: "Cash savings", cls: "svc-c-cash", signed: true, value: (p) => p.cashSavings, incomeBase: (p) => p.cashIncome }],
+        line: { label: "Running total", value: (p) => p.cumulativeCashSavings },
       };
 
     return [incomeVsSpending, increase];
