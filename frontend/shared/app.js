@@ -102,7 +102,8 @@ function buildTable(rows, columns, options = {}) {
 
     const headerCells = columns.map(col => {
         const label = col.isToggle ? addExpandCollapseMarker(col.label, "", expanded) : col.label;
-        return `<th>${label}</th>`;
+        const divider = col.dividerAfter ? " data-divider" : "";
+        return `<th${divider}>${label}</th>`;
     }).join("");
 
     const bodyRows = rows.map((row, i) => {
@@ -125,15 +126,15 @@ function buildTable(rows, columns, options = {}) {
                 display = value;
             }
             if (col.isBold) display = `<strong>${display}</strong>`;
-
-            return `<td ${colorAttr} ${otherAttr}>${display}</td>`;
+            const dividerAttr = col.dividerAfter ? "data-divider" : "";
+            return `<td ${colorAttr} ${otherAttr} ${dividerAttr}>${display}</td>`;
         }).join("");
 
         return `<tr class="${rowClass}">${cells}</tr>`;
     }).join("");
 
-    return `<div class="${wrapperClass}">
-        ${title ? `<h2>${title}</h2>` : ""}
+    return `${title ? `<h2>${title}</h2>` : ""}
+    <div class="${wrapperClass}">
         <table class="${tableClass}">
             <thead><tr>${headerCells}</tr></thead>
             <tbody>${bodyRows}</tbody>

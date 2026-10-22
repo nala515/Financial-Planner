@@ -38,12 +38,8 @@
     border-color: #4da3ff;
 }
 
-.savings-summary-table th:nth-child(1),
-.savings-summary-table td:nth-child(1),
-.savings-summary-table th:nth-child(3),
-.savings-summary-table td:nth-child(3),
-.savings-summary-table th:nth-child(4),
-.savings-summary-table td:nth-child(4){
+.data-table th[data-divider],
+.data-table td[data-divider] {
     border-right: 2px solid #6b7280;
 }
 
@@ -85,6 +81,17 @@
     min-width: 0;
     width: auto;
 }
+
+.svc-checkbox[hidden] { display: none; }
+
+/* Average lines: each class sets the color, the shared rules below apply it */
+.svc-l-income   { --svc-line: #8ab8f0; }
+.svc-l-spending { --svc-line: #f0a07a; }
+.svc-l-avg      { --svc-line: #f3f4f6; }
+
+.acs-line.svc-line          { stroke: var(--svc-line); }
+.acs-key-line.svc-key-line  { border-top-color: var(--svc-line); }
+.svc-hover-dot              { fill: var(--svc-line); stroke: #1f2937; stroke-width: 2; }
 
 /* each class colors both the HTML key (background) and the SVG bar (fill) */
 .svc-c-income { background: #3987e5; fill: #3987e5; }

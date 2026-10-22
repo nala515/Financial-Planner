@@ -4,6 +4,7 @@ from backend.account_categories import INVESTED_SPENDABLE_CATEGORIES, SPENDABLE_
 
 SUMMED_FIELDS = ("cash_income", "investment_gains", "total_income",
                  "spending", "cash_savings", "total_savings")
+AVG_12M_FIELDS = ("spending", "cash_income", "total_income", "cash_savings", "total_savings")
 
 # returns total cash income for each month in a list
 def get_cash_income(income_events: list) -> dict[tuple[int, int], int]:
@@ -63,13 +64,16 @@ def calculate_monthly_savings_metrics(db: Session, income_sources: list):
             "total_savings": growth,
         })
 
-    # trailing 12-month average of spending for the chart (needs a full 12 months of history)
+    # trailing 12-month averages for the charts (need a full 12 months of history)
     oldest_first = list(reversed(monthly_rows))
     for i, row in enumerate(oldest_first):
         if i >= 11:
-            row["spending_avg_12m"] = round(sum(r["spending"] for r in oldest_first[i - 11:i + 1]) / 12)
+            window = oldest_first[i - 11:i + 1]
+            for field in AVG_12M_FIELDS:
+                row[f"{field}_avg_12m"] = round(sum(r[field] for r in window) / 12)
         else:
-            row["spending_avg_12m"] = None
+            for field in AVG_12M_FIELDS:
+                row[f"{field}_avg_12m"] = None
 
     return monthly_rows
 
