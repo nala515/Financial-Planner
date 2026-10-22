@@ -50,22 +50,24 @@ function setSavedIncludeGains(value) {
     localStorage.setItem(STORAGE_KEYS.includeGains, value ? "true" : "false");
 }
 
-// One chart point per row. Yearly points use the monthly averages, like the first yearly table.
 function normalizeSavingsChartPoint(row, granularity) {
     const prefix = granularity === "year" ? "avg_monthly_" : "";
+    const monthly = granularity === "month";
     return {
-        heading: granularity === "month" ? formatMonthYear(row.year, row.month) : `${row.year} (monthly avg)`,
+        heading: monthly ? formatMonthYear(row.year, row.month) : `${row.year} (monthly avg)`,
         year: row.year,
-        month: granularity === "month" ? row.month : null,
+        month: monthly ? row.month : null,
         cashIncome: row[`${prefix}cash_income`],
         totalIncome: row[`${prefix}total_income`],
         spending: row[`${prefix}spending`],
         cashSavings: row[`${prefix}cash_savings`],
         investmentGains: row[`${prefix}investment_gains`],
         totalSavings: row[`${prefix}total_savings`],
-        spendingAvg12: granularity === "month" ? row.spending_avg_12m : null,
-        cashSavingsAvg12: granularity === "month" ? row.cash_savings_avg_12m : null,
-        totalSavingsAvg12: granularity === "month" ? row.total_savings_avg_12m : null,
+        spendingAvg12: monthly ? row.spending_avg_12m : null,
+        cashIncomeAvg12: monthly ? row.cash_income_avg_12m : null,
+        totalIncomeAvg12: monthly ? row.total_income_avg_12m : null,
+        cashSavingsAvg12: monthly ? row.cash_savings_avg_12m : null,
+        totalSavingsAvg12: monthly ? row.total_savings_avg_12m : null,
     };
 }
 
