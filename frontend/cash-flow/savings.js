@@ -65,6 +65,7 @@ function normalizeSavingsChartPoint(row, granularity) {
         totalSavings: row[`${prefix}total_savings`],
         spendingAvg12: granularity === "month" ? row.spending_avg_12m : null,
         cashSavingsAvg12: granularity === "month" ? row.cash_savings_avg_12m : null,
+        totalSavingsAvg12: granularity === "month" ? row.total_savings_avg_12m : null,
     };
 }
 
