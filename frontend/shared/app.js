@@ -133,8 +133,8 @@ function buildTable(rows, columns, options = {}) {
         return `<tr class="${rowClass}">${cells}</tr>`;
     }).join("");
 
-    return `<div class="${wrapperClass}">
-        ${title ? `<h2>${title}</h2>` : ""}
+    return `${title ? `<h2>${title}</h2>` : ""}
+    <div class="${wrapperClass}">
         <table class="${tableClass}">
             <thead><tr>${headerCells}</tr></thead>
             <tbody>${bodyRows}</tbody>
