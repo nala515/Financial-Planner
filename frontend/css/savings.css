@@ -82,6 +82,8 @@
     width: auto;
 }
 
+.svc-checkbox[hidden] { display: none; }
+
 /* each class colors both the HTML key (background) and the SVG bar (fill) */
 .svc-c-income { background: #3987e5; fill: #3987e5; }
 .svc-c-gains { background: #3987e5; fill: #3987e5; }
