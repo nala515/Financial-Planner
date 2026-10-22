@@ -63,13 +63,16 @@ def calculate_monthly_savings_metrics(db: Session, income_sources: list):
             "total_savings": growth,
         })
 
-    # trailing 12-month average of spending for the chart (needs a full 12 months of history)
+    # trailing 12-month averages for the charts (need a full 12 months of history)
     oldest_first = list(reversed(monthly_rows))
     for i, row in enumerate(oldest_first):
         if i >= 11:
-            row["spending_avg_12m"] = round(sum(r["spending"] for r in oldest_first[i - 11:i + 1]) / 12)
+            window = oldest_first[i - 11:i + 1]
+            row["spending_avg_12m"] = round(sum(r["spending"] for r in window) / 12)
+            row["cash_savings_avg_12m"] = round(sum(r["cash_savings"] for r in window) / 12)
         else:
             row["spending_avg_12m"] = None
+            row["cash_savings_avg_12m"] = None
 
     return monthly_rows
 
