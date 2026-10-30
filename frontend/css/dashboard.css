@@ -35,6 +35,43 @@
     font-weight: 600;
 }
 
+.monthly-change {
+    margin-top: 1rem;
+    background: #1f2937;
+    border: 1px solid #374151;
+    color: #d1d5db;
+}
+
+.monthly-change h2 {
+    margin: 0;
+    color: #f3f4f6;
+}
+
+.monthly-change-item {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #374151;
+}
+
+.monthly-change-item:last-child {
+    border-bottom: none;
+}
+
+.monthly-change-label {
+    font-size: 0.85rem;
+    color: #9ca3af;
+}
+
+.monthly-change-value {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #f9fafb;
+}
+
+.monthly-change-total {
+    font-size: 1.4rem;
+    font-weight: 700;
+}
+
 .dashboard-card a:hover {
     color: #4da3ff;
     text-decoration: underline;
