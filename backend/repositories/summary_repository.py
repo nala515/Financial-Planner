@@ -84,3 +84,8 @@ def db_get_monthly_growth(db: Session, categories: list[str], net_of_contributio
         .all()
     )
     return {(int(m[:4]), int(m[5:7])): total for m, total in rows}
+
+
+def db_get_latest_balance_date(db: Session):
+    """The date of the most recent balance entry across all accounts, or None if there are none."""
+    return db.query(func.max(Balance.date)).scalar()
