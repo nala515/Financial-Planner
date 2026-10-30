@@ -43,6 +43,60 @@ function renderGrowth(currentCents, pastCents) {
     `;
 }
 
+function renderMonthlyChange(data) {
+    const rows = [
+        { label: "Previous month's net worth", value: data.previous_net_worth },
+        { label: "Contributions", value: data.contributions },
+        { label: "Investment gains", value: data.investment_gains, signed: true },
+        { label: "Spending", value: data.spending },
+        { label: "This month's net worth", value: data.current_net_worth, bold: true },
+    ];
+
+    const items = rows.map(row => {
+        let valueHtml;
+        if (row.value === null || row.value === undefined) {
+            valueHtml = `<span class="growth-neutral">--</span>`;
+        } else if (row.signed) {
+            valueHtml = `<span ${getGrowthFormatting(row.value)}>${formatCurrency(row.value)}</span>`;
+        } else {
+            valueHtml = formatCurrency(row.value);
+        }
+        return `
+            <div class="monthly-change-item">
+                <div class="monthly-change-label">${row.label}</div>
+                <div class="monthly-change-value${row.bold ? " monthly-change-total" : ""}">${valueHtml}</div>
+            </div>`;
+    }).join("");
+
+    const period = `${formatMonthYearLabel(data.previous_month)} to ${formatMonthYearLabel(data.current_month)}`;
+    return `
+        <div class="dashboard-card monthly-change">
+            <h2>Monthly Change</h2>
+            <p class="dashboard-blurb">${period}</p>
+            ${items}
+        </div>`;
+}
+
+async function loadMonthlyChange(container) {
+    try {
+        const response = await fetch(`/api/dashboard/monthly-change`);
+        if (!response.ok) {
+            throw new Error("Unable to load monthly change");
+        }
+        const data = await response.json();
+        if (!data) {
+            return;
+        }
+        const section = document.createElement("div");
+        section.innerHTML = renderMonthlyChange(data);
+        container.appendChild(section);
+    } catch (error) {
+        const message = document.createElement("p");
+        message.textContent = error.message;
+        container.appendChild(message);
+    }
+}
+
 //-----------------------------------------------------
 // Dashboard
 //-----------------------------------------------------
@@ -67,6 +121,7 @@ async function loadDashboard() {
         grid.className = "dashboard-grid";
         grid.innerHTML = keys.map(key => renderDashboardCard(key, dashboard.categories[key])).join("");
         container.appendChild(grid);
+        await loadMonthlyChange(container);
     } catch (error) {
         container.innerHTML = `<p>${error.message}</p>`;
     }
