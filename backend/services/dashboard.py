@@ -1,26 +1,22 @@
-from sqlalchemy.orm import Session
-from backend.repositories import summary_repository
-from backend.account_categories import (
-    ACCOUNT_VIEWS,
-    categories_matching,
-    normalize_category,
-)
+from fastapi import APIRouter
+from backend.database import SessionLocal
+from backend import services
 
-def empty_stats():
-    return {"current": 0, "1m": 0, "1y": 0}
+router = APIRouter()
 
-def get_dashboard_data(db: Session):
-    view_members = {key: set(categories_matching(c)) for key, c in ACCOUNT_VIEWS.items()}
-    totals = {key: empty_stats() for key in ACCOUNT_VIEWS}
+@router.get("/api/dashboard")
+def api_get_dashboard_data():
+    db = SessionLocal()
+    try:
+        return services.get_dashboard_data(db)
+    finally:
+        db.close()
 
-    for category, current, m_ago, y_ago in summary_repository.db_get_category_totals(db):
-        name = normalize_category(category)
-        for key, members in view_members.items():
-            if name in members:
-                totals[key]["current"] += current
-                totals[key]["1m"] += m_ago
-                totals[key]["1y"] += y_ago
 
-    net_worth = totals.pop("net_worth")
-    return {"net_worth": net_worth, "categories": totals}
-
+@router.get("/api/dashboard/monthly-change")
+def api_get_monthly_change():
+    db = SessionLocal()
+    try:
+        return services.get_monthly_change(db)
+    finally:
+        db.close()
