@@ -23,4 +23,3 @@ def get_dashboard_data(db: Session):
 
     net_worth = totals.pop("net_worth")
     return {"net_worth": net_worth, "categories": totals}
-

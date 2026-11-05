@@ -11,3 +11,12 @@ def api_get_dashboard_data():
         return services.get_dashboard_data(db)
     finally:
         db.close()
+
+
+@router.get("/api/dashboard/monthly-change")
+def api_get_monthly_change():
+    db = SessionLocal()
+    try:
+        return services.get_monthly_change(db)
+    finally:
+        db.close()
