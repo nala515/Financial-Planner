@@ -89,3 +89,39 @@ def db_get_monthly_growth(db: Session, categories: list[str], net_of_contributio
 def db_get_latest_balance_date(db: Session):
     """The date of the most recent balance entry across all accounts, or None if there are none."""
     return db.query(func.max(Balance.date)).scalar()
+
+def db_get_account_changes(db: Session, month: str):
+    """
+    Returns one row per account that has entries for both `month` ("YYYY-MM") and the month after:
+    (account_id, name, category, balance_change_cents, contribution_cents).
+    Uses the same join as db_get_monthly_growth, so the totals match it.
+    """
+    cur = aliased(Balance)
+    prev = aliased(Balance)
+
+    contrib = (
+        db.query(
+            Contribution.account_id.label("account_id"),
+            func.sum(Contribution.amount_cents).label("total"),
+        )
+        .filter(func.strftime("%Y-%m", Contribution.date) == month)
+        .group_by(Contribution.account_id)
+        .subquery()
+    )
+
+    return (
+        db.query(
+            Account.id,
+            Account.name,
+            Account.category,
+            cur.balance_cents - prev.balance_cents,
+            func.coalesce(contrib.c.total, 0),
+        )
+        .select_from(prev)
+        .join(Account, Account.id == prev.account_id)
+        .join(cur, and_(cur.account_id == prev.account_id,
+                        cur.date == func.date(prev.date, "+1 month")))
+        .outerjoin(contrib, contrib.c.account_id == prev.account_id)
+        .filter(func.strftime("%Y-%m", prev.date) == month)
+        .all()
+    )
