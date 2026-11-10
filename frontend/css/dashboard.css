@@ -76,3 +76,49 @@
     color: #4da3ff;
     text-decoration: underline;
 }
+
+/* Values that have a popup get a dotted underline as the hint */
+.has-breakdown {
+    display: inline-block;
+    cursor: help;
+    border-bottom: 1px dotted #6b7280;
+}
+
+.has-breakdown:focus-visible {
+    outline: 2px solid #4da3ff;
+    outline-offset: 2px;
+}
+
+/* Popup is fixed to the screen so the card's edges can't clip it */
+.breakdown-tip {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    min-width: 14rem;
+    max-width: calc(100vw - 16px);
+    padding: 0.6rem 0.8rem;
+    background: #111827;
+    color: #d1d5db;
+    border: 1px solid #4b5563;
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    font-size: 0.85rem;
+    pointer-events: none;
+}
+
+.breakdown-heading {
+    margin-bottom: 0.35rem;
+    font-weight: 600;
+    color: #f3f4f6;
+}
+
+.breakdown-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 1.5rem;
+    padding-top: 0.15rem;
+    padding-bottom: 0.15rem;
+}
+
+.breakdown-label { color: #9ca3af; }
+.breakdown-row strong { color: #f9fafb; white-space: nowrap; }
