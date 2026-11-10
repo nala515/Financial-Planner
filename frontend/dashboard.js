@@ -43,28 +43,50 @@ function renderGrowth(currentCents, pastCents) {
     `;
 }
 
+//-----------------------------------------------------
+// Monthly change + breakdown popups
+//-----------------------------------------------------
+
+let monthlyChangeRows = {};     // key -> { label, node }, read by the popup
+let breakdownTip = null;
+let breakdownTarget = null;
+
+function canHover() {
+    return window.matchMedia("(hover: hover)").matches;
+}
+
 function renderMonthlyChange(data) {
     const rows = [
-        { label: "Previous month's net worth", value: data.previous_net_worth },
-        { label: "Contributions", value: data.contributions },
-        { label: "Investment gains", value: data.investment_gains, signed: true },
-        { label: "Spending", value: data.spending },
-        { label: "This month's net worth", value: data.current_net_worth, bold: true },
+        { key: "previous_net_worth", label: "Previous month's net worth" },
+        { key: "contributions", label: "Contributions" },
+        { key: "investment_gains", label: "Investment gains", signed: true },
+        { key: "spending", label: "Spending" },
+        { key: "current_net_worth", label: "This month's net worth", bold: true },
     ];
 
+    monthlyChangeRows = {};
+
     const items = rows.map(row => {
+        const node = data[row.key] || { value: null, parts: [] };
+        monthlyChangeRows[row.key] = { label: row.label, node };
+
         let valueHtml;
-        if (row.value === null || row.value === undefined) {
+        if (node.value === null || node.value === undefined) {
             valueHtml = `<span class="growth-neutral">--</span>`;
         } else if (row.signed) {
-            valueHtml = `<span ${getGrowthFormatting(row.value)}>${formatCurrency(row.value)}</span>`;
+            valueHtml = `<span ${getGrowthFormatting(node.value)}>${formatCurrency(node.value)}</span>`;
         } else {
-            valueHtml = formatCurrency(row.value);
+            valueHtml = formatCurrency(node.value);
         }
+
+        const hasParts = node.parts && node.parts.length > 0;
+        const valueClass = `monthly-change-value${row.bold ? " monthly-change-total" : ""}${hasParts ? " has-breakdown" : ""}`;
+        const valueAttrs = hasParts ? ` data-breakdown="${row.key}" tabindex="0"` : "";
+
         return `
             <div class="monthly-change-item">
                 <div class="monthly-change-label">${row.label}</div>
-                <div class="monthly-change-value${row.bold ? " monthly-change-total" : ""}">${valueHtml}</div>
+                <div class="${valueClass}"${valueAttrs}>${valueHtml}</div>
             </div>`;
     }).join("");
 
@@ -75,6 +97,119 @@ function renderMonthlyChange(data) {
             <p class="dashboard-blurb">${period}</p>
             ${items}
         </div>`;
+}
+
+// Adds one row per part to the popup, indenting nested parts under their parent.
+function appendBreakdownRows(parent, parts, depth) {
+    parts.forEach(part => {
+        const row = document.createElement("div");
+        row.className = "breakdown-row";
+        row.style.paddingLeft = `${depth * 0.9}rem`;
+
+        const label = document.createElement("span");
+        label.className = "breakdown-label";
+        label.textContent = part.label;
+
+        const value = document.createElement("strong");
+        value.textContent = formatCurrency(part.value);
+
+        row.append(label, value);
+        parent.appendChild(row);
+
+        if (part.parts && part.parts.length) {
+            appendBreakdownRows(parent, part.parts, depth + 1);
+        }
+    });
+}
+
+function showBreakdown(target) {
+    const entry = monthlyChangeRows[target.dataset.breakdown];
+    if (!entry) {
+        return;
+    }
+
+    if (!breakdownTip) {
+        breakdownTip = document.createElement("div");
+        breakdownTip.className = "breakdown-tip";
+        document.body.appendChild(breakdownTip);
+    }
+
+    breakdownTip.innerHTML = "";
+    const heading = document.createElement("div");
+    heading.className = "breakdown-heading";
+    heading.textContent = entry.label;
+    breakdownTip.appendChild(heading);
+    appendBreakdownRows(breakdownTip, entry.node.parts, 0);
+
+    breakdownTip.style.display = "block";
+    breakdownTarget = target;
+
+    // Sit just below the value, kept inside the screen; flip above it if there is no room below
+    const rect = target.getBoundingClientRect();
+    const tipWidth = breakdownTip.offsetWidth;
+    const tipHeight = breakdownTip.offsetHeight;
+    const left = Math.max(8, Math.min(rect.left, window.innerWidth - tipWidth - 8));
+    let top = rect.bottom + 6;
+    if (top + tipHeight > window.innerHeight - 8) {
+        top = Math.max(8, rect.top - tipHeight - 6);
+    }
+    breakdownTip.style.left = `${left}px`;
+    breakdownTip.style.top = `${top}px`;
+}
+
+function hideBreakdown() {
+    if (breakdownTip) {
+        breakdownTip.style.display = "none";
+    }
+    breakdownTarget = null;
+}
+
+// Mouse: hover. Keyboard: focus. Touch screens (no hover): tap to open, tap elsewhere to close.
+function initBreakdownTips(container) {
+    container.addEventListener("mouseover", (event) => {
+        const target = event.target.closest(".has-breakdown");
+        if (target && canHover()) {
+            showBreakdown(target);
+        }
+    });
+
+    container.addEventListener("mouseout", (event) => {
+        const target = event.target.closest(".has-breakdown");
+        if (target && canHover() && !target.contains(event.relatedTarget)) {
+            hideBreakdown();
+        }
+    });
+
+    container.addEventListener("focusin", (event) => {
+        const target = event.target.closest(".has-breakdown");
+        if (target) {
+            showBreakdown(target);
+        }
+    });
+
+    container.addEventListener("focusout", (event) => {
+        if (event.target.closest(".has-breakdown")) {
+            hideBreakdown();
+        }
+    });
+
+    container.addEventListener("click", (event) => {
+        const target = event.target.closest(".has-breakdown");
+        if (!target || canHover()) {
+            return;
+        }
+        if (breakdownTarget === target) {
+            hideBreakdown();
+        } else {
+            showBreakdown(target);
+        }
+    });
+
+    document.addEventListener("click", (event) => {
+        if (!event.target.closest(".has-breakdown")) {
+            hideBreakdown();
+        }
+    });
 }
 
 async function loadMonthlyChange(container) {
@@ -90,6 +225,7 @@ async function loadMonthlyChange(container) {
         const section = document.createElement("div");
         section.innerHTML = renderMonthlyChange(data);
         container.appendChild(section);
+        initBreakdownTips(section);
     } catch (error) {
         const message = document.createElement("p");
         message.textContent = error.message;
