@@ -44,6 +44,7 @@ def db_get_category_totals(db: Session):
         .outerjoin(m1, and_(m1.account_id == Account.id, m1.date == m1_dates.c.anchor))
         .outerjoin(y1_dates, y1_dates.c.account_id == Account.id)
         .outerjoin(y1, and_(y1.account_id == Account.id, y1.date == y1_dates.c.anchor))
+        .filter(Account.disabled.is_(False))
         .group_by(Account.category)
         .all()
     )
@@ -79,7 +80,7 @@ def db_get_monthly_growth(db: Session, categories: list[str], net_of_contributio
                         cur.date == func.date(prev.date, "+1 month")))
         .outerjoin(contrib, and_(contrib.c.account_id == prev.account_id,
                                  contrib.c.month == prev_month))
-        .filter(Account.category.in_(categories))
+        .filter(Account.category.in_(categories), Account.disabled.is_(False))
         .group_by(prev_month)
         .all()
     )
