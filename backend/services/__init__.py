@@ -59,6 +59,10 @@ from .dashboard import (
     get_dashboard_data,
 )
 
+from .money_movement import (
+    get_money_movement,
+)
+
 from .monthly_change import (
     get_monthly_change,
 )
@@ -103,6 +107,8 @@ __all__ = [
     # dashboard
     "get_dashboard_data",
     "get_monthly_change",
+    # money movement
+    "get_money_movement",
     # savings
     "get_savings_summary",
     "calculate_monthly_savings_metrics",

@@ -8,7 +8,7 @@ from backend.schemas import DebugRequest
 from backend.account_categories import ACCOUNT_CATEGORIES
 from backend.routers import (
     pages, accounts, account_summary, balances, contributions,
-    dashboard, data_integrity, growth, income, savings, settings
+    dashboard, data_integrity, growth, income, savings, money_movement, settings
 )
 
 app = FastAPI()
@@ -45,6 +45,7 @@ app.include_router(data_integrity.router)
 app.include_router(growth.router)
 app.include_router(income.router)
 app.include_router(savings.router)
+app.include_router(money_movement.router)
 app.include_router(settings.router)
 
 @app.post("/api/debug")
