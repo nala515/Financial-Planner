@@ -70,3 +70,9 @@
     white-space: nowrap;
     padding-left: 1rem;
 }
+
+.account-card-disabled {
+    opacity: 0.55;
+    border-style: dashed;
+    border-color: #4b5563;
+}

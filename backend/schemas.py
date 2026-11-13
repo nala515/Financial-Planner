@@ -10,6 +10,7 @@ class AccountCreate(BaseModel):
     name: str
     shared: bool
     category: str
+    disabled: bool = False
 
 class BalanceCreate(BaseModel):
     account_id: int
@@ -42,6 +43,7 @@ class AccountUpdate(BaseModel):
     name: str | None = None
     shared: bool | None = None
     category: str | None = None
+    disabled: bool | None = None
 
 class SettingsUpdate(BaseModel):
     hide_disabled_accounts: bool | None = None

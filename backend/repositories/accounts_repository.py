@@ -17,6 +17,7 @@ def db_create_account(db: Session, account_data: AccountCreate):
         name=account_data.name,
         shared=account_data.shared,
         category=category_name,
+        disabled=account_data.disabled,
     )
 
     db.add(account)
@@ -35,11 +36,18 @@ def db_get_account(db: Session, account_id: int):
         .first()
     )
 
-def db_get_accounts(db: Session):
-    return db.query(Account).all()
+def db_get_accounts(db: Session, include_disabled: bool = True):
+    query = db.query(Account)
+    if not include_disabled:
+        query = query.filter(Account.disabled.is_(False))
+    return query.all()
 
 def db_get_accounts_by_ids(db: Session, account_ids: list[int], categories: list[str] | None = None):
-    query = db.query(Account).filter(Account.id.in_(account_ids))
+    query = (
+        db.query(Account)
+        .filter(Account.id.in_(account_ids))
+        .filter(Account.disabled.is_(False))
+    )
     if categories is not None:
         query = query.filter(Account.category.in_(categories))
     return query.order_by(Account.id).all()
@@ -62,6 +70,9 @@ def db_update_account(db: Session, account_id: int, account_data: AccountUpdate)
 
     if account_data.category is not None:
         account.category = normalize_category(account_data.category)
+
+    if account_data.disabled is not None:
+        account.disabled = account_data.disabled
 
     db.commit()
     db.refresh(account)

@@ -1,0 +1,43 @@
+name: Update Settings
+on:
+  workflow_dispatch:
+    inputs:
+      hide_disabled_accounts:
+        description: Hide disabled accounts in tables
+        type: choice
+        options:
+          - unchanged
+          - "true"
+          - "false"
+        default: unchanged
+      disable_accounts:
+        description: Account names to disable (comma-separated)
+        required: false
+        default: ""
+      enable_accounts:
+        description: Account names to re-enable (comma-separated)
+        required: false
+        default: ""
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install -r requirements.txt
+      - name: Apply settings
+        env:
+          HIDE: ${{ inputs.hide_disabled_accounts }}
+          DISABLE: ${{ inputs.disable_accounts }}
+          ENABLE: ${{ inputs.enable_accounts }}
+        run: python -m backend.utilities.settings.update_settings --hide-disabled "$HIDE" --disable "$DISABLE" --enable "$ENABLE"
+      - name: Commit updated database
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add finance.db
+          git diff --staged --quiet || git commit -m "Update settings via Actions"
+          git push

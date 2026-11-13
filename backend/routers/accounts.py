@@ -8,11 +8,11 @@ router = APIRouter()
 
 
 @router.get("/api/accounts")
-def api_get_accounts():
+def api_get_accounts(include_disabled: bool | None = None):
     db = SessionLocal()
 
     try:
-        return services.get_accounts(db)
+        return services.get_accounts(db, include_disabled)
     finally:
         db.close()
 

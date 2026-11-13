@@ -75,7 +75,7 @@ async function loadAccounts() {
 
             const list = document.createElement("ul");
             list.className = "account-list";
-
+            
             categoryAccounts.forEach(account => {
                 const latest = latestBalanceByAccount[account.id];
                 const balanceDisplay = latest
@@ -83,11 +83,11 @@ async function loadAccounts() {
                     : "No balance yet";
 
                 const item = document.createElement("li");
-                item.className = "account-card account-card-row";
+                item.className = "account-card account-card-row" + (account.disabled ? " account-card-disabled" : "");
                 item.innerHTML = `
                     <div class="account-card-info">
                         <strong>${account.name}</strong>
-                        <small>${account.shared ? "Shared" : "Personal"}</small>
+                        <small>${account.shared ? "Shared" : "Personal"}${account.disabled ? " · Disabled" : ""}</small>
                         <small><a href="/summary?account=${account.id}">Summary</a></small>
                     </div>
                     <div class="account-card-balance">${balanceDisplay}</div>

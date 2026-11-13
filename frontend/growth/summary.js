@@ -274,7 +274,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     let accounts, categories, views;
     try {
         [accounts, categories, views] = await Promise.all([
-            fetch("/api/accounts").then(r => r.json()),
+            fetch("/api/accounts?include_disabled=false").then(r => r.json()),
             getAccountCategories(),
             getAccountViews(),
         ]);

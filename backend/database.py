@@ -17,7 +17,6 @@ engine = create_engine(DATABASE_URL)
 
 SessionLocal = sessionmaker(bind=engine)
 
-
 def ensure_account_schema(target_engine=None):
     active_engine = target_engine or engine
     from .models import Base
@@ -29,15 +28,20 @@ def ensure_account_schema(target_engine=None):
         return
 
     columns = [column["name"] for column in inspector.get_columns("accounts")]
-    if "account_type" not in columns:
-        return
 
-    with active_engine.begin() as connection:
-        connection.execute(text("ALTER TABLE accounts RENAME COLUMN account_type TO account_type_old"))
-        connection.execute(text("CREATE TABLE accounts_new (id INTEGER PRIMARY KEY, name VARCHAR NOT NULL, shared BOOLEAN NOT NULL, category VARCHAR NOT NULL DEFAULT 'Cash')"))
-        connection.execute(text("INSERT INTO accounts_new (id, name, shared, category) SELECT id, name, shared, category FROM accounts"))
-        connection.execute(text("DROP TABLE accounts"))
-        connection.execute(text("ALTER TABLE accounts_new RENAME TO accounts"))
+    if "account_type" in columns:
+        with active_engine.begin() as connection:
+            connection.execute(text("ALTER TABLE accounts RENAME COLUMN account_type TO account_type_old"))
+            connection.execute(text("CREATE TABLE accounts_new (id INTEGER PRIMARY KEY, name VARCHAR NOT NULL, shared BOOLEAN NOT NULL, category VARCHAR NOT NULL DEFAULT 'Cash')"))
+            connection.execute(text("INSERT INTO accounts_new (id, name, shared, category) SELECT id, name, shared, category FROM accounts"))
+            connection.execute(text("DROP TABLE accounts"))
+            connection.execute(text("ALTER TABLE accounts_new RENAME TO accounts"))
+
+    # Add the disabled column to databases created before it existed; existing rows become false.
+    columns = [column["name"] for column in inspect(active_engine).get_columns("accounts")]
+    if "disabled" not in columns:
+        with active_engine.begin() as connection:
+            connection.execute(text("ALTER TABLE accounts ADD COLUMN disabled BOOLEAN NOT NULL DEFAULT 0"))
 
 
 def initialize_database():
