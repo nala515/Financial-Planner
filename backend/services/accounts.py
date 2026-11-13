@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 from backend.schemas import AccountCreate
-from backend.repositories import accounts_repository
+from backend.repositories import accounts_repository, settings_repository
 from backend.account_categories import get_category_attributes
 
 
@@ -14,18 +14,24 @@ def get_account(db: Session, account_id: int):
 		"name": account.name,
 		"shared": account.shared,
 		"category": account.category,
+		"disabled": account.disabled,
 		"category_attributes": get_category_attributes(account.category),
 	}
 
 
-def get_accounts(db: Session):
-	accounts = accounts_repository.db_get_accounts(db)
+def get_accounts(db: Session, include_disabled: bool | None = None):
+	# None means "follow the hide_disabled_accounts setting"; True/False overrides it.
+	if include_disabled is None:
+		include_disabled = not settings_repository.db_get_settings(db).hide_disabled_accounts
+
+	accounts = accounts_repository.db_get_accounts(db, include_disabled)
 	return [
 		{
 			"id": account.id,
 			"name": account.name,
 			"shared": account.shared,
 			"category": account.category,
+			"disabled": account.disabled,
 			"category_attributes": get_category_attributes(account.category),
 		}
 		for account in accounts
@@ -52,6 +58,7 @@ def update_account(db: Session, account_id: int, account_data):
 		"name": account.name,
 		"shared": account.shared,
 		"category": account.category,
+		"disabled": account.disabled,
 		"status": "updated",
 	}
 
