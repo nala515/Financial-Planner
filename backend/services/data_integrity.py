@@ -19,7 +19,7 @@ def _group_by_account_month(rows, amount_attr: str) -> dict[int, dict[tuple[int,
     return grouped
 
 def find_missing_rows(db: Session, start_ym: tuple[int, int], end_ym: tuple[int, int]) -> list[dict]:
-    accounts = accounts_repository.db_get_accounts(db)
+    accounts = accounts_repository.db_get_accounts(db, include_disabled=False)
     balances_by_account = _group_by_account_month(
         balances_repository.db_get_all_balances(db), "balance_cents"
     )
