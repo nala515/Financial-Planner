@@ -1,7 +1,7 @@
 from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy import (
     Boolean, Column, Date, Float, ForeignKey,
-    Integer, String, UniqueConstraint
+    Integer, String, UniqueConstraint, false
 )
 
 class Base(DeclarativeBase):
@@ -14,6 +14,7 @@ class Account(Base):
     name = Column(String, nullable=False)
     shared = Column(Boolean, nullable=False)
     category = Column(String, nullable=False, default="Cash")
+    disabled = Column(Boolean, nullable=False, default=False, server_default=false())
 
 class Balance(Base):
     __tablename__ = "balances"
